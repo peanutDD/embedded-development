@@ -1,0 +1,76 @@
+[workspace]
+members = [
+    "07-adc-dac/examples/basic-adc",
+    "07-adc-dac/examples/dac-generator",
+    "07-adc-dac/projects/voltmeter",
+    "08-rtos-integration/examples/freertos-basic",
+    "09-industrial-projects/case-studies/smart-manufacturing",
+    "09-industrial-projects/templates/sensor-node",
+    "09-industrial-projects/templates/communication-hub",
+]
+
+exclude = [
+    "04-gpio-control/projects/basic-led",
+    "04-gpio-control/projects/button-led",
+    "09-industrial-projects/case-studies/iot-gateway",
+    "09-industrial-projects/templates/basic-controller",
+]
+
+resolver = "2"
+
+[workspace.dependencies]
+# 嵌入式核心库
+embedded-hal = "1.0"
+embedded-hal-nb = "1.0"
+embedded-io = "0.6"
+embedded-storage = "0.3"
+
+# 常用嵌入式库
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+panic-probe = "0.3"
+rtt-target = "0.4"
+
+# 异步支持
+embassy-executor = "0.5"
+embassy-time = "0.3"
+embassy-sync = "0.5"
+
+# 数据处理
+heapless = "0.8"
+nb = "1.1"
+void = "1.0"
+
+# 序列化
+serde = { version = "1.0", default-features = false }
+postcard = "1.0"
+
+# 数学和算法
+libm = "0.2"
+micromath = "2.0"
+
+# 调试和日志
+log = "0.4"
+defmt = "0.3"
+defmt-rtt = "0.4"
+
+[profile.dev]
+codegen-units = 1
+debug = 2
+debug-assertions = true
+incremental = false
+opt-level = "s"
+overflow-checks = true
+panic = "abort"
+
+[profile.release]
+codegen-units = 1
+debug = 2
+debug-assertions = false
+incremental = false
+lto = "fat"
+opt-level = "s"
+overflow-checks = false
+panic = "abort"
+strip = "symbols"

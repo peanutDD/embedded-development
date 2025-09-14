@@ -1,0 +1,64 @@
+[package]
+name = "basic-adc"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Rust Tutorial"]
+description = "基础ADC采样示例 - 单通道电压测量"
+keywords = ["embedded", "stm32f4", "adc", "analog", "no-std"]
+categories = ["embedded", "hardware-support"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/rust-embedded/stm32f4xx-hal"
+
+[[bin]]
+name = "basic-adc"
+path = "src/main.rs"
+
+[dependencies]
+# 核心嵌入式库
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = "0.2"
+nb = "1.0"
+panic-halt = "0.2"
+
+# STM32F4 HAL库
+stm32f4xx-hal = { version = "0.16", features = ["stm32f407", "rt"] }
+
+# 调试和日志
+rtt-target = "0.4"
+cortex-m-log = { version = "0.8", features = ["log-integration"] }
+log = "0.4"
+
+# 数学和实用工具
+libm = "0.2"
+heapless = "0.7"
+
+# 数值处理
+micromath = "2.0"
+
+[profile.dev]
+codegen-units = 1
+debug = 2
+debug-assertions = true
+incremental = false
+opt-level = 1
+overflow-checks = true
+panic = "abort"
+
+[profile.release]
+codegen-units = 1
+debug = 2
+debug-assertions = false
+incremental = false
+lto = true
+opt-level = 3
+overflow-checks = false
+panic = "abort"
+
+[profile.dev.package."*"]
+codegen-units = 1
+opt-level = 2
+
+[profile.release.package."*"]
+codegen-units = 1
+opt-level = 3

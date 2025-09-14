@@ -1,0 +1,381 @@
+[package]
+name = "iot-gateway"
+version = "1.0.0"
+edition = "2021"
+authors = ["IoT Team <iot@example.com>"]
+description = "工业物联网边缘计算网关 - 多协议数据采集与云端同步"
+keywords = ["iot", "gateway", "edge-computing", "mqtt", "lorawan"]
+categories = ["embedded", "no-std", "iot"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+readme = "README.md"
+homepage = "https://example.com/iot-gateway"
+documentation = "https://docs.example.com/iot-gateway"
+
+[[bin]]
+name = "iot-gateway"
+path = "src/main.rs"
+
+[dependencies]
+# RTIC实时框架
+rtic = { version = "2.0", features = ["thumbv7-backend"] }
+rtic-time = { version = "1.0" }
+# rtic-monotonics = { version = "0.1" }
+
+# 嵌入式核心库
+cortex-m = { version = "0.7", features = ["critical-section-single-core"] }
+cortex-m-rt = "0.7"
+embedded-hal = "0.2"
+nb = "1.0"
+void = { version = "1.0", default-features = false }
+
+# STM32F4 HAL (成本优化的IoT网关)
+stm32f4xx-hal = { version = "0.14", features = ["stm32f407", "rt", "usb_fs", "can"] }
+
+# 无线通信模块
+# esp-at-nal = { version = "0.3", default-features = false, optional = true }  # 示例中使用但可能不兼容
+# lora-phy = { version = "1.0", default-features = false, optional = true }
+lorawan = { version = "0.7", default-features = false, features = ["default-crypto"], optional = true }
+nrf24l01 = { version = "0.2", default-features = false, optional = true }
+zigbee = { version = "0.1.0-alpha.3", default-features = false, optional = true }
+
+# 网络协议栈
+embedded-nal = "0.7"
+embedded-nal-async = "0.7"
+smoltcp = { version = "0.10", default-features = false, features = [
+    "log", "medium-ethernet", "proto-ipv4", "proto-ipv6",
+    "proto-dhcpv4", "socket-tcp", "socket-udp", "socket-raw"
+]}
+
+# MQTT客户端
+# rumqttc = { version = "0.22", default-features = false, optional = true }  # 示例中使用但不兼容no_std
+mqtt-async-client = { version = "0.3", default-features = false, optional = true }
+embedded-mqtt = { version = "0.1", default-features = false, optional = true }
+
+# CoAP协议
+coap-lite = { version = "0.11", default-features = false, optional = true }
+coap-message = { version = "0.3", default-features = false, optional = true }
+
+# HTTP客户端
+reqwless = { version = "0.11", default-features = false, optional = true }
+embedded-tls = { version = "0.16", default-features = false, optional = true }
+
+# 数据处理和存储
+heapless = { version = "0.7", default-features = false }
+tinyvec = { version = "1.6", default-features = false }
+smallvec = { version = "1.11", default-features = false, features = ["const_generics"] }
+sequential-storage = { version = "1.0", default-features = false, optional = true }
+embedded-storage = { version = "0.3", optional = true }
+linked_list_allocator = "0.10"  # 用于示例程序的内存分配
+
+# 序列化和数据格式
+serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
+postcard = { version = "1.0", features = ["heapless"], optional = true }
+# json = { version = "0.12", default-features = false, optional = true } # 不兼容 no_std
+cbor = { version = "0.4", default-features = false, optional = true }
+protobuf = { version = "3.0", default-features = false, optional = true }
+msgpack = { version = "0.1", default-features = false, optional = true }
+
+# 时间和调度
+fugit = "0.3"
+embedded-time = "0.12"
+chrono = { version = "0.4", default-features = false }
+
+# 数学和算法
+libm = "0.2"
+micromath = { version = "2.0", features = ["vector"], optional = true }
+num-traits = { version = "0.2", default-features = false, optional = true }
+statistics = { version = "0.4", default-features = false, optional = true }
+kalman_filter = { version = "0.1", default-features = false, optional = true }
+
+# 加密和安全
+aes = { version = "0.8", default-features = false, optional = true }
+sha2 = { version = "0.10", default-features = false, optional = true }
+hmac = { version = "0.12", default-features = false, optional = true }
+rand_core = { version = "0.6", default-features = false, optional = true }
+ecdsa = { version = "0.16", default-features = false, optional = true }
+p256 = { version = "0.13", default-features = false, optional = true }
+
+# 传感器驱动
+ads1x1x = { version = "0.2", default-features = false, optional = true }
+# bme280 = { version = "0.4", default-features = false }
+# sht3x = { version = "0.1", default-features = false, optional = true }
+ds18b20 = { version = "0.1", default-features = false, optional = true }
+mpu6050 = { version = "0.1", default-features = false, optional = true }
+max31855 = { version = "0.1", default-features = false, optional = true }
+
+# GPS和定位
+nmea = { version = "0.6", default-features = false, optional = true }
+gps = { version = "7.3", default-features = false, optional = true }
+
+# 调试和日志
+panic-halt = "0.2"
+rtt-target = { version = "0.4", optional = true }
+cortex-m-log = { version = "0.8", features = ["log-integration"], optional = true }
+log = { version = "0.4", optional = true }
+defmt = { version = "0.3", optional = true }
+defmt-rtt = { version = "0.4", optional = true }
+
+# 同步和原子操作
+atomic-polyfill = "1.0"
+critical-section = "1.1"
+portable-atomic = { version = "1.0", features = ["critical-section"] }
+
+# 内存管理
+# linked_list_allocator = "0.10"  # 已在数据处理和存储部分定义
+
+# 错误处理
+# thiserror = { version = "1.0", default-features = false } # 不兼容 no_std
+
+# 文件系统
+embedded-sdmmc = { version = "0.5", default-features = false, optional = true }
+littlefs2 = { version = "0.4", default-features = false, optional = true }
+fatfs = { version = "0.3", default-features = false, optional = true }
+
+# 显示驱动
+ssd1306 = { version = "0.8", default-features = false, optional = true }
+st7735-lcd = { version = "0.9", default-features = false, optional = true }
+embedded-graphics = { version = "0.8", default-features = false, optional = true }
+
+[profile.dev]
+codegen-units = 1
+debug = 2
+debug-assertions = true
+incremental = false
+opt-level = "s"
+overflow-checks = true
+lto = false
+panic = "abort"
+
+[profile.release]
+codegen-units = 1
+debug = false
+debug-assertions = false
+incremental = false
+lto = true
+opt-level = "s"
+overflow-checks = false
+panic = "abort"
+strip = true
+
+[profile.release.build-override]
+codegen-units = 8
+debug = false
+debug-assertions = false
+opt-level = 0
+overflow-checks = false
+
+# 内存配置 (STM32F407)
+[package.metadata.memory]
+ram_start = "0x20000000"
+ram_size = "128K"
+flash_start = "0x08000000"
+flash_size = "1024K"
+stack_size = "8K"
+heap_size = "32K"
+network_buffer_size = "16K"
+mqtt_buffer_size = "4K"
+data_buffer_size = "8K"
+
+# IoT网关配置
+[package.metadata.iot_gateway]
+max_sensors = 32
+max_devices = 16
+max_mqtt_topics = 64
+max_data_points = 1000
+data_retention_hours = 48
+upload_interval_seconds = 60
+heartbeat_interval_seconds = 30
+max_retry_attempts = 3
+connection_timeout_seconds = 30
+log_level = "info"
+
+# 网络配置
+[package.metadata.network]
+wifi_ssid = "IoT_Network"
+wifi_password = "password123"
+mqtt_broker = "mqtt.example.com"
+mqtt_port = 1883
+mqtt_client_id = "iot-gateway-001"
+coap_port = 5683
+http_port = 80
+https_port = 443
+ntp_server = "pool.ntp.org"
+
+# LoRaWAN配置
+[package.metadata.lorawan]
+device_eui = "0000000000000000"
+application_eui = "0000000000000000"
+application_key = "00000000000000000000000000000000"
+region = "EU868"
+class = "A"
+confirmed_uplinks = false
+max_fcnt_gap = 16384
+
+# 传感器配置
+[package.metadata.sensors]
+sampling_rate_hz = 1
+filter_enabled = true
+calibration_enabled = true
+temperature_offset = 0.0
+humidity_offset = 0.0
+pressure_offset = 0.0
+
+# 性能配置
+[package.metadata.performance]
+max_cpu_usage_percent = 85
+max_memory_usage_percent = 90
+max_network_latency_ms = 1000
+max_sensor_response_time_ms = 100
+min_battery_voltage = 3.0
+max_power_consumption_mw = 500
+
+# 构建配置
+[package.metadata.build]
+target = "thumbv7em-none-eabihf"
+runner = "probe-rs run --chip STM32F407VGTx"
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+  "-C", "link-arg=--nmagic",
+]
+
+[package.metadata.docs.rs]
+all-features = true
+targets = ["thumbv7em-none-eabihf"]
+rustdoc-args = ["--cfg", "docsrs"]
+
+# 功能特性
+[features]
+default = [
+    "wifi-support", "mqtt-support", "sensor-support", 
+    "data-logging", "web-interface", "security"
+]
+
+# 无线通信
+wifi-support = []
+lora-support = ["lorawan"]
+nrf24-support = ["nrf24l01"]
+zigbee-support = ["zigbee"]
+
+# 网络协议
+mqtt-support = ["embedded-mqtt"]
+coap-support = ["coap-lite", "coap-message"]
+http-support = ["reqwless", "embedded-tls"]
+
+# 数据格式
+protobuf-support = ["protobuf"]
+msgpack-support = ["msgpack"]
+cbor-support = ["cbor"]
+
+# 传感器支持
+sensor-support = ["ads1x1x", "ds18b20", "mpu6050"]
+temperature-sensors = ["ds18b20", "max31855"]
+environmental-sensors = []
+motion-sensors = ["mpu6050"]
+
+# 定位服务
+gps-support = ["nmea", "gps"]
+
+# 数据处理
+data-logging = ["sequential-storage", "embedded-storage"]
+data-filtering = ["kalman_filter"]
+data-compression = ["cbor"]
+data-encryption = ["aes", "sha2", "hmac"]
+
+# 用户界面
+web-interface = ["reqwless"]
+display-support = ["ssd1306", "embedded-graphics"]
+lcd-support = ["st7735-lcd", "embedded-graphics"]
+
+# 安全功能
+security = ["aes", "sha2", "hmac", "ecdsa", "p256"]
+tls-support = ["embedded-tls"]
+
+# 存储支持
+sd-card = ["embedded-sdmmc", "fatfs"]
+flash-storage = ["littlefs2"]
+
+# 调试和测试
+debug-output = ["rtt-target", "cortex-m-log"]
+defmt-logging = ["defmt", "defmt-rtt"]
+performance-monitoring = ["statistics"]
+hardware-testing = []
+
+# 硬件支持
+can-support = ["stm32f4xx-hal/can"]
+usb-support = ["stm32f4xx-hal/usb_fs"]
+rtc-support = []
+adc-support = []
+dac-support = ["stm32f4xx-hal/dac"]
+
+# 开发依赖 - 注释掉不兼容no_std的依赖
+[dev-dependencies]
+# criterion = { version = "0.5", features = ["html_reports"] }
+# proptest = "1.0"  # 不兼容no_std
+# quickcheck = "1.0"  # 不兼容no_std
+# quickcheck_macros = "1.0"  # 不兼容no_std
+# mockall = "0.11"  # 不兼容no_std
+
+# 基准测试
+[[bench]]
+name = "sensor_sampling"
+harness = false
+required-features = ["sensor-support"]
+
+[[bench]]
+name = "mqtt_throughput"
+harness = false
+required-features = ["mqtt-support"]
+
+[[bench]]
+name = "data_processing"
+harness = false
+required-features = ["data-filtering"]
+
+[[bench]]
+name = "network_latency"
+harness = false
+required-features = ["wifi-support"]
+
+# 示例程序
+[[example]]
+name = "basic_gateway"
+required-features = ["wifi-support", "mqtt-support"]
+
+[[example]]
+name = "sensor_node"
+required-features = ["sensor-support", "lora-support"]
+
+[[example]]
+name = "data_logger"
+required-features = ["data-logging", "sd-card"]
+
+[[example]]
+name = "web_dashboard"
+required-features = ["web-interface"]
+
+[[example]]
+name = "secure_gateway"
+required-features = ["security", "tls-support"]
+
+# 集成测试
+[[test]]
+name = "integration_tests"
+path = "tests/integration.rs"
+required-features = ["wifi-support", "mqtt-support"]
+
+[[test]]
+name = "sensor_tests"
+path = "tests/sensors.rs"
+required-features = ["sensor-support"]
+
+[[test]]
+name = "network_tests"
+path = "tests/network.rs"
+required-features = ["wifi-support"]
+
+[[test]]
+name = "security_tests"
+path = "tests/security.rs"
+required-features = ["security"]

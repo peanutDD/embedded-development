@@ -1,0 +1,62 @@
+[target.thumbv7em-none-eabihf]
+# 使用ARM Cortex-M4F链接器
+runner = "probe-rs run --chip STM32F407VGTx"
+rustflags = [
+  # 链接器参数
+  "-C", "linker=flip-link",
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+  # 优化参数
+  "-C", "target-cpu=cortex-m4",
+  "-C", "target-feature=+fp-armv8d16",
+]
+
+[build]
+# 默认目标架构
+target = "thumbv7em-none-eabihf"
+
+[env]
+# 定义环境变量
+DEFMT_LOG = "debug"
+RUST_LOG = "debug"
+
+# probe-rs 配置
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+runner = "probe-rs run --chip STM32F407VGTx --protocol swd"
+
+# 别名配置，方便使用
+[alias]
+# 构建发布版本
+rb = "build --release"
+# 运行调试版本
+rr = "run"
+# 运行发布版本
+rrr = "run --release"
+# 检查代码
+cc = "check"
+# 清理构建产物
+cl = "clean"
+
+# 特定于STM32的配置（备用runner配置）
+# 如果没有probe-rs，可以使用openocd
+# [target.thumbv7em-none-eabihf]
+# runner = "arm-none-eabi-gdb -q -x openocd.gdb"
+
+# 调试配置
+[profile.dev]
+# 启用调试信息
+debug = true
+# 优化级别（嵌入式通常需要一定优化以节省空间）
+opt-level = "s"
+# 启用溢出检查
+overflow-checks = true
+
+[profile.release]
+# 发布版本优化
+debug = true
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
+overflow-checks = false

@@ -1,0 +1,57 @@
+# Rust项目通用.gitignore
+
+# 编译产物
+target/
+Cargo.lock
+
+# 编辑器和IDE配置
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 环境变量和配置
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 日志文件
+*.log
+
+# 临时文件
+*.tmp
+*.temp
+
+# 操作系统文件
+Thumbs.db
+
+# 嵌入式开发相关文件
+*.hex
+*.bin
+*.elf
+*.map
+*.lst
+*.o
+*.obj
+*.a
+*.lib
+*.axf
+*.out
+
+# EIDE项目文件
+.eide.usr.ctx.json
+build/
+
+# JLink和调试工具
+*.jdebug
+*.jdebug.user
+
+# 其他可能需要忽略的文件
+*.pdb
+*.dll
+*.dylib
+*.so

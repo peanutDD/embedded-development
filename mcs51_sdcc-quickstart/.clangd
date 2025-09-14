@@ -1,0 +1,12 @@
+CompileFlags:
+    Add:
+        - -I"null/share/sdcc/include"
+        - -D"__SDCC=1"
+        - -D"__SDCC_VERSION_MAJOR=4"
+        - -D"__SDCC_VERSION_MINOR=2"
+        - -D"__SDCC_VERSION_PATCH=0"
+        - -D"__SDCC_mcs51=1"
+    Remove: []
+    CompilationDatabase: ./build/Debug
+Diagnostics:
+    Suppress: "*"

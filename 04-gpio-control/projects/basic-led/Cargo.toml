@@ -1,0 +1,51 @@
+[package]
+name = "basic-led"
+version = "0.1.0"
+edition = "2021"
+authors = ["Rust Embedded Tutorial"]
+description = "基础LED控制示例 - GPIO输出控制入门"
+
+[dependencies]
+# 核心嵌入式库
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+
+# STM32F4 HAL库
+stm32f4xx-hal = { version = "0.19", features = ["stm32f407", "rt"] }
+
+# 嵌入式HAL特征
+embedded-hal = "1.0.0-rc.2"
+nb = "1.1"
+
+# 调试和日志
+rtt-target = "0.4"
+defmt = "0.3"
+defmt-rtt = "0.4"
+
+# 实用工具
+# void = "1.0"  # 暂时注释掉，如果需要可以使用 nb 库替代
+
+[[bin]]
+name = "basic-led"
+test = false
+bench = false
+
+[profile.dev]
+codegen-units = 1
+debug = 2
+debug-assertions = true
+incremental = false
+opt-level = "s"
+overflow-checks = true
+
+[profile.release]
+codegen-units = 1
+debug = 2
+debug-assertions = false
+incremental = false
+lto = "fat"
+opt-level = "s"
+overflow-checks = false
+panic = "abort"
+strip = "symbols"

@@ -1,0 +1,64 @@
+{
+  "name": "mcs51_sdcc-quickstart",
+  "type": "C51",
+  "dependenceList": [],
+  "srcDirs": [
+    "src"
+  ],
+  "virtualFolder": {
+    "name": "<virtual_root>",
+    "files": [],
+    "folders": []
+  },
+  "outDir": "build",
+  "deviceName": null,
+  "packDir": null,
+  "miscInfo": {
+    "uid": "d59a259507bed4ba9aae719d297bb433"
+  },
+  "targets": {
+    "Debug": {
+      "excludeList": [],
+      "toolchain": "SDCC",
+      "compileConfig": {
+        "options": ""
+      },
+      "uploader": "Custom",
+      "uploadConfig": {
+        "bin": "",
+        "commandLine": "python ./tools/stcflash.py -p COM3 \"${hexFile}\"",
+        "eraseChipCommand": ""
+      },
+      "uploadConfigMap": {},
+      "custom_dep": {
+        "name": "default",
+        "incList": [
+          "inc"
+        ],
+        "libList": [],
+        "defineList": []
+      },
+      "builderOptions": {
+        "SDCC": {
+          "version": 3,
+          "beforeBuildTasks": [],
+          "afterBuildTasks": [],
+          "global": {
+            "device": "mcs51",
+            "optimize-type": "speed",
+            "misc-controls": "--iram-size 256 --xram-size 0 --code-size 8192"
+          },
+          "c/cpp-compiler": {
+            "language-c": "c99"
+          },
+          "asm-compiler": {},
+          "linker": {
+            "$mainFileName": "main",
+            "output-format": "hex"
+          }
+        }
+      }
+    }
+  },
+  "version": "3.6"
+}

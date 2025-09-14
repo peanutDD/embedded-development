@@ -1,0 +1,58 @@
+[package]
+name = "basic-echo"
+version = "0.1.0"
+edition = "2021"
+authors = ["Rust Embedded Tutorial"]
+description = "基础串口回显示例 - UART通信入门"
+
+[dependencies]
+# 核心嵌入式库
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+
+# STM32F4 HAL库
+stm32f4xx-hal = { version = "0.19", features = ["stm32f407", "rt"] }
+
+# 嵌入式HAL特征
+embedded-hal = "1.0"
+nb = "1.1"
+
+# 串口相关
+embedded-io = "0.6"
+
+# 调试和日志
+rtt-target = { version = "0.4", features = ["cortex-m"] }
+defmt = "0.3"
+defmt-rtt = "0.4"
+
+# 实用工具
+void = "1.0"
+heapless = "0.8"
+
+# 字符串处理
+nb = "1.1"
+
+[[bin]]
+name = "basic-echo"
+test = false
+bench = false
+
+[profile.dev]
+codegen-units = 1
+debug = 2
+debug-assertions = true
+incremental = false
+opt-level = "s"
+overflow-checks = true
+
+[profile.release]
+codegen-units = 1
+debug = 2
+debug-assertions = false
+incremental = false
+lto = "fat"
+opt-level = "s"
+overflow-checks = false
+panic = "abort"
+strip = "symbols"

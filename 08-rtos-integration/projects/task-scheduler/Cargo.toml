@@ -1,0 +1,194 @@
+[package]
+name = "task-scheduler"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "高级任务调度器 - 实时系统任务管理和优先级调度"
+keywords = ["embedded", "rtos", "scheduler", "realtime", "stm32"]
+categories = ["embedded", "no-std"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+readme = "README.md"
+
+[[bin]]
+name = "task-scheduler"
+path = "src/main.rs"
+
+[dependencies]
+# RTIC框架
+rtic = { version = "2.0", features = ["thumbv7-backend"] }
+rtic-monotonics = { version = "1.0", features = ["cortex-m-systick"] }
+
+# 嵌入式核心库
+cortex-m = { version = "0.7", features = ["critical-section-single-core"] }
+cortex-m-rt = "0.7"
+embedded-hal = "0.2"
+nb = "1.0"
+void = { version = "1.0", default-features = false }
+
+# STM32F4 HAL
+stm32f4xx-hal = { version = "0.16", features = ["stm32f407", "rt", "usb_fs"] }
+
+# 调试和日志
+panic-halt = "0.2"
+rtt-target = { version = "0.4", features = ["cortex-m"] }
+cortex-m-log = { version = "0.8", features = ["log-integration", "rtt"] }
+log = "0.4"
+
+# 数据结构和集合
+heapless = { version = "0.7", features = ["serde"] }
+tinyvec = { version = "1.6", features = ["alloc"] }
+smallvec = { version = "1.11", features = ["const_generics"] }
+
+# 时间和调度
+fugit = "0.3"
+embedded-time = "0.12"
+rtic-time = "1.0"
+
+# 数学和算法
+libm = "0.2"
+micromath = { version = "2.0", features = ["vector"] }
+num-traits = { version = "0.2", default-features = false }
+
+# 同步和原子操作
+atomic-polyfill = "1.0"
+critical-section = "1.1"
+portable-atomic = { version = "1.0", features = ["critical-section"] }
+
+# 序列化和通信
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+postcard = { version = "1.0", features = ["heapless"] }
+
+# 错误处理
+nb = "1.0"
+void = { version = "1.0", default-features = false }
+
+# 内存管理
+linked_list_allocator = "0.10"
+
+[profile.dev]
+codegen-units = 1
+debug = 2
+debug-assertions = true
+incremental = false
+opt-level = "s"
+overflow-checks = true
+lto = false
+panic = "abort"
+
+[profile.release]
+codegen-units = 1
+debug = false
+debug-assertions = false
+incremental = false
+lto = true
+opt-level = "s"
+overflow-checks = false
+panic = "abort"
+strip = true
+
+[profile.release.build-override]
+codegen-units = 8
+debug = false
+debug-assertions = false
+opt-level = 0
+overflow-checks = false
+
+# 内存配置
+[package.metadata.memory]
+ram_start = 0x20000000
+ram_size = 128K
+flash_start = 0x08000000
+flash_size = 1024K
+stack_size = 8K
+heap_size = 32K
+
+# 调度器配置
+[package.metadata.scheduler]
+max_tasks = 16
+max_priority_levels = 8
+tick_rate_hz = 1000
+time_slice_ms = 10
+preemption_enabled = true
+round_robin_enabled = true
+deadline_scheduling = true
+load_balancing = false
+power_management = true
+
+# 性能配置
+[package.metadata.performance]
+max_interrupt_latency_us = 50
+max_task_switch_time_us = 10
+max_queue_depth = 32
+max_semaphore_count = 16
+max_mutex_count = 8
+max_timer_count = 16
+
+# 构建配置
+[package.metadata.build]
+target = "thumbv7em-none-eabihf"
+runner = "probe-rs run --chip STM32F407VGTx"
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+  "-C", "link-arg=--nmagic",
+]
+
+[package.metadata.docs.rs]
+all-features = true
+targets = ["thumbv7em-none-eabihf"]
+rustdoc-args = ["--cfg", "docsrs"]
+
+# 功能特性
+[features]
+default = ["rtic-backend", "advanced-scheduling", "debug-output", "performance-monitoring"]
+rtic-backend = ["rtic", "rtic-monotonics"]
+freertos-backend = []
+advanced-scheduling = ["deadline-scheduling", "load-balancing"]
+deadline-scheduling = []
+load-balancing = []
+power-management = []
+performance-monitoring = ["cortex-m-log"]
+debug-output = ["rtt-target", "cortex-m-log"]
+usb-support = ["stm32f4xx-hal/usb_fs"]
+can-support = ["stm32f4xx-hal/can"]
+sdio-support = ["stm32f4xx-hal/sdio"]
+rng-support = ["stm32f4xx-hal/rng"]
+crypto-support = ["stm32f4xx-hal/cryp"]
+rtc-support = ["stm32f4xx-hal/rtc"]
+
+# 开发依赖
+[dev-dependencies]
+criteria = "0.3"
+criterion = { version = "0.5", features = ["html_reports"] }
+proptest = "1.0"
+quickcheck = "1.0"
+quickcheck_macros = "1.0"
+
+# 基准测试
+[[bench]]
+name = "scheduler_benchmark"
+harness = false
+required-features = ["performance-monitoring"]
+
+[[bench]]
+name = "task_switch_benchmark"
+harness = false
+required-features = ["performance-monitoring"]
+
+# 示例
+[[example]]
+name = "basic_scheduling"
+required-features = ["rtic-backend"]
+
+[[example]]
+name = "deadline_scheduling"
+required-features = ["deadline-scheduling"]
+
+[[example]]
+name = "load_balancing"
+required-features = ["load-balancing"]
+
+[[example]]
+name = "power_management"
+required-features = ["power-management"]

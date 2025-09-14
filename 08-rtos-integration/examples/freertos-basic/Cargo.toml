@@ -1,0 +1,139 @@
+[package]
+name = "freertos-basic"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "FreeRTOS基础示例 - 多任务管理和同步机制"
+keywords = ["embedded", "freertos", "rtos", "stm32", "multitasking"]
+categories = ["embedded", "no-std"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+readme = "README.md"
+
+[[bin]]
+name = "freertos-basic"
+path = "src/main.rs"
+
+[dependencies]
+# FreeRTOS内核
+# freertos-rust = { version = "0.1" }
+# freertos-sys = { version = "0.1" }
+
+# 嵌入式核心库
+cortex-m = { version = "0.7", features = ["critical-section-single-core"] }
+cortex-m-rt = "0.7"
+embedded-hal = "0.2"
+nb = "1.0"
+void = { version = "1.0", default-features = false }
+
+# STM32F4 HAL
+stm32f4xx-hal = { version = "0.16", features = ["stm32f407", "rt", "usb_fs"] }
+
+# 调试和日志
+panic-halt = "0.2"
+rtt-target = { version = "0.4", optional = true }
+cortex-m-log = { version = "0.8", features = ["log-integration"], optional = true }
+log = "0.4"
+
+# 实用工具
+heapless = { version = "0.7", features = ["serde"] }
+embedded-time = "0.12"
+fugit = "0.3"
+
+# 数学和算法
+libm = "0.2"
+micromath = { version = "2.0", features = ["vector"] }
+
+# 同步和原子操作
+atomic-polyfill = "1.0"
+critical-section = "1.1"
+portable-atomic = { version = "1.0", features = ["critical-section"] }
+
+# 内存管理
+linked_list_allocator = { version = "0.10", optional = true }
+
+[profile.dev]
+codegen-units = 1
+debug = 2
+debug-assertions = true
+incremental = false
+opt-level = "s"
+overflow-checks = true
+lto = false
+panic = "abort"
+
+[profile.release]
+codegen-units = 1
+debug = false
+debug-assertions = false
+incremental = false
+lto = true
+opt-level = "s"
+overflow-checks = false
+panic = "abort"
+strip = true
+
+[profile.release.build-override]
+codegen-units = 8
+debug = false
+debug-assertions = false
+opt-level = 0
+overflow-checks = false
+
+# 内存配置
+[package.metadata.memory]
+ram_start = 0x20000000
+ram_size = "128K"
+flash_start = 0x08000000
+flash_size = "1024K"
+stack_size = "8K"
+heap_size = "32K"
+
+# FreeRTOS配置
+[package.metadata.freertos]
+max_priorities = 8
+tick_rate_hz = 1000
+minimal_stack_size = 512
+total_heap_size = 32768
+use_preemption = true
+use_time_slicing = true
+use_idle_hook = true
+use_tick_hook = true
+use_malloc_failed_hook = true
+use_stack_overflow_hook = true
+use_daemon_task_startup_hook = true
+
+# 构建配置
+[package.metadata.build]
+target = "thumbv7em-none-eabihf"
+runner = "probe-rs run --chip STM32F407VGTx"
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+  "-C", "link-arg=--nmagic",
+]
+
+[package.metadata.docs.rs]
+all-features = true
+targets = ["thumbv7em-none-eabihf"]
+rustdoc-args = ["--cfg", "docsrs"]
+
+# 功能特性
+[features]
+default = ["heap-management", "debug-output"]
+# std-freertos = ["freertos-rust/std"]
+heap-management = ["linked_list_allocator"]
+debug-output = ["rtt-target", "cortex-m-log"]
+usb-support = ["stm32f4xx-hal/usb_fs"]
+can-support = ["stm32f4xx-hal/can"]
+sdio-support = ["stm32f4xx-hal/sdio"]
+rng-support = ["stm32f4xx-hal/rng"]
+# crypto-support = ["stm32f4xx-hal/cryp"]
+# rtc-support = ["stm32f4xx-hal/rtc"]
+
+# 开发依赖
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+proptest = "1.0"
+quickcheck = "1.0"
+quickcheck_macros = "1.0"

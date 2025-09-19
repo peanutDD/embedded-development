@@ -47,10 +47,10 @@
 - Option和Result
 
 ### 6. [集合类型](./06-collections.md)
-- Vector
-- HashMap
-- 字符串处理
-- 迭代器
+- Vector动态数组
+- HashMap哈希映射
+- HashSet哈希集合
+- 其他集合类型
 
 ### 7. [泛型与特征](./07-generics-traits.md)
 - 泛型函数和结构体
@@ -59,105 +59,98 @@
 - 关联类型
 
 ### 8. [生命周期详解](./08-lifetimes.md)
-- 生命周期注解
+- 生命周期语法
 - 生命周期省略规则
 - 静态生命周期
 - 高级生命周期特性
 
 ### 9. [错误处理](./09-error-handling.md)
-- Result类型详解
+- Result类型
+- Option类型
 - 错误传播
 - 自定义错误类型
-- 错误处理最佳实践
 
 ### 10. [模块系统](./10-modules.md)
 - 模块定义和使用
 - 可见性规则
 - use语句
-- 包和crate
+- 包和Crate管理
 
 ### 11. [并发编程](./11-concurrency.md)
 - 线程创建和管理
 - 消息传递
 - 共享状态并发
-- Sync和Send特征
+- Send和Sync特征
 
 ### 12. [智能指针](./12-smart-pointers.md)
-- Box<T>
-- Rc<T>和Arc<T>
-- RefCell<T>和Mutex<T>
-- 自定义智能指针
+- Box<T>堆分配
+- Rc<T>引用计数
+- Arc<T>原子引用计数
+- RefCell<T>内部可变性
 
 ### 13. [宏系统](./13-macros.md)
 - 声明式宏
 - 过程宏
-- 宏的高级用法
-- 元编程技巧
+- 宏调试
+- 实用宏示例
 
 ### 14. [异步编程](./14-async-programming.md)
 - async/await语法
 - Future特征
 - 异步运行时
-- 异步编程模式
+- 异步I/O操作
 
-### 15. [unsafe Rust](./15-unsafe-rust.md)
+### 15. [Unsafe Rust](./15-unsafe-rust.md)
 - unsafe关键字
-- 原始指针
-- 调用unsafe函数
-- 实现unsafe特征
-
-## 实践项目
-
-每个章节都包含相应的代码示例和练习项目：
-
-- **基础练习**: 巩固语法知识的小程序
-- **综合项目**: 结合多个概念的实战项目
-- **嵌入式预备**: 为嵌入式开发做准备的特定练习
-
-## 代码示例结构
-
-```
-01-rust-basics/
-├── examples/
-│   ├── 01-variables/
-│   ├── 02-ownership/
-│   ├── 03-control-flow/
-│   └── ...
-├── exercises/
-│   ├── basic/
-│   ├── intermediate/
-│   └── advanced/
-└── projects/
-    ├── calculator/
-    ├── text-processor/
-    └── mini-database/
-```
+- 原始指针操作
+- 与C语言互操作
+- 内联汇编
 
 ## 学习建议
 
-1. **循序渐进**: 按照章节顺序学习，每个概念都建立在前面的基础上
-2. **动手实践**: 运行所有代码示例，完成练习题
-3. **理解原理**: 不仅要知道怎么写，更要理解为什么这样写
-4. **查阅文档**: 养成查阅官方文档的习惯
-5. **编写测试**: 为你的代码编写单元测试
+### 学习顺序
+建议按照章节顺序学习，每个章节都建立在前面章节的基础上：
 
-## 嵌入式相关重点
+1. **基础语法**（第1-3章）：掌握Rust的基本语法和控制流
+2. **核心概念**（第4-6章）：理解函数、数据结构和集合
+3. **高级特性**（第7-9章）：学习泛型、生命周期和错误处理
+4. **系统编程**（第10-12章）：掌握模块系统、并发和内存管理
+5. **高级主题**（第13-15章）：学习宏、异步编程和unsafe代码
 
-在学习过程中，特别注意以下与嵌入式开发相关的概念：
+### 实践建议
+- 每学完一个章节，完成相应的练习题
+- 尝试编写小项目来巩固所学知识
+- 阅读Rust标准库源码，理解最佳实践
+- 参与开源项目，提升实际编程能力
 
-- **零成本抽象**: Rust如何在不牺牲性能的情况下提供高级特性
-- **内存安全**: 如何在没有垃圾回收器的情况下保证内存安全
-- **编译时检查**: 如何利用类型系统在编译时捕获错误
-- **资源管理**: RAII模式和自动资源管理
-- **并发安全**: 如何安全地处理并发和中断
+### 学习资源
+- [Rust官方文档](https://doc.rust-lang.org/)
+- [Rust程序设计语言](https://kaisery.github.io/trpl-zh-cn/)
+- [Rust By Example](https://rustwiki.org/zh-CN/rust-by-example/)
+- [Rustlings练习](https://github.com/rust-lang/rustlings)
 
-## 推荐资源
+## 总结
 
-- [The Rust Programming Language](https://doc.rust-lang.org/book/)
-- [Rust by Example](https://doc.rust-lang.org/rust-by-example/)
-- [The Rustonomicon](https://doc.rust-lang.org/nomicon/)
-- [Rust Reference](https://doc.rust-lang.org/reference/)
+Rust是一门系统编程语言，具有以下特点：
 
----
+### 核心优势
+- **内存安全**：通过所有权系统防止内存泄漏和悬垂指针
+- **并发安全**：编译时检查数据竞争，确保线程安全
+- **零成本抽象**：高级特性不会带来运行时开销
+- **跨平台**：支持多种操作系统和硬件架构
 
-**准备好开始你的Rust学习之旅了吗？让我们从第一章开始！** 🦀
+### 适用场景
+- 系统编程和操作系统开发
+- 嵌入式系统和物联网设备
+- Web后端和网络服务
+- 区块链和加密货币
+- 游戏引擎和图形编程
+
+### 学习成果
+通过本章节的学习，你将：
+- 掌握Rust的核心语法和概念
+- 理解所有权系统和借用检查
+- 能够编写安全、高效的Rust程序
+- 为后续的嵌入式开发做好准备
+
+继续学习下一章节：[嵌入式Rust开发环境](../02-embedded-setup/README.md)

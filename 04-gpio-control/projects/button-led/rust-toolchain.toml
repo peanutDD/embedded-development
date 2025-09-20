@@ -1,0 +1,9 @@
+[toolchain]
+# 使用稳定版本以获得最佳性能和兼容性
+channel = "stable"
+# 指定目标架构
+targets = ["thumbv7em-none-eabihf"]
+# 只安装必要的组件
+components = ["rust-src", "rustfmt", "clippy"]
+# 设置配置文件
+profile = "minimal"

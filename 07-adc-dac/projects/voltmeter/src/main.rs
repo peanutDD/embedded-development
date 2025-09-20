@@ -15,14 +15,13 @@ use rtt_target::{rprintln, rtt_init_print};
 
 use stm32f4xx_hal::{
     adc::{Adc, config::{AdcConfig, SampleTime}},
-    gpio::{Analog, Pin, Output, PushPull},
+    gpio::{Analog, Pin},
     pac,
     prelude::*,
-    timer::{Counter, Timer, TimerExt},
+    timer::TimerExt,
 };
 
-use libm::{roundf, sqrtf, fabsf};
-use micromath::F32Ext;
+use libm::sqrtf;
 use heapless::Vec;
 
 // 电压表配置常量
@@ -32,8 +31,6 @@ const VOLTAGE_DIVIDER_RATIO: f32 = 10.0; // 分压比 (R1+R2)/R2
 const MAX_INPUT_VOLTAGE: f32 = 30.0; // 最大输入电压 (V)
 const SAMPLE_TIME: SampleTime = SampleTime::Cycles_480; // 最长采样时间
 const MEASUREMENT_INTERVAL_MS: u32 = 50; // 测量间隔 (ms)
-const AVERAGING_SAMPLES: usize = 16; // 平均采样数
-const CALIBRATION_SAMPLES: usize = 100; // 校准采样数
 
 // 测量精度等级
 #[derive(Clone, Copy, Debug)]
@@ -59,7 +56,6 @@ struct CalibrationData {
     offset: f32,      // 零点偏移 (V)
     gain: f32,        // 增益系数
     linearity: [f32; 5], // 线性度校正系数
-    temperature_coeff: f32, // 温度系数
 }
 
 impl Default for CalibrationData {
@@ -68,7 +64,6 @@ impl Default for CalibrationData {
             offset: 0.0,
             gain: 1.0,
             linearity: [0.0; 5],
-            temperature_coeff: 0.0,
         }
     }
 }
@@ -314,7 +309,7 @@ fn main() -> ! {
 
     // 获取外设句柄
     let dp = pac::Peripherals::take().unwrap();
-    let cp = cortex_m::Peripherals::take().unwrap();
+    let _cp = cortex_m::Peripherals::take().unwrap();
 
     // 配置时钟
     let rcc = dp.RCC.constrain();

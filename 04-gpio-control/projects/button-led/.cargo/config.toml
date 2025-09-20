@@ -1,23 +1,27 @@
-# 使用ARM Cortex-M4F链接器
+# 使用ARM Cortex-M4F链接器 - 优化配置
+[target.thumbv7em-none-eabihf]
 runner = "probe-rs run --chip STM32F407VGTx"
 rustflags = [
   # 链接器参数
-  "-C", "linker=flip-link",
   "-C", "link-arg=-Tlink.x",
-  "-C", "link-arg=-Tdefmt.x",
-  # 优化参数
+  # 优化参数 - 减少编译时间
   "-C", "target-cpu=cortex-m4",
-  "-C", "target-feature=+fp-armv8d16",
+  "-C", "target-feature=+thumb2,+dsp",
+  # 减少代码大小和编译时间
+  "-C", "opt-level=s",
+  "-C", "codegen-units=1",
 ]
 
 [build]
 # 默认目标架构
 target = "thumbv7em-none-eabihf"
+# 并行编译作业数 - 减少内存使用
+jobs = 2
 
 [env]
-# 定义环境变量
-DEFMT_LOG = "debug"
-RUST_LOG = "debug"
+# 定义环境变量 - 减少日志级别
+DEFMT_LOG = "info"
+RUST_LOG = "warn"
 
 # probe-rs 配置
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']

@@ -1,0 +1,155 @@
+[package]
+name = "basic-plc"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "Basic PLC implementation for STM32F4 microcontroller"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+readme = "README.md"
+
+[dependencies]
+# 核心依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+nb = "1.0"
+
+# STM32F4 HAL
+stm32f4xx-hal = { version = "0.19", features = ["stm32f407", "rt", "usb_fs"] }
+
+# 数学和信号处理
+libm = "0.2"
+micromath = "2.0"
+heapless = "0.8"
+
+# 时间和延时
+embedded-time = "0.12"
+fugit = "0.3"
+
+# 数据序列化和存储
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+postcard = "1.0"
+embedded-storage = "0.3"
+
+# 通信协议
+embedded-hal = "1.0"
+embedded-io = "0.6"
+
+# 显示和用户界面
+embedded-graphics = "0.8"
+ssd1306 = "0.8"
+
+# 网络通信
+smoltcp = { version = "0.11", default-features = false, features = [
+    "std", "log", "medium-ethernet", "proto-ipv4", "proto-tcp", "socket-tcp"
+] }
+
+# 加密和安全
+aes = { version = "0.8", default-features = false }
+sha2 = { version = "0.10", default-features = false }
+
+# 滤波和控制算法
+pid = "4.0"
+
+# Flash存储
+embedded-storage-async = "0.4"
+
+# 实时任务调度
+rtic = { version = "2.0", features = ["thumbv7-backend"] }
+rtic-monotonics = { version = "1.0", features = ["cortex-m-systick"] }
+
+# 日志和调试
+log = "0.4"
+defmt = "0.3"
+defmt-rtt = "0.4"
+
+[features]
+default = ["std-features"]
+
+# 标准功能特性
+std-features = [
+    "ethernet",
+    "modbus-tcp",
+    "web-interface",
+    "data-logging",
+    "alarm-system"
+]
+
+# 以太网通信
+ethernet = ["smoltcp"]
+
+# Modbus TCP支持
+modbus-tcp = ["ethernet"]
+
+# Web界面
+web-interface = ["ethernet"]
+
+# 数据记录
+data-logging = ["embedded-storage"]
+
+# 报警系统
+alarm-system = []
+
+# 高级控制算法
+advanced-control = ["pid"]
+
+# 安全功能
+security = ["aes", "sha2"]
+
+# 调试功能
+debug = ["defmt", "defmt-rtt", "log"]
+
+[[bin]]
+name = "basic_plc"
+path = "src/main.rs"
+
+[[bin]]
+name = "io_test"
+path = "src/bin/io_test.rs"
+
+[[bin]]
+name = "modbus_test"
+path = "src/bin/modbus_test.rs"
+
+[[bin]]
+name = "ladder_logic_test"
+path = "src/bin/ladder_logic_test.rs"
+
+[[bin]]
+name = "ethernet_test"
+path = "src/bin/ethernet_test.rs"
+
+[profile.dev]
+debug = true
+opt-level = "s"
+lto = false
+codegen-units = 1
+incremental = false
+
+[profile.release]
+debug = false
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+
+# 目标平台配置
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+runner = "probe-rs run --chip STM32F407VGTx"
+
+# 链接器配置
+[target.thumbv7em-none-eabihf]
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+]
+
+# 内存配置
+[package.metadata.memory]
+flash = "1024K"
+ram = "128K"
+
+# RTIC配置
+[package.metadata.rtic]
+backend = "thumbv7-backend"

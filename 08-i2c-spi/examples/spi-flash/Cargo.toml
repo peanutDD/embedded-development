@@ -1,0 +1,39 @@
+[package]
+name = "spi-flash-example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+nb = "1.0"
+
+[dependencies.stm32f4xx-hal]
+version = "0.14"
+features = ["stm32f401", "rt"]
+
+[[bin]]
+name = "spi-flash"
+path = "src/main.rs"
+
+[profile.dev]
+debug = true
+lto = false
+
+[profile.release]
+debug = true
+lto = true
+opt-level = "s"
+
+# 目标平台配置
+[build]
+target = "thumbv7em-none-eabihf"
+
+# 链接器配置
+[target.thumbv7em-none-eabihf]
+runner = "arm-none-eabi-gdb"
+rustflags = [
+  "-C", "linker=arm-none-eabi-ld",
+  "-C", "link-arg=-Tlink.x",
+]

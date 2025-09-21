@@ -1,0 +1,145 @@
+[package]
+name = "wifi-sensor"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "WiFi sensor data collection and transmission example"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+readme = "README.md"
+
+[dependencies]
+# 核心依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+nb = "1.0"
+embedded-hal = "0.2"
+
+# STM32F4 HAL
+stm32f4xx-hal = { version = "0.14", features = ["stm32f407", "rt", "usb_fs"] }
+
+# 数学和信号处理
+libm = "0.2"
+micromath = "2.0"
+num-traits = { version = "0.2", default-features = false }
+
+# 时间和延时
+fugit = "0.3"
+systick-monotonic = "1.0"
+
+# 数据序列化和存储
+heapless = { version = "0.7", features = ["serde"] }
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+serde-json-core = "0.4"
+postcard = "1.0"
+
+# 通信协议
+at-commands = "0.5"
+
+# 显示和用户界面
+embedded-graphics = "0.7"
+ssd1306 = "0.7"
+
+# 网络通信
+httparse = "1.8"
+url = { version = "2.3", default-features = false }
+
+# 加密和安全
+sha2 = { version = "0.10", default-features = false }
+hmac = { version = "0.12", default-features = false }
+
+# 滤波和控制算法
+filter = { version = "0.1", default-features = false }
+
+# Flash存储
+embedded-storage = "0.3"
+
+# 实时任务调度
+rtic = { version = "2.0", features = ["thumbv7-backend"] }
+rtic-monotonics = { version = "1.0", features = ["cortex-m-systick"] }
+
+# 日志和调试
+log = "0.4"
+rtt-target = { version = "0.4", features = ["cortex-m"] }
+panic-rtt-target = { version = "0.1", features = ["cortex-m"] }
+
+# CRC计算
+crc = "3.0"
+
+[features]
+default = ["std"]
+std = []
+
+# 调试功能
+debug = ["rtt-target", "panic-rtt-target"]
+
+# 网络功能
+network = ["httparse", "url"]
+
+# 加密功能
+crypto = ["sha2", "hmac"]
+
+# 显示功能
+display = ["embedded-graphics", "ssd1306"]
+
+# 存储功能
+storage = ["embedded-storage"]
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+
+[[bin]]
+name = "sensor_test"
+path = "src/bin/sensor_test.rs"
+
+[[bin]]
+name = "wifi_test"
+path = "src/bin/wifi_test.rs"
+
+[[bin]]
+name = "http_client"
+path = "src/bin/http_client.rs"
+
+[profile.dev]
+debug = true
+opt-level = "s"
+lto = false
+codegen-units = 1
+incremental = false
+
+[profile.release]
+debug = false
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+
+# 目标平台配置
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+runner = "arm-none-eabi-gdb"
+rustflags = [
+  "-C", "linker=arm-none-eabi-ld",
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-nostartfiles",
+]
+
+# 链接器配置
+[target.thumbv7em-none-eabihf]
+runner = "probe-run --chip STM32F407VGTx"
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=--nmagic",
+]
+
+# 内存配置
+[package.metadata.memory]
+ram_start = 0x20000000
+ram_size = 128K
+flash_start = 0x08000000
+flash_size = 1024K
+
+# RTIC配置
+[package.metadata.rtic]
+backend = "thumbv7-backend"

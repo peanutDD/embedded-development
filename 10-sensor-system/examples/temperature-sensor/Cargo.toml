@@ -1,0 +1,82 @@
+[package]
+name = "temperature-sensor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# 核心依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+nb = "1.0"
+
+# STM32F4 HAL
+stm32f4xx-hal = { version = "0.14", features = ["stm32f401", "rt"] }
+
+# 传感器驱动
+ds18b20 = "0.1"
+dht22 = "0.1"
+bmp280 = "0.2"
+sht3x = "0.2"
+
+# 数学和滤波
+libm = "0.2"
+heapless = "0.7"
+
+# 时间和延时
+systick-monotonic = "1.0"
+
+# 串口通信
+nb = "1.0"
+
+# 可选功能
+serde = { version = "1.0", default-features = false, optional = true }
+serde-json-core = { version = "0.4", optional = true }
+
+[features]
+default = []
+json-output = ["serde", "serde-json-core"]
+multiple-sensors = []
+calibration = []
+data-logging = []
+
+[[bin]]
+name = "ds18b20-example"
+path = "src/ds18b20_example.rs"
+
+[[bin]]
+name = "dht22-example"
+path = "src/dht22_example.rs"
+
+[[bin]]
+name = "bmp280-example"
+path = "src/bmp280_example.rs"
+
+[[bin]]
+name = "multi-sensor"
+path = "src/multi_sensor.rs"
+
+[profile.dev]
+debug = true
+opt-level = "s"
+
+[profile.release]
+debug = true
+lto = true
+opt-level = "s"
+
+# 目标平台配置
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+runner = "arm-none-eabi-gdb"
+rustflags = [
+  "-C", "linker=arm-none-eabi-ld",
+  "-C", "link-arg=-Tlink.x",
+]
+
+# 链接器配置
+[target.thumbv7em-none-eabihf]
+runner = "arm-none-eabi-gdb"
+rustflags = [
+  "-C", "linker=arm-none-eabi-ld",
+  "-C", "link-arg=-Tlink.x",
+]

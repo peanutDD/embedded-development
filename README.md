@@ -16,24 +16,25 @@
 
 ## 📚 教程结构
 
-### 基础篇 (Foundation)
-- **[01-rust-basics](01-rust-basics/)** - Rust 基础语法和概念
-- **[02-environment-setup](02-environment-setup/)** - 开发环境配置和工具链
+### 基础篇 (Fundamentals)
+- **[01-rust-basics](01-rust-basics/)** - Rust 语言基础
+- **[02-environment-setup](02-environment-setup/)** - 开发环境搭建
 - **[03-embedded-concepts](03-embedded-concepts/)** - 嵌入式系统核心概念
 
 ### 外设控制篇 (Peripheral Control)
-- **[04-gpio-control](04-gpio-control/)** - GPIO 控制和数字I/O
-- **[05-serial-communication](05-serial-communication/)** - 串口通信(UART/USART)
-- **[06-timers-interrupts](06-timers-interrupts/)** - 定时器和中断处理
-- **[07-adc-dac](07-adc-dac/)** - 模数转换和数模转换
-- **[08-i2c-spi](08-i2c-spi/)** - I2C/SPI 总线通信
+- **[04-gpio-control](04-gpio-control/)** - GPIO 控制与数字信号
+- **[05-serial-communication](05-serial-communication/)** - 串口通信
+- **[06-timers-interrupts](06-timers-interrupts/)** - 定时器与中断
+- **[07-adc-dac](07-adc-dac/)** - 模数转换与数模转换
+- **[08-i2c-spi](08-i2c-spi/)** - I2C/SPI 通信协议
 
 ### 高级应用篇 (Advanced Applications)
-- **[08-rtos-integration](08-rtos-integration/)** - 实时操作系统集成
-- **[09-industrial-projects](09-industrial-projects/)** - 工业级项目案例
-- **[10-sensor-system](10-sensor-system/)** - 传感器系统设计
-- **[11-industrial-controller](11-industrial-controller/)** - 工业控制器开发
-- **[12-wireless-communication](12-wireless-communication/)** - 无线通信技术
+- **[09-rtos-integration](09-rtos-integration/)** - 实时操作系统集成
+- **[10-sensor-system](10-sensor-system/)** - 传感器系统集成
+- **[11-power-management](11-power-management/)** - 电源管理与低功耗设计
+- **[12-industrial-controller](12-industrial-controller/)** - 工业控制器开发
+- **[13-industrial-projects](13-industrial-projects/)** - 工业级项目案例
+- **[14-wireless-communication](14-wireless-communication/)** - 无线通信技术
 
 ## 🚀 快速开始
 

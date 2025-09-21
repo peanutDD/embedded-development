@@ -3,17 +3,17 @@ members = [
     "07-adc-dac/examples/basic-adc",
     "07-adc-dac/examples/dac-generator",
     "07-adc-dac/projects/voltmeter",
-    "08-rtos-integration/examples/freertos-basic",
-    "09-industrial-projects/case-studies/smart-manufacturing",
-    "09-industrial-projects/templates/sensor-node",
-    "09-industrial-projects/templates/communication-hub",
+    "09-rtos-integration/examples/freertos-basic",
+    "13-industrial-projects/case-studies/smart-manufacturing",
+    "13-industrial-projects/templates/sensor-node",
+    "13-industrial-projects/templates/communication-hub",
 ]
 
 exclude = [
     "04-gpio-control/projects/basic-led",
     "04-gpio-control/projects/button-led",
-    "09-industrial-projects/case-studies/iot-gateway",
-    "09-industrial-projects/templates/basic-controller",
+    "13-industrial-projects/case-studies/iot-gateway",
+    "13-industrial-projects/templates/basic-controller",
 ]
 
 resolver = "2"

@@ -1,0 +1,105 @@
+[package]
+name = "code-optimization"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# 核心依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+
+# STM32F4 HAL
+stm32f4xx-hal = { version = "0.14", features = ["stm32f407"] }
+
+# 数据结构和算法
+heapless = "0.7"
+nb = "1.0"
+
+# 数学和信号处理
+micromath = "2.0"
+libm = "0.2"
+
+# 时间和延时
+fugit = "0.3"
+
+# 调试和日志
+cortex-m-log = { version = "0.8", features = ["log-integration", "semihosting"] }
+log = "0.4"
+
+# 性能测试
+criterion = { version = "0.4", optional = true }
+
+[features]
+default = []
+benchmark = ["criterion"]
+
+[[bin]]
+name = "algorithm_optimization"
+path = "src/algorithm_optimization.rs"
+
+[[bin]]
+name = "memory_optimization"
+path = "src/memory_optimization.rs"
+
+[[bin]]
+name = "compiler_optimization"
+path = "src/compiler_optimization.rs"
+
+[[bin]]
+name = "simd_optimization"
+path = "src/simd_optimization.rs"
+
+[[bin]]
+name = "cache_optimization"
+path = "src/cache_optimization.rs"
+
+[profile.dev]
+debug = true
+opt-level = 0
+overflow-checks = true
+
+[profile.release]
+debug = false
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+overflow-checks = false
+
+[profile.release-with-debug]
+inherits = "release"
+debug = true
+
+# 目标平台配置
+[target.thumbv7em-none-eabihf]
+runner = "arm-none-eabi-gdb"
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+  "-C", "target-cpu=cortex-m4",
+  "-C", "target-feature=+fp-armv8d16",
+]
+
+# 链接器配置
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+]
+
+# 内存配置
+[package.metadata.memory]
+flash = { origin = "0x08000000", length = "1024K" }
+ram = { origin = "0x20000000", length = "128K" }
+
+# 优化配置
+[package.metadata.optimization]
+inline-threshold = 275
+llvm-args = [
+  "-enable-machine-outliner=never",
+  "-enable-shrink-wrap=false",
+]
+
+# 性能分析配置
+[package.metadata.profiling]
+enabled = true
+output-format = "json"

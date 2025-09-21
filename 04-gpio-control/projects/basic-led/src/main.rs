@@ -40,7 +40,7 @@ fn main() -> ! {
     
     // 配置GPIO
     let gpioc = dp.GPIOC.split();
-    let mut led = gpioc.pc13.into_push_pull_output();
+    let mut led: LedPin = gpioc.pc13.into_push_pull_output();
     
     // 配置系统定时器用于精确延时
     let mut timer = Timer::syst(cp.SYST, &clocks).counter_hz();

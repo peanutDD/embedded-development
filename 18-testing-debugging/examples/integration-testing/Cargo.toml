@@ -1,0 +1,124 @@
+[package]
+name = "integration-testing-examples"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "Integration testing examples for embedded Rust development"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+
+[dependencies]
+# Core dependencies
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+
+# STM32F4 HAL
+stm32f4xx-hal = { version = "0.14", features = ["stm32f401", "rt"] }
+
+# Embedded HAL
+embedded-hal = "0.2"
+nb = "1.0"
+
+# Testing framework
+embedded-test = "0.3"
+defmt = "0.3"
+defmt-rtt = "0.4"
+
+# Mock and stub utilities
+embedded-hal-mock = "0.9"
+
+# Communication protocols
+embedded-can = "0.4"
+serde = { version = "1.0", default-features = false }
+serde-json-core = "0.4"
+postcard = "1.0"
+
+# Utilities
+heapless = "0.7"
+void = "1.0"
+generic-array = "0.14"
+
+# Time and delays
+fugit = "0.3"
+
+[dev-dependencies]
+# Additional testing utilities
+assert_matches = "1.5"
+pretty_assertions = "1.3"
+serial_test = "2.0"
+
+[features]
+default = ["std"]
+std = []
+no-std = []
+
+# Testing features
+mock-hardware = []
+can-testing = []
+uart-testing = []
+spi-testing = []
+i2c-testing = []
+
+[[bin]]
+name = "hal_integration"
+path = "src/hal_integration.rs"
+
+[[bin]]
+name = "communication_tests"
+path = "src/communication_tests.rs"
+
+[[bin]]
+name = "system_tests"
+path = "src/system_tests.rs"
+
+[[bin]]
+name = "end_to_end_tests"
+path = "src/end_to_end_tests.rs"
+
+[profile.dev]
+debug = true
+opt-level = 0
+overflow-checks = true
+
+[profile.release]
+debug = true
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[profile.test]
+debug = true
+opt-level = 1
+
+# Target configuration
+[target.thumbv7em-none-eabihf]
+runner = "probe-run --chip STM32F401RETx"
+rustflags = [
+  "-C", "linker=flip-link",
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+]
+
+# Memory configuration
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+]
+
+# Testing configuration
+[package.metadata.docs.rs]
+default-target = "thumbv7em-none-eabihf"
+targets = ["thumbv7em-none-eabihf"]
+
+# Integration test configuration
+[package.metadata.integration-test]
+hardware_required = true
+test_timeout = 30
+setup_script = "scripts/setup_test_hardware.sh"
+teardown_script = "scripts/cleanup_test_hardware.sh"
+
+# Defmt configuration
+[package.metadata.defmt]
+log_level = "debug"

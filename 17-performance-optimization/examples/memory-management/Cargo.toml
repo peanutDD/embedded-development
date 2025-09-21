@@ -1,0 +1,116 @@
+[package]
+name = "memory-management"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# 核心依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+
+# STM32F4 HAL
+stm32f4xx-hal = { version = "0.19", features = ["stm32f407"] }
+
+# 内存管理
+heapless = "0.8"
+linked_list_allocator = "0.10"
+embedded-alloc = "0.5"
+
+# 数据结构
+nb = "1.0"
+generic-array = "0.14"
+
+# 时间和延时
+fugit = "0.3"
+
+# 调试和日志
+cortex-m-log = { version = "0.8", features = ["log-integration", "semihosting"] }
+log = "0.4"
+
+# 性能测试
+criterion = { version = "0.5", default-features = false }
+
+# 数学运算
+micromath = "2.0"
+libm = "0.2"
+
+# 内存分析
+memchr = { version = "2.5", default-features = false }
+
+[features]
+default = []
+semihosting = ["cortex-m-log/semihosting"]
+rtt = ["cortex-m-log/rtt"]
+
+[[bin]]
+name = "basic_memory"
+path = "src/main.rs"
+
+[[bin]]
+name = "heap_management"
+path = "src/heap_management.rs"
+
+[[bin]]
+name = "stack_optimization"
+path = "src/stack_optimization.rs"
+
+[[bin]]
+name = "cache_optimization"
+path = "src/cache_optimization.rs"
+
+[[bin]]
+name = "dma_memory"
+path = "src/dma_memory.rs"
+
+[[bin]]
+name = "memory_pool"
+path = "src/memory_pool.rs"
+
+[profile.dev]
+debug = true
+opt-level = 1
+overflow-checks = true
+
+[profile.release]
+debug = true
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+overflow-checks = false
+
+# 目标平台配置
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+runner = "probe-rs run --chip STM32F407VGTx"
+rustflags = [
+  "-C", "linker=flip-link",
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+]
+
+# 链接器配置
+[target.thumbv7em-none-eabihf]
+runner = "probe-rs run --chip STM32F407VGTx"
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+]
+
+# 内存配置
+[package.metadata.memory]
+ram_start = 0x20000000
+ram_size = 128K
+flash_start = 0x08000000
+flash_size = 1024K
+
+# 内存分析配置
+[package.metadata.memory-analysis]
+stack_size = "8K"
+heap_size = "32K"
+static_size = "16K"
+
+# 性能分析配置
+[package.metadata.performance]
+enable_cycle_counter = true
+enable_memory_profiling = true
+enable_stack_profiling = true

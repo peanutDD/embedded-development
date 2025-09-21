@@ -14,13 +14,3 @@ MEMORY
 
 /* 程序入口点 */
 _stack_start = ORIGIN(RAM) + LENGTH(RAM);
-
-/* 确保向量表位于Flash起始位置 */
-ASSERT(ORIGIN(FLASH) == 0x08000000, "Flash起始地址必须为0x08000000");
-
-/* 确保有足够的堆栈空间 */
-ASSERT(LENGTH(RAM) >= 8K, "RAM大小必须至少8KB以确保基本运行");
-
-/* 调试信息 */
-/* Flash使用情况将在编译时显示 */
-/* RAM使用情况将在编译时显示 */

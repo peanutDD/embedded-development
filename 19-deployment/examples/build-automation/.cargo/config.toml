@@ -1,0 +1,105 @@
+[target.thumbv7em-none-eabihf]
+# uncomment this to make `cargo run` execute programs on QEMU
+# runner = "qemu-system-arm -cpu cortex-m4 -machine lm3s6965evb -nographic -semihosting-config enable=on,target=native -kernel"
+
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+# uncomment ONE of these three option to make `cargo run` start a GDB session
+# which option to pick depends on your system
+runner = "arm-none-eabi-gdb -q -x openocd.gdb"
+# runner = "gdb-multiarch -q -x openocd.gdb"
+# runner = "gdb -q -x openocd.gdb"
+
+rustflags = [
+  # Previously, the linker arguments --nmagic and -Tlink.x were set here.
+  # They are now set by the build script instead. The linker argument can be found
+  # in the build script at the root of this project.
+
+  # LLD (shipped with the Rust toolchain) is used as the default linker
+  "-C", "link-arg=-Tlink.x",
+
+  # if you run into problems with LLD switch to the GNU linker by commenting out
+  # this line
+  # "-C", "linker=arm-none-eabi-ld",
+
+  # if you need to link to pre-compiled C libraries provided by a C toolchain
+  # use GCC as the linker by commenting out both lines above and then
+  # uncommenting the three lines below
+  # "-C", "linker=arm-none-eabi-gcc",
+  # "-C", "link-arg=-Wl,-Tlink.x",
+  # "-C", "link-arg=-nostartfiles",
+]
+
+[build]
+# Pick ONE of these compilation targets
+# target = "thumbv6m-none-eabi"        # Cortex-M0 and Cortex-M0+
+target = "thumbv7em-none-eabihf"     # Cortex-M4F and Cortex-M7F (with FPU)
+# target = "thumbv7em-none-eabi"       # Cortex-M4 and Cortex-M7 (no FPU)
+# target = "thumbv7m-none-eabi"        # Cortex-M3
+
+# use cargo's built-in support for .cargo/config.toml files to automatically
+# apply the --target flag to every invocation of `cargo build`, `cargo check`,
+# etc.
+
+[unstable]
+build-std = ["core", "compiler_builtins"]
+
+[env]
+# Define environment variables for the build process
+DEFMT_LOG = "info"
+
+# Custom build profiles
+[profile.dev]
+# this is the default for the dev profile, optimize for debugging
+opt-level = "s"
+debug = 2
+debug-assertions = true
+overflow-checks = true
+lto = false
+panic = 'unwind'
+incremental = true
+codegen-units = 256
+rpath = false
+
+[profile.release]
+# better optimizations
+opt-level = 3
+debug = false
+debug-assertions = false
+overflow-checks = false
+lto = true
+panic = 'abort'
+incremental = false
+codegen-units = 1
+rpath = false
+
+[profile.size-opt]
+inherits = "release"
+opt-level = "s"     # optimize for size
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[profile.speed-opt]
+inherits = "release"
+opt-level = 3       # optimize for speed
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+
+# Custom aliases for common commands
+[alias]
+rb = "run --bin"
+rr = "run --release"
+b = "build"
+br = "build --release"
+t = "test"
+tr = "test --release"
+c = "check"
+cr = "check --release"
+clippy-all = "clippy --all-targets --all-features -- -D warnings"
+fmt-all = "fmt --all"
+clean-all = "clean"
+
+# Build script configuration
+[build-dependencies]
+chrono = { version = "0.4", default-features = false, features = ["clock"] }

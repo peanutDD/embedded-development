@@ -1,0 +1,21 @@
+[package]
+name = "i2c-eeprom-example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+stm32f4xx-hal = { version = "0.14", features = ["stm32f401"] }
+nb = "1.0"
+panic-halt = "0.2"
+
+[profile.dev]
+debug = true
+lto = false
+
+[profile.release]
+debug = true
+lto = true
+codegen-units = 1
+opt-level = "s"

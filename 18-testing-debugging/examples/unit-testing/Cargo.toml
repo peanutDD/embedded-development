@@ -1,0 +1,110 @@
+[package]
+name = "unit-testing-examples"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "Unit testing examples for embedded Rust development"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+
+[dependencies]
+# Core dependencies
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+
+# STM32F4 HAL
+stm32f4xx-hal = { version = "0.14", features = ["stm32f401", "rt"] }
+
+# Testing framework
+embedded-test = "0.3"
+defmt = "0.3"
+defmt-rtt = "0.4"
+
+# Mock and stub utilities
+mockall = "0.11"
+embedded-hal-mock = "0.9"
+
+# Property testing
+proptest = "1.0"
+quickcheck = "1.0"
+
+# Benchmarking
+criterion = { version = "0.4", features = ["html_reports"] }
+
+# Utilities
+heapless = "0.7"
+nb = "1.0"
+void = "1.0"
+
+[dev-dependencies]
+# Additional testing utilities
+assert_matches = "1.5"
+pretty_assertions = "1.3"
+serial_test = "2.0"
+
+[features]
+default = ["std"]
+std = []
+no-std = []
+
+# Testing features
+mock-hardware = []
+property-testing = []
+benchmark-tests = []
+
+[[bin]]
+name = "basic_tests"
+path = "src/basic_tests.rs"
+
+[[bin]]
+name = "mock_tests"
+path = "src/mock_tests.rs"
+
+[[bin]]
+name = "property_tests"
+path = "src/property_tests.rs"
+
+[[bin]]
+name = "benchmark_tests"
+path = "src/benchmark_tests.rs"
+
+[profile.dev]
+debug = true
+opt-level = 0
+overflow-checks = true
+
+[profile.release]
+debug = true
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[profile.test]
+debug = true
+opt-level = 1
+
+# Target configuration
+[target.thumbv7em-none-eabihf]
+runner = "probe-run --chip STM32F401RETx"
+rustflags = [
+  "-C", "linker=flip-link",
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+]
+
+# Memory configuration
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+]
+
+# Testing configuration
+[package.metadata.docs.rs]
+default-target = "thumbv7em-none-eabihf"
+targets = ["thumbv7em-none-eabihf"]
+
+# Defmt configuration
+[package.metadata.defmt]
+log_level = "trace"

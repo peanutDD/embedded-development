@@ -1,0 +1,30 @@
+[package]
+name = "simple-bootloader"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+stm32f4xx-hal = { version = "0.14", features = ["stm32f401"] }
+panic-halt = "0.2"
+crc = "3.0"
+
+[profile.dev]
+debug = true
+lto = false
+
+[profile.release]
+debug = true
+lto = true
+codegen-units = 1
+opt-level = "s"
+
+# Bootloader 特殊配置
+[[bin]]
+name = "bootloader"
+path = "src/bootloader.rs"
+
+[[bin]]
+name = "application"
+path = "src/application.rs"

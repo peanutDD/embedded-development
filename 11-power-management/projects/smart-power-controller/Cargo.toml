@@ -1,0 +1,133 @@
+[package]
+name = "smart-power-controller"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "Intelligent power management controller with advanced features"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+
+[dependencies]
+# 核心依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = "0.2"
+nb = "1.0"
+panic-halt = "0.2"
+
+# STM32F4 HAL
+stm32f4xx-hal = { version = "0.14", features = ["rt", "stm32f401"] }
+
+# 数学和信号处理
+libm = "0.2"
+micromath = "2.0"
+heapless = "0.7"
+nalgebra = { version = "0.32", default-features = false, features = ["libm"] }
+
+# 时间和延时
+systick-monotonic = "1.0"
+fugit = "0.3"
+rtic = { version = "2.0", features = ["thumbv7-backend"] }
+
+# 数据序列化和存储
+serde = { version = "1.0", default-features = false }
+postcard = "1.0"
+embedded-storage = "0.3"
+sequential-storage = "0.5"
+
+# 通信协议
+embedded-io = "0.4"
+modbus = { version = "0.12", default-features = false }
+canbus = "0.2"
+
+# 显示和用户界面
+ssd1306 = "0.7"
+embedded-graphics = "0.7"
+u8g2-fonts = "0.4"
+
+# 网络通信
+embedded-nal = "0.6"
+smoltcp = { version = "0.9", default-features = false, features = ["proto-ipv4", "socket-tcp", "socket-udp"] }
+
+# 加密和安全
+aes = { version = "0.8", default-features = false }
+sha2 = { version = "0.10", default-features = false }
+
+# 滤波和控制算法
+pid = "4.0"
+biquad = "0.4"
+
+# Flash存储
+w25q = "0.3"
+
+[features]
+default = ["basic", "display"]
+basic = []
+advanced = ["networking", "security", "data-logging"]
+display = []
+networking = []
+security = []
+data-logging = []
+modbus-support = []
+canbus-support = []
+wireless = []
+debug = []
+
+[[bin]]
+name = "basic-controller"
+path = "src/basic_controller.rs"
+
+[[bin]]
+name = "advanced-controller"
+path = "src/advanced_controller.rs"
+
+[[bin]]
+name = "power-scheduler"
+path = "src/power_scheduler.rs"
+
+[[bin]]
+name = "load-balancer"
+path = "src/load_balancer.rs"
+
+[[bin]]
+name = "energy-optimizer"
+path = "src/energy_optimizer.rs"
+
+[profile.release]
+debug = true
+lto = true
+opt-level = "s"
+codegen-units = 1
+panic = "abort"
+
+[profile.dev]
+debug = true
+opt-level = 1
+panic = "abort"
+
+# 目标平台配置
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+]
+
+# 链接器配置
+[target.thumbv7em-none-eabihf]
+runner = "probe-run --chip STM32F401RETx"
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+  "-C", "target-cpu=cortex-m4",
+  "-C", "target-feature=+fp-armv8d16",
+]
+
+# 内存配置
+[package.metadata.memory]
+ram_start = 0x20000000
+ram_size = 96K
+flash_start = 0x08000000
+flash_size = 512K
+
+# RTIC配置
+[package.metadata.rtic]
+monotonic = "systick"

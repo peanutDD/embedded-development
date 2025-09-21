@@ -1,0 +1,143 @@
+[package]
+name = "performance-monitor"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# 核心依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+
+# STM32F4 HAL
+stm32f4xx-hal = { version = "0.19", features = ["stm32f407"] }
+
+# RTIC框架
+rtic = { version = "2.0", features = ["thumbv7-backend"] }
+rtic-time = "1.0"
+rtic-monotonics = { version = "1.0", features = ["cortex-m-systick"] }
+
+# 数据结构
+heapless = "0.8"
+nb = "1.0"
+generic-array = "0.14"
+
+# 数学运算
+micromath = "2.0"
+libm = "0.2"
+
+# 时间和延时
+fugit = "0.3"
+
+# 调试和日志
+cortex-m-log = { version = "0.8", features = ["log-integration", "semihosting"] }
+log = "0.4"
+
+# 数据序列化
+serde = { version = "1.0", default-features = false }
+postcard = "1.0"
+
+# 通信协议
+embedded-hal = "0.2"
+
+# 显示
+embedded-graphics = "0.8"
+ssd1306 = "0.8"
+
+# 加密和安全
+aes = { version = "0.8", default-features = false }
+sha2 = { version = "0.10", default-features = false }
+
+[features]
+default = []
+semihosting = ["cortex-m-log/semihosting"]
+rtt = ["cortex-m-log/rtt"]
+display = ["embedded-graphics", "ssd1306"]
+crypto = ["aes", "sha2"]
+
+[[bin]]
+name = "basic_monitor"
+path = "src/main.rs"
+
+[[bin]]
+name = "cpu_monitor"
+path = "src/cpu_monitor.rs"
+
+[[bin]]
+name = "memory_monitor"
+path = "src/memory_monitor.rs"
+
+[[bin]]
+name = "power_monitor"
+path = "src/power_monitor.rs"
+
+[[bin]]
+name = "realtime_monitor"
+path = "src/realtime_monitor.rs"
+
+[[bin]]
+name = "system_profiler"
+path = "src/system_profiler.rs"
+
+[profile.dev]
+debug = true
+opt-level = 1
+overflow-checks = true
+
+[profile.release]
+debug = true
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+overflow-checks = false
+
+# 目标平台配置
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+runner = "probe-rs run --chip STM32F407VGTx"
+rustflags = [
+  "-C", "linker=flip-link",
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+]
+
+# 链接器配置
+[target.thumbv7em-none-eabihf]
+runner = "probe-rs run --chip STM32F407VGTx"
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+]
+
+# 内存配置
+[package.metadata.memory]
+ram_start = 0x20000000
+ram_size = 128K
+flash_start = 0x08000000
+flash_size = 1024K
+
+# 性能监控配置
+[package.metadata.performance-monitor]
+sampling_rate = 1000  # Hz
+buffer_size = 1024
+metrics = [
+  "cpu_usage",
+  "memory_usage", 
+  "stack_usage",
+  "interrupt_latency",
+  "task_execution_time",
+  "power_consumption"
+]
+
+# 实时监控配置
+[package.metadata.realtime]
+max_interrupt_latency = "10us"
+max_task_execution_time = "1ms"
+watchdog_timeout = "5s"
+critical_memory_threshold = 90  # percent
+
+# 性能分析配置
+[package.metadata.profiling]
+enable_cycle_counter = true
+enable_trace = true
+enable_memory_profiling = true
+enable_power_profiling = true

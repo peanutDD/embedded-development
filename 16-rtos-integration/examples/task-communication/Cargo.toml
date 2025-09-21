@@ -1,0 +1,126 @@
+[package]
+name = "task-communication"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "Task communication example using RTIC framework for STM32F4"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+readme = "README.md"
+
+[dependencies]
+# 核心依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+
+# STM32F4 HAL
+stm32f4xx-hal = { version = "0.19", features = ["stm32f407", "rt"] }
+
+# RTIC框架
+rtic = { version = "2.0", features = ["thumbv7-backend"] }
+rtic-monotonics = { version = "1.0", features = ["cortex-m-systick"] }
+
+# 数据结构
+heapless = "0.8"
+nb = "1.0"
+
+# 数学和信号处理
+libm = "0.2"
+micromath = "2.0"
+
+# 时间和延时
+fugit = "0.3"
+embedded-time = "0.12"
+
+# 数据序列化和存储
+serde = { version = "1.0", default-features = false }
+postcard = "1.0"
+
+# 通信协议
+embedded-hal = "0.2"
+embedded-hal-nb = "1.0"
+
+# 显示和用户界面
+embedded-graphics = "0.8"
+ssd1306 = "0.8"
+
+# 加密和安全
+aes = { version = "0.8", default-features = false }
+sha2 = { version = "0.10", default-features = false }
+
+# 调试和日志
+cortex-m-log = { version = "0.8", features = ["log-integration", "semihosting"] }
+log = "0.4"
+
+[features]
+default = ["rt"]
+rt = ["stm32f4xx-hal/rt"]
+
+# 调试特性
+debug = ["cortex-m-log/semihosting"]
+semihosting = ["cortex-m-log/semihosting"]
+
+# 优化特性
+size-opt = []
+speed-opt = []
+
+[[bin]]
+name = "message_queue"
+path = "src/bin/message_queue.rs"
+
+[[bin]]
+name = "channel_communication"
+path = "src/bin/channel_communication.rs"
+
+[[bin]]
+name = "shared_resources"
+path = "src/bin/shared_resources.rs"
+
+[[bin]]
+name = "producer_consumer"
+path = "src/bin/producer_consumer.rs"
+
+[[bin]]
+name = "event_system"
+path = "src/bin/event_system.rs"
+
+[profile.dev]
+debug = true
+opt-level = 1
+overflow-checks = true
+
+[profile.release]
+debug = false
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+overflow-checks = false
+
+# 目标平台配置
+[target.thumbv7em-none-eabihf]
+runner = "arm-none-eabi-gdb"
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+]
+
+# 链接器配置
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+runner = "probe-rs run --chip STM32F407VGTx"
+rustflags = [
+  "-C", "linker=flip-link",
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+]
+
+# 内存配置
+[package.metadata.memory]
+flash = { size = "1024K", start = "0x08000000" }
+ram = { size = "128K", start = "0x20000000" }
+
+# RTIC配置
+[package.metadata.rtic]
+backend = "thumbv7-backend"
+dispatchers = ["EXTI0", "EXTI1", "EXTI2", "EXTI3", "EXTI4"]

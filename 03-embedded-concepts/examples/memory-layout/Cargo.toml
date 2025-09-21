@@ -1,0 +1,26 @@
+[package]
+name = "memory-layout-example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+
+# 目标平台配置
+[profile.dev]
+debug = true
+lto = false
+
+[profile.release]
+debug = true
+lto = true
+codegen-units = 1
+opt-level = "s"
+
+# 链接器配置
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+rustflags = [
+  "-C", "link-arg=-Tlink.x",
+]

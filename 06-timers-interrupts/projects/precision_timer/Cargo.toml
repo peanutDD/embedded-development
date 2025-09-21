@@ -1,0 +1,113 @@
+[package]
+name = "precision_timer"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Rust Developer <dev@example.com>"]
+description = "高精度定时器实现 - 微秒级定时精度与时间测量"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+keywords = ["embedded", "timer", "precision", "stm32", "no-std"]
+categories = ["embedded", "hardware-support"]
+
+[dependencies]
+# 核心嵌入式依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = "1.0"
+nb = "1.1"
+
+# 调试和日志
+cortex-m-semihosting = "0.5"
+panic-halt = "0.2"
+rtt-target = { version = "0.4", features = ["cortex-m"] }
+log = "0.4"
+
+# 数学和统计
+libm = "0.2"
+micromath = "2.0"
+heapless = "0.8"
+
+# 时间和测量
+fugit = "0.3"
+embedded-time = "0.12"
+
+# 数据处理
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+postcard = "1.0"
+
+# 平台特定HAL库 (条件编译)
+[target.'cfg(feature = "stm32f4xx")'.dependencies]
+stm32f4xx-hal = { version = "0.20", features = ["rt", "stm32f407"] }
+
+[target.'cfg(feature = "stm32f1xx")'.dependencies]
+stm32f1xx-hal = { version = "0.10", features = ["rt", "stm32f103", "medium"] }
+
+[target.'cfg(feature = "stm32f3xx")'.dependencies]
+stm32f3xx-hal = { version = "0.10", features = ["rt", "stm32f303xc"] }
+
+[dev-dependencies]
+# 测试和基准测试
+criterion = { version = "0.5", default-features = false }
+proptest = { version = "1.0", default-features = false, features = ["std"] }
+
+[features]
+default = ["stm32f4xx"]
+stm32f4xx = []
+stm32f1xx = []
+stm32f3xx = []
+
+# 功能特性
+high-precision = []
+statistics = []
+calibration = []
+debug-timing = []
+
+[[bin]]
+name = "precision_timer"
+path = "src/main.rs"
+
+[[example]]
+name = "microsecond_delay"
+path = "examples/microsecond_delay.rs"
+
+[[example]]
+name = "timing_measurement"
+path = "examples/timing_measurement.rs"
+
+[[example]]
+name = "timer_calibration"
+path = "examples/timer_calibration.rs"
+
+# 优化配置
+[profile.dev]
+opt-level = 1
+debug = true
+lto = false
+codegen-units = 16
+panic = "abort"
+incremental = true
+overflow-checks = true
+
+[profile.release]
+opt-level = 3
+debug = false
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
+overflow-checks = false
+
+[profile.perf]
+inherits = "release"
+debug = 1
+lto = "thin"
+
+[profile.size]
+inherits = "release"
+opt-level = "s"
+lto = "fat"
+codegen-units = 1
+
+# 构建脚本配置
+[build-dependencies]
+cc = "1.0"

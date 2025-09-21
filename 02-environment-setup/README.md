@@ -1,67 +1,216 @@
-# 嵌入式开发环境配置
+# 第2章：开发环境搭建
 
 ## 概述
 
-本章将详细介绍如何搭建完整的Rust嵌入式开发环境。我们将涵盖从基础工具安装到高级调试配置的所有内容，确保你能够顺利开始嵌入式开发之旅。
+本章将指导你搭建完整的Rust嵌入式开发环境，包括工具链安装、IDE配置、调试环境设置等。我们将支持多种操作系统和硬件平台，确保你能够顺利开始嵌入式开发之旅。
+
+嵌入式开发环境的搭建是一个复杂但关键的过程，涉及交叉编译、硬件抽象、调试接口等多个方面。本章不仅提供详细的安装指导，还深入解释每个工具的作用原理和最佳实践。
 
 ## 学习目标
 
-完成本章节后，你将能够：
-- 安装和配置Rust嵌入式工具链
-- 设置不同硬件平台的开发环境
-- 配置调试器和烧录工具
-- 使用IDE和编辑器进行嵌入式开发
-- 解决常见的环境配置问题
+- **工具链掌握**: 安装和配置Rust工具链，理解交叉编译原理
+- **平台支持**: 设置多种嵌入式目标架构和硬件平台
+- **调试能力**: 配置专业的调试和烧录工具链
+- **开发效率**: 设置高效的IDE和开发环境
+- **质量保证**: 建立自动化测试和持续集成流程
+- **问题解决**: 掌握环境诊断和故障排除技能
 
 ## 章节内容
 
-### 1. [基础环境安装](./01-basic-installation.md)
-- Rust工具链安装
-- 目标架构支持
-- 包管理器配置
-- 环境变量设置
+### 2.1 基础环境安装 ⭐
+- **Rust工具链**: rustup、cargo、rustc版本管理
+- **交叉编译**: 目标架构理解、工具链配置
+- **包管理**: Cargo.toml配置、依赖管理策略
+- **环境变量**: PATH、RUST_TARGET_PATH等关键配置
+- **实践项目**: [basic_setup](projects/basic_setup/)
 
-### 2. [硬件平台配置](./02-hardware-platforms.md)
-- STM32开发环境
-- ESP32开发环境
-- Raspberry Pi Pico配置
-- Nordic nRF配置
+### 2.2 硬件平台配置 ⭐
+- **ARM Cortex-M**: STM32、nRF、LPC系列支持
+- **RISC-V**: ESP32-C3、GD32VF103等平台
+- **Xtensa**: ESP32、ESP8266架构支持
+- **AVR**: Arduino兼容开发板配置
+- **平台特性**: 内存映射、启动代码、链接脚本
+- **实践项目**: [platform_configs](projects/platform_configs/)
 
-### 3. [调试工具配置](./03-debugging-tools.md)
-- probe-rs安装和配置
-- OpenOCD设置
-- GDB调试器配置
-- RTT (Real Time Transfer) 设置
+### 2.3 调试工具安装 ⭐
+- **probe-rs**: 现代化调试工具，支持多种调试器
+- **OpenOCD**: 传统调试工具配置和使用
+- **GDB**: 命令行调试技巧和脚本
+- **RTT**: 实时传输技术，高效日志输出
+- **SWD/JTAG**: 调试接口原理和配置
+- **实践项目**: [debug_setup](projects/debug_setup/)
 
-### 4. [IDE和编辑器配置](./04-ide-setup.md)
-- VS Code配置
-- CLion配置
-- Vim/Neovim配置
-- 插件和扩展推荐
+### 2.4 IDE和编辑器配置
+- **VS Code**: rust-analyzer、调试配置、任务自动化
+- **CLion**: Rust插件、CMake集成、调试设置
+- **Vim/Neovim**: LSP配置、插件生态、工作流优化
+- **代码补全**: 智能提示、错误检查、重构支持
+- **实践项目**: [ide_configs](projects/ide_configs/)
 
-### 5. [项目模板和脚手架](./05-project-templates.md)
-- cargo-generate使用
-- 项目模板创建
-- 构建脚本配置
-- 依赖管理最佳实践
+### 2.5 项目模板和脚手架
+- **cargo-generate**: 项目模板创建和使用
+- **模板设计**: 最佳实践模板、多平台支持
+- **构建系统**: build.rs脚本、条件编译
+- **项目结构**: 模块组织、文件布局标准
+- **实践项目**: [project_templates](projects/project_templates/)
 
-### 6. [交叉编译配置](./06-cross-compilation.md)
-- 目标三元组理解
-- 链接器配置
-- 系统库依赖
-- 条件编译设置
+### 2.6 仿真器和测试环境
+- **QEMU仿真**: ARM、RISC-V仿真器配置
+- **单元测试**: std环境测试、mock技术
+- **集成测试**: 硬件在环测试、自动化验证
+- **性能测试**: 基准测试、内存使用分析
+- **实践项目**: [testing_setup](projects/testing_setup/)
 
-### 7. [仿真器和测试环境](./07-simulation-testing.md)
-- QEMU仿真器配置
-- 单元测试环境
-- 集成测试设置
-- CI/CD配置
+### 2.7 持续集成配置
+- **GitHub Actions**: 多平台构建、自动化测试
+- **代码质量**: clippy、rustfmt、安全审计
+- **文档生成**: rustdoc、mdbook集成
+- **发布流程**: 版本管理、自动发布
+- **实践项目**: [ci_setup](projects/ci_setup/)
 
-### 8. [故障排除指南](./08-troubleshooting.md)
-- 常见错误解决
-- 环境诊断工具
-- 性能优化建议
-- 社区资源
+### 2.8 故障排除和常见问题
+- **诊断工具**: 环境检查脚本、问题定位
+- **常见错误**: 编译错误、链接问题、调试失败
+- **性能优化**: 编译时间、二进制大小优化
+- **社区资源**: 官方文档、社区支持、问题报告
+- **实践项目**: [troubleshooting](projects/troubleshooting/)
+
+## 环境架构图
+
+```mermaid
+graph TB
+    subgraph "开发主机"
+        A[Rust工具链] --> B[交叉编译器]
+        B --> C[目标代码]
+        D[IDE/编辑器] --> E[代码编写]
+        F[调试工具] --> G[probe-rs/OpenOCD]
+    end
+    
+    subgraph "目标硬件"
+        H[微控制器] --> I[调试接口]
+        I --> J[SWD/JTAG]
+        H --> K[应用程序]
+    end
+    
+    C --> |烧录| K
+    G --> |调试连接| J
+    
+    subgraph "测试环境"
+        L[QEMU仿真器] --> M[虚拟硬件]
+        N[单元测试] --> O[std环境]
+    end
+    
+    C --> |仿真运行| M
+```
+
+## 工具链版本矩阵
+
+| 平台 | Rust版本 | 目标架构 | 调试工具 | 推荐IDE |
+|------|----------|----------|----------|----------|
+| STM32F4 | 1.70+ | thumbv7em-none-eabihf | probe-rs | VS Code |
+| ESP32 | 1.70+ | xtensa-esp32-none-elf | espflash | VS Code |
+| nRF52 | 1.70+ | thumbv7em-none-eabihf | probe-rs | VS Code |
+| RISC-V | 1.70+ | riscv32imac-unknown-none-elf | probe-rs | CLion |
+
+## 性能基准
+
+不同配置下的编译和调试性能对比：
+
+| 配置 | 编译时间 | 二进制大小 | 调试延迟 | 内存使用 |
+|------|----------|------------|----------|----------|
+| Debug | 15s | 128KB | <100ms | 512MB |
+| Release | 45s | 32KB | <50ms | 256MB |
+| LTO | 120s | 24KB | <50ms | 1GB |
+
+## 最佳实践
+
+### 1. 工具链管理
+```bash
+# 使用rustup管理多个工具链版本
+rustup toolchain install stable
+rustup toolchain install nightly
+rustup default stable
+
+# 为特定项目设置工具链
+rustup override set nightly
+```
+
+### 2. 目标架构配置
+```toml
+# .cargo/config.toml
+[build]
+target = "thumbv7em-none-eabihf"
+
+[target.thumbv7em-none-eabihf]
+runner = "probe-rs run --chip STM32F411RETx"
+rustflags = [
+    "-C", "link-arg=-Tlink.x",
+    "-C", "link-arg=--nmagic",
+]
+```
+
+### 3. 调试配置优化
+```json
+// .vscode/launch.json
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "probe-rs-debug",
+            "request": "launch",
+            "name": "Debug STM32",
+            "chip": "STM32F411RETx",
+            "flashingConfig": {
+                "flashingEnabled": true,
+                "resetAfterFlashing": true
+            },
+            "rttConfig": {
+                "enabled": true,
+                "up": [
+                    {
+                        "channel": 0,
+                        "dataFormat": "String",
+                        "showInTerminal": true
+                    }
+                ]
+            }
+        }
+    ]
+}
+```
+
+## 安全考虑
+
+### 1. 工具链验证
+```bash
+# 验证工具链完整性
+rustup check
+cargo --version
+probe-rs --version
+
+# 检查目标架构支持
+rustup target list --installed
+```
+
+### 2. 依赖安全
+```toml
+# Cargo.toml - 固定依赖版本
+[dependencies]
+cortex-m = "=0.7.7"
+cortex-m-rt = "=0.7.3"
+panic-halt = "=0.2.0"
+```
+
+### 3. 构建安全
+```bash
+# 使用cargo-audit检查安全漏洞
+cargo install cargo-audit
+cargo audit
+
+# 使用cargo-deny检查许可证和安全
+cargo install cargo-deny
+cargo deny check
+```
 
 ## 支持的操作系统
 

@@ -1,0 +1,128 @@
+[package]
+name = "type_safe_gpio"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "类型安全GPIO设计项目 - 展示零成本抽象和编译时安全"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+readme = "README.md"
+keywords = ["embedded", "gpio", "type-safety", "zero-cost", "abstraction"]
+categories = ["embedded", "no-std"]
+
+[dependencies]
+# 核心嵌入式依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+nb = "1.0"
+
+# 调试和日志
+rtt-target = { version = "0.4", features = ["cortex-m"], optional = true }
+cortex-m-log = { version = "0.8", features = ["log-integration", "rtt"], optional = true }
+log = "0.4"
+
+# 类型级编程
+typenum = { version = "1.16", optional = true }
+generic-array = { version = "0.14", optional = true }
+heapless = "0.7"
+
+# 状态机
+smlang = { version = "0.6", optional = true }
+
+# 平台特定HAL库 (条件编译)
+[target.'cfg(feature = "stm32f4")'.dependencies]
+stm32f4xx-hal = { version = "0.16", features = ["rt", "stm32f407"] }
+
+[target.'cfg(feature = "stm32f1")'.dependencies]
+stm32f1xx-hal = { version = "0.10", features = ["rt", "stm32f103", "medium"] }
+
+[target.'cfg(feature = "esp32")'.dependencies]
+esp32-hal = "0.15"
+esp-backtrace = { version = "0.8", features = ["esp32", "panic-handler", "exception-handler", "print-rtt"] }
+
+[target.'cfg(feature = "rp2040")'.dependencies]
+rp2040-hal = { version = "0.9", features = ["rt"] }
+rp2040-boot2 = "0.3"
+
+[dev-dependencies]
+# 测试框架
+embedded-test = "0.3"
+defmt-test = "0.3"
+defmt-rtt = "0.4"
+
+# 基准测试
+criterion = { version = "0.5", default-features = false }
+
+[features]
+default = ["stm32f4"]
+
+# 平台支持
+stm32f4 = []
+stm32f1 = []
+esp32 = []
+rp2040 = []
+
+# 功能特性
+type-level-validation = []
+compile-time-checks = []
+zero-cost-abstractions = []
+state-machines = ["smlang"]
+advanced-types = ["typenum", "generic-array"]
+
+# 调试特性
+debug-gpio = ["rtt-target", "cortex-m-log"]
+performance-analysis = []
+
+[[bin]]
+name = "type_safe_gpio"
+path = "src/main.rs"
+
+[[example]]
+name = "pin_states"
+path = "examples/pin_states.rs"
+
+[[example]]
+name = "type_level_validation"
+path = "examples/type_level_validation.rs"
+
+[[example]]
+name = "zero_cost_abstraction"
+path = "examples/zero_cost_abstraction.rs"
+
+[[example]]
+name = "compile_time_checks"
+path = "examples/compile_time_checks.rs"
+
+[[example]]
+name = "state_machine_gpio"
+path = "examples/state_machine_gpio.rs"
+
+[profile.dev]
+debug = true
+opt-level = 1
+overflow-checks = true
+lto = false
+codegen-units = 16
+
+[profile.release]
+debug = false
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+
+# 性能分析配置
+[profile.perf]
+inherits = "release"
+debug = true
+lto = "thin"
+
+# 大小优化配置
+[profile.size]
+inherits = "release"
+opt-level = "s"
+strip = true
+
+[build-dependencies]
+cc = "1.0"

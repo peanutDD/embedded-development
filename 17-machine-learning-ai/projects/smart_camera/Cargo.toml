@@ -1,0 +1,261 @@
+[package]
+name = "smart_camera"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "智能摄像头系统 - 实时目标检测、人脸识别和行为分析"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+keywords = ["embedded", "ai", "computer-vision", "camera", "detection"]
+categories = ["embedded", "computer-vision", "multimedia"]
+
+[dependencies]
+# AI推理引擎
+candle-core = "0.3"
+candle-nn = "0.3"
+candle-transformers = "0.3"
+ort = "1.15"
+tflite = "0.9"
+
+# 计算机视觉
+image = { version = "0.24", features = ["jpeg", "png", "webp"] }
+imageproc = "0.23"
+opencv = { version = "0.88", optional = true }
+
+# 视频处理
+ffmpeg-next = { version = "6.0", optional = true }
+gstreamer = { version = "0.21", optional = true }
+
+# 数值计算和线性代数
+ndarray = "0.15"
+nalgebra = "0.32"
+num-traits = "0.2"
+statrs = "0.16"
+
+# 并行计算
+rayon = "1.8"
+crossbeam = "0.8"
+crossbeam-channel = "0.5"
+
+# GPU计算
+wgpu = "0.18"
+cudarc = { version = "0.9", optional = true }
+
+# 异步运行时
+tokio = { version = "1.35", features = ["full"] }
+async-std = { version = "1.12", optional = true }
+
+# 网络和通信
+reqwest = { version = "0.11", features = ["json", "stream"] }
+hyper = { version = "0.14", features = ["full"] }
+tonic = { version = "0.10", optional = true }
+prost = { version = "0.12", optional = true }
+
+# WebRTC和流媒体
+webrtc = { version = "0.7", optional = true }
+rtsp = { version = "0.1", optional = true }
+
+# 序列化和数据处理
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+bincode = "1.3"
+postcard = "1.0"
+protobuf = { version = "3.4", optional = true }
+
+# 数据库和存储
+rusqlite = { version = "0.30", features = ["bundled"] }
+redis = { version = "0.24", optional = true }
+rocksdb = { version = "0.21", optional = true }
+
+# 时间处理
+chrono = { version = "0.4", features = ["serde"] }
+time = "0.3"
+
+# 配置管理
+config = "0.14"
+toml = "0.8"
+yaml-rust = "0.4"
+
+# 日志和监控
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+log = "0.4"
+env_logger = "0.10"
+prometheus = { version = "0.13", optional = true }
+
+# 错误处理
+anyhow = "1.0"
+thiserror = "1.0"
+color-eyre = "0.6"
+
+# 加密和安全
+ring = "0.17"
+rustls = "0.21"
+webpki-roots = "0.25"
+
+# 数据结构和算法
+indexmap = "2.1"
+dashmap = "5.5"
+lru = "0.12"
+priority-queue = "1.3"
+
+# 数学和统计
+approx = "0.5"
+rand = "0.8"
+rand_distr = "0.4"
+
+# 压缩和编码
+flate2 = "1.0"
+lz4 = "1.24"
+base64 = "0.21"
+
+# UUID和随机数
+uuid = { version = "1.6", features = ["v4", "serde"] }
+fastrand = "2.0"
+
+# 内存管理
+bumpalo = "3.14"
+typed-arena = "2.0"
+
+# 文件系统和路径
+walkdir = "2.4"
+glob = "0.3"
+tempfile = "3.8"
+
+# 嵌入式HAL (条件编译)
+[target.'cfg(target_arch = "arm")'.dependencies]
+embedded-hal = "0.2"
+nb = "1.1"
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+
+[target.'cfg(target_arch = "aarch64")'.dependencies]
+embedded-hal = "0.2"
+nb = "1.1"
+
+# 平台特定依赖
+[target.'cfg(target_os = "linux")'.dependencies]
+v4l = "0.14"
+udev = "0.7"
+
+[target.'cfg(target_os = "windows")'.dependencies]
+winapi = { version = "0.3", features = ["full"] }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+core-foundation = "0.9"
+core-graphics = "0.23"
+
+# 开发依赖
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+proptest = "1.4"
+quickcheck = "1.0"
+mockall = "0.12"
+serial_test = "3.0"
+tempfile = "3.8"
+pretty_assertions = "1.4"
+
+# 功能特性
+[features]
+default = ["opencv", "gpu", "streaming"]
+
+# 计算机视觉
+opencv = ["dep:opencv"]
+gpu = ["dep:cudarc", "wgpu"]
+
+# 视频和流媒体
+streaming = ["dep:ffmpeg-next", "dep:gstreamer"]
+webrtc = ["dep:webrtc"]
+rtsp = ["dep:rtsp"]
+
+# 网络协议
+grpc = ["dep:tonic", "dep:prost"]
+protobuf = ["dep:protobuf"]
+
+# 数据库
+redis = ["dep:redis"]
+rocksdb = ["dep:rocksdb"]
+
+# 监控
+metrics = ["dep:prometheus"]
+
+# 异步运行时
+async-std-runtime = ["dep:async-std"]
+
+# 硬件平台
+raspberry-pi = []
+jetson = ["gpu"]
+coral = []
+
+# 二进制目标
+[[bin]]
+name = "smart_camera"
+path = "src/main.rs"
+
+[[bin]]
+name = "camera_server"
+path = "src/bin/server.rs"
+
+[[bin]]
+name = "model_benchmark"
+path = "src/bin/benchmark.rs"
+
+# 示例
+[[example]]
+name = "basic_detection"
+path = "examples/basic_detection.rs"
+
+[[example]]
+name = "face_recognition"
+path = "examples/face_recognition.rs"
+
+[[example]]
+name = "streaming_server"
+path = "examples/streaming_server.rs"
+
+[[example]]
+name = "behavior_analysis"
+path = "examples/behavior_analysis.rs"
+
+# 基准测试
+[[bench]]
+name = "inference_benchmark"
+harness = false
+
+[[bench]]
+name = "video_processing"
+harness = false
+
+# 优化配置
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
+
+[profile.dev]
+opt-level = 1
+debug = true
+overflow-checks = true
+
+# 构建依赖
+[build-dependencies]
+cc = "1.0"
+pkg-config = "0.3"
+bindgen = { version = "0.68", optional = true }
+
+# 工作空间配置
+[workspace]
+members = [
+    ".",
+    "crates/vision",
+    "crates/detection",
+    "crates/tracking",
+    "crates/streaming"
+]
+
+# 元数据
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

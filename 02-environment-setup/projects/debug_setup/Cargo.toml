@@ -1,0 +1,78 @@
+[package]
+name = "debug_setup"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Development Team"]
+description = "调试工具配置验证项目"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+# 核心嵌入式依赖
+cortex-m = "0.7.7"
+cortex-m-rt = "0.7.3"
+embedded-hal = "1.0.0"
+panic-halt = "0.2.0"
+
+# 调试和日志
+cortex-m-rtt = "0.1.3"
+cortex-m-semihosting = "0.5.0"
+log = "0.4.20"
+rtt-target = { version = "0.4.0", features = ["cortex-m"] }
+
+# 时间和延迟
+nb = "1.1.0"
+
+# 可选的平台支持
+stm32f4xx-hal = { version = "0.20.0", features = ["stm32f411"], optional = true }
+probe-rs = { version = "0.21.0", optional = true }
+
+[features]
+default = ["rtt-log"]
+rtt-log = ["rtt-target"]
+semihosting-log = []
+stm32f4 = ["stm32f4xx-hal"]
+probe-rs-support = ["probe-rs"]
+
+[dev-dependencies]
+criterion = "0.5.1"
+
+# 调试相关的二进制文件
+[[bin]]
+name = "debug_test"
+path = "src/bin/debug_test.rs"
+
+[[bin]]
+name = "rtt_demo"
+path = "src/bin/rtt_demo.rs"
+
+[[bin]]
+name = "semihosting_demo"
+path = "src/bin/semihosting_demo.rs"
+
+[[example]]
+name = "breakpoint_test"
+path = "examples/breakpoint_test.rs"
+
+[[example]]
+name = "memory_dump"
+path = "examples/memory_dump.rs"
+
+# 优化配置
+[profile.dev]
+debug = true
+opt-level = 0
+overflow-checks = true
+lto = false
+
+[profile.release]
+debug = true  # 保留调试信息
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+
+# 专门的调试配置
+[profile.debug-optimized]
+inherits = "dev"
+opt-level = 1
+debug = true

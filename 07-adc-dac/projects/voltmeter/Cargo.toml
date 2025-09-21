@@ -17,12 +17,12 @@ path = "src/main.rs"
 # 核心嵌入式库
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
-embedded-hal = "0.2"
+embedded-hal = "1.0.0-rc.2"
 nb = "1.0"
 panic-halt = "0.2"
 
-# STM32F4 HAL库
-stm32f4xx-hal = { version = "0.16", features = ["stm32f407", "rt"] }
+# STM32F4 HAL库 - 使用兼容embedded-hal 1.0.0-rc.2的版本
+stm32f4xx-hal = { version = "0.19", features = ["stm32f407", "rt"] }
 
 # 调试和日志
 rtt-target = "0.4"

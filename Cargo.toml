@@ -1,76 +1,160 @@
 [workspace]
+resolver = "2"
+
+# 工作空间成员 - 只包含最基本的项目
 members = [
+    # 基础篇项目
+    "01-rust-basics",
+    "04-gpio-control/projects/basic-led",
+    "04-gpio-control/projects/button-led", 
     "07-adc-dac/examples/basic-adc",
     "07-adc-dac/examples/dac-generator",
     "07-adc-dac/projects/voltmeter",
-    "09-rtos-integration/examples/freertos-basic",
-    "13-industrial-projects/case-studies/smart-manufacturing",
-    "13-industrial-projects/templates/sensor-node",
-    "13-industrial-projects/templates/communication-hub",
+    
+    # 嵌入式概念示例
+    "03-embedded-concepts/examples/memory-layout",
+    
+    # 测试工具
+    "tests",
 ]
 
+# 排除不需要编译的目录和有问题的项目
 exclude = [
-    "04-gpio-control/projects/basic-led",
-    "04-gpio-control/projects/button-led",
-    "13-industrial-projects/case-studies/iot-gateway",
-    "13-industrial-projects/templates/basic-controller",
+    "docs",
+    "scripts",
+    "assets",
+    "*.md",
+    "target",
+    "17-machine-learning-ai/projects/smart_camera",
+    "19-system-integration-deployment/projects/iot_platform",
+    "12-industrial-projects/case-studies/iot-gateway",
+    "12-industrial-projects/templates/basic-controller",
+    # 排除所有其他examples和projects以减少负载
+    "*/examples/*",
+    "*/projects/*",
+    "!04-gpio-control/projects/basic-led",
+    "!04-gpio-control/projects/button-led",
+    "!07-adc-dac/examples/basic-adc", 
+    "!07-adc-dac/examples/dac-generator",
+    "!07-adc-dac/projects/voltmeter",
+    "!03-embedded-concepts/examples/memory-layout",
 ]
 
-resolver = "2"
+# 工作空间级别的包信息
+[workspace.package]
+version = "1.0.0"
+authors = ["Embedded Rust Tutorial Team"]
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/your-username/embedded-development"
+homepage = "https://github.com/your-username/embedded-development"
+documentation = "https://github.com/your-username/embedded-development"
+description = "Complete Rust embedded development tutorial with practical projects"
+keywords = ["embedded", "rust", "microcontroller", "iot", "tutorial"]
+categories = ["embedded", "hardware-support", "no-std"]
+readme = "README.md"
 
+# 工作空间级别的依赖版本管理 - 优化版本
 [workspace.dependencies]
-# 嵌入式核心库
+# 嵌入式核心库 - 只保留必需的
 embedded-hal = "1.0"
 embedded-hal-nb = "1.0"
-embedded-io = "0.6"
-embedded-storage = "0.3"
-
-# 常用嵌入式库
-cortex-m = "0.7"
-cortex-m-rt = "0.7"
-panic-halt = "0.2"
-panic-probe = "0.3"
-rtt-target = "0.4"
-
-# 异步支持
-embassy-executor = "0.5"
-embassy-time = "0.3"
-embassy-sync = "0.5"
-
-# 数据处理
-heapless = "0.8"
 nb = "1.1"
 void = "1.0"
 
-# 序列化
-serde = { version = "1.0", default-features = false }
-postcard = "1.0"
+# Cortex-M支持 - 基础版本
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
 
-# 数学和算法
-libm = "0.2"
-micromath = "2.0"
-
-# 调试和日志
+# 核心Rust依赖 - 精简版本
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
 log = "0.4"
-defmt = "0.3"
-defmt-rtt = "0.4"
+
+# 开发和测试工具
+env_logger = "0.10"
+tower = "0.4"
+tower-http = { version = "0.5", features = ["full"] }
+
+# 数据库
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "sqlite", "chrono", "uuid"] }
+redis = { version = "0.24", features = ["tokio-comp", "connection-manager"] }
+
+# 序列化和配置
+toml = "0.8"
+config = "0.14"
+
+# 数据处理
+heapless = "0.8"
+hashbrown = "0.14"
+indexmap = "2.1"
+petgraph = "0.6"
+
+# 数学和科学计算
+libm = "0.2"
+nalgebra = "0.32"
+ndarray = "0.15"
+num-traits = "0.2"
+
+# 加密和安全
+aes = "0.8"
+sha2 = "0.10"
+hmac = "0.12"
+
+# 并发和同步
+crossbeam = "0.8"
+parking_lot = "0.12"
+
+# 机器学习和AI
+candle-core = "0.3"
+candle-nn = "0.3"
+
+# 测试和基准测试
+criterion = { version = "0.5", features = ["html_reports"] }
+
+# 开发工具
+clap = { version = "4.4", features = ["derive"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# 优化配置
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
 
 [profile.dev]
-codegen-units = 1
-debug = 2
-debug-assertions = true
-incremental = false
-opt-level = "s"
-overflow-checks = true
-panic = "abort"
+opt-level = 0
+debug = true
+panic = "unwind"
 
-[profile.release]
+# 嵌入式发布配置
+[profile.release-embedded]
+inherits = "release"
+opt-level = "z"     # 优化代码大小
+lto = true
 codegen-units = 1
-debug = 2
-debug-assertions = false
-incremental = false
-lto = "fat"
-opt-level = "s"
-overflow-checks = false
 panic = "abort"
-strip = "symbols"
+strip = true
+overflow-checks = false
+
+# 注意：虚拟工作空间不允许直接定义二进制目标
+# 集成测试通过 tests/ 目录中的独立包来运行
+
+# 工作空间元数据
+[workspace.metadata]
+# 最小支持的Rust版本
+msrv = "1.70.0"
+
+# 教程元数据
+[workspace.metadata.tutorial]
+name = "Rust嵌入式开发完整教程"
+version = "1.0.0"
+chapters = 19
+projects = 50
+difficulty = ["beginner", "intermediate", "advanced"]
+duration = "12-20 weeks"

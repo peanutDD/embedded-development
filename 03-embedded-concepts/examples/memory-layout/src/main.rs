@@ -36,15 +36,24 @@ fn main() -> ! {
     // 显示内存布局信息
     show_memory_layout();
     
-    // 演示不同内存区域的使用
+    // 演示内存使用
     demonstrate_memory_usage();
     
     // 检查栈使用情况
     check_stack_usage();
     
+    // 主循环 - 优化版本，避免过度CPU使用
     loop {
-        // 主循环
-        cortex_m::asm::wfi(); // 等待中断
+        // 执行一些轻量级操作
+        unsafe {
+            GLOBAL_COUNTER = GLOBAL_COUNTER.wrapping_add(1);
+        }
+        
+        // 添加延迟以减少CPU负载
+        cortex_m::asm::delay(1000000); // 约1ms延迟
+        
+        // 可选：进入低功耗模式
+        cortex_m::asm::wfi(); // Wait For Interrupt
     }
 }
 
@@ -229,12 +238,12 @@ unsafe fn HardFault(ef: &ExceptionFrame) -> ! {
 
 // 内存管理故障异常处理
 #[exception]
-unsafe fn MemoryManagement(ef: &ExceptionFrame) -> ! {
+unsafe fn MemoryManagement() -> ! {
     // 内存管理单元 (MPU) 故障
     let mmfsr = (*cortex_m::peripheral::SCB::ptr()).cfsr.read() & 0xFF;
     let mmfar = (*cortex_m::peripheral::SCB::ptr()).mmfar.read();
     
-    let _ = (mmfsr, mmfar, ef);
+    let _ = (mmfsr, mmfar);
     
     loop {
         cortex_m::asm::bkpt();
@@ -243,12 +252,12 @@ unsafe fn MemoryManagement(ef: &ExceptionFrame) -> ! {
 
 // 总线故障异常处理
 #[exception]
-unsafe fn BusFault(ef: &ExceptionFrame) -> ! {
+unsafe fn BusFault() -> ! {
     // 总线访问故障
     let bfsr = ((*cortex_m::peripheral::SCB::ptr()).cfsr.read() >> 8) & 0xFF;
     let bfar = (*cortex_m::peripheral::SCB::ptr()).bfar.read();
     
-    let _ = (bfsr, bfar, ef);
+    let _ = (bfsr, bfar);
     
     loop {
         cortex_m::asm::bkpt();
@@ -257,11 +266,11 @@ unsafe fn BusFault(ef: &ExceptionFrame) -> ! {
 
 // 用法故障异常处理
 #[exception]
-unsafe fn UsageFault(ef: &ExceptionFrame) -> ! {
+unsafe fn UsageFault() -> ! {
     // 指令用法故障
     let ufsr = ((*cortex_m::peripheral::SCB::ptr()).cfsr.read() >> 16) & 0xFFFF;
     
-    let _ = (ufsr, ef);
+    let _ = ufsr;
     
     loop {
         cortex_m::asm::bkpt();

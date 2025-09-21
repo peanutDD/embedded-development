@@ -78,14 +78,14 @@ path = "exercises/basic_exercises.rs"
 name = "advanced_exercises"
 path = "exercises/advanced_exercises.rs"
 
-# 基准测试配置
-[[bench]]
-name = "collections_bench"
-harness = false
+# 基准测试配置 - 暂时注释掉，因为基准测试文件不存在
+# [[bench]]
+# name = "collections_bench"
+# harness = false
 
-[[bench]]
-name = "ownership_bench"
-harness = false
+# [[bench]]
+# name = "ownership_bench"
+# harness = false
 
 [profile.dev]
 # 开发模式配置
@@ -138,12 +138,7 @@ std = []
 no_std = []
 embedded = ["no_std"]
 
-# 工作空间配置 (如果需要)
-[workspace]
-members = [
-    ".",
-    "projects/*"
-]
+# 注意：此项目是根工作空间的成员，不需要自己的工作空间配置
 
 # 元数据配置
 [package.metadata.docs.rs]

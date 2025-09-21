@@ -1,0 +1,213 @@
+[package]
+name = "async_uart"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Rust Developer <dev@embedded-rust.com>"]
+description = "异步UART通信实现 - 基于async/await的高效串口通信"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/embedded-rust/async-uart"
+keywords = ["embedded", "async", "uart", "dma", "futures"]
+categories = ["embedded", "asynchronous"]
+
+[dependencies]
+# 核心嵌入式依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+embedded-hal = "1.0"
+embedded-hal-async = "1.0"
+nb = "1.1"
+
+# 异步运行时和futures
+embassy-executor = "0.5"
+embassy-time = "0.3"
+embassy-futures = "0.1"
+futures = { version = "0.3", default-features = false, features = ["async-await"] }
+pin-project = "1.1"
+
+# 调试和日志
+cortex-m-semihosting = "0.5"
+log = "0.4"
+rtt-target = { version = "0.4", features = ["cortex-m"] }
+defmt = "0.3"
+defmt-rtt = "0.4"
+
+# 数据结构和集合
+heapless = { version = "0.8", features = ["serde"] }
+arrayvec = "0.7"
+ringbuffer = "0.15"
+
+# 序列化和反序列化
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+postcard = { version = "1.0", features = ["heapless"] }
+
+# 状态机和协议处理
+sm = "0.9"
+async-trait = { version = "0.1", default-features = false }
+
+# 错误处理
+thiserror-no-std = "2.0"
+
+# 时间和定时器
+fugit = "0.3"
+
+# DMA和内存管理
+linked_list_allocator = "0.10"
+static_cell = "2.0"
+
+# 加密和安全（可选）
+aes = { version = "0.8", default-features = false, optional = true }
+sha2 = { version = "0.10", default-features = false, optional = true }
+
+# 数学和算法
+crc = "3.0"
+
+# 平台特定HAL库 (条件编译)
+[target.'cfg(feature = "stm32")'.dependencies]
+stm32f4xx-hal = { version = "0.20", features = ["rt", "stm32f407"] }
+embassy-stm32 = { version = "0.1", features = ["stm32f407vg", "time-driver-any", "exti"] }
+
+[target.'cfg(feature = "esp32")'.dependencies]
+esp32-hal = { version = "0.17", features = ["rt", "async"] }
+embassy-executor = { version = "0.5", features = ["arch-xtensa", "executor-thread"] }
+
+[target.'cfg(feature = "rp2040")'.dependencies]
+rp2040-hal = { version = "0.9", features = ["rt", "critical-section-impl"] }
+embassy-rp = { version = "0.1", features = ["time-driver"] }
+
+[target.'cfg(feature = "nrf52")'.dependencies]
+nrf52840-hal = { version = "0.16", features = ["rt"] }
+embassy-nrf = { version = "0.1", features = ["nrf52840", "time-driver-rtc1", "gpiote"] }
+
+[dev-dependencies]
+# 测试框架
+defmt-test = "0.3"
+tokio-test = "0.4"
+
+# 模拟和测试工具
+embedded-hal-mock = "0.10"
+
+[features]
+default = ["std-support"]
+
+# 硬件平台支持
+stm32 = []
+esp32 = []
+rp2040 = []
+nrf52 = []
+
+# 功能特性
+std-support = []
+dma-support = []
+interrupt-driven = []
+security = ["aes", "sha2"]
+flow-control = []
+error-correction = []
+
+# 异步特性
+async-std = []
+embassy = ["embassy-executor", "embassy-time"]
+tokio-compat = []
+
+# 调试和分析
+debug-async = ["log", "rtt-target"]
+performance-monitoring = []
+async-tracing = []
+
+# 二进制文件配置
+[[bin]]
+name = "async_demo"
+path = "src/bin/async_demo.rs"
+
+[[bin]]
+name = "dma_demo"
+path = "src/bin/dma_demo.rs"
+
+[[bin]]
+name = "interrupt_demo"
+path = "src/bin/interrupt_demo.rs"
+
+# 示例配置
+[[example]]
+name = "basic_async"
+path = "examples/basic_async.rs"
+
+[[example]]
+name = "buffered_io"
+path = "examples/buffered_io.rs"
+
+[[example]]
+name = "concurrent_streams"
+path = "examples/concurrent_streams.rs"
+
+[[example]]
+name = "dma_transfer"
+path = "examples/dma_transfer.rs"
+
+[[example]]
+name = "flow_control"
+path = "examples/flow_control.rs"
+
+[[example]]
+name = "protocol_handler"
+path = "examples/protocol_handler.rs"
+
+# 优化配置
+[profile.dev]
+opt-level = 1
+debug = true
+lto = false
+codegen-units = 16
+panic = "abort"
+incremental = true
+overflow-checks = true
+
+[profile.release]
+opt-level = 3
+debug = false
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
+overflow-checks = false
+
+# 异步优化配置
+[profile.async-release]
+inherits = "release"
+opt-level = 3
+debug = false
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+
+# 内存优化配置
+[profile.size]
+inherits = "release"
+opt-level = "z"
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
+
+# 构建脚本
+[build-dependencies]
+cc = "1.0"
+
+# 包元数据
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+[package.metadata.cross.target.thumbv7em-none-eabihf]
+pre-build = [
+    "dpkg --add-architecture $CROSS_DEB_ARCH",
+    "apt-get update && apt-get install --assume-yes libc6-dev:$CROSS_DEB_ARCH"
+]
+
+# Embassy配置
+[package.metadata.embassy]
+flavors = [
+    { name = "stm32f407", target = "thumbv7em-none-eabihf" },
+    { name = "rp2040", target = "thumbv6m-none-eabi" },
+    { name = "nrf52840", target = "thumbv7em-none-eabihf" },
+]

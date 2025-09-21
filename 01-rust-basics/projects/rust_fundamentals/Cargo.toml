@@ -1,0 +1,178 @@
+[package]
+name = "rust_fundamentals"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Development Team"]
+description = "Rust语言基础综合项目 - 展示核心概念和最佳实践"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/embedded-development/rust-fundamentals"
+keywords = ["rust", "fundamentals", "embedded", "tutorial"]
+categories = ["development-tools", "embedded"]
+
+[dependencies]
+# 序列化和反序列化
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# 异步运行时
+tokio = { version = "1.0", features = ["full"] }
+
+# 错误处理
+anyhow = "1.0"
+thiserror = "1.0"
+
+# 日志
+log = "0.4"
+env_logger = "0.10"
+
+# 时间处理
+chrono = { version = "0.4", features = ["serde"] }
+
+# 随机数生成
+rand = "0.8"
+
+# 正则表达式
+regex = "1.0"
+
+# 命令行参数解析
+clap = { version = "4.0", features = ["derive"] }
+
+# 配置文件处理
+config = "0.13"
+
+# 数据库（可选）
+# sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "sqlite"] }
+
+# HTTP客户端（可选）
+# reqwest = { version = "0.11", features = ["json"] }
+
+[dev-dependencies]
+# 测试工具
+criterion = "0.5"
+proptest = "1.0"
+mockall = "0.11"
+
+# 基准测试
+bencher = "0.1"
+
+[features]
+default = ["std"]
+std = []
+no_std = []
+
+# 实验性功能
+experimental = []
+
+# 性能优化
+performance = []
+
+# 调试功能
+debug = ["log/max_level_debug"]
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+
+[[bin]]
+name = "cli"
+path = "src/bin/cli.rs"
+
+[[bin]]
+name = "server"
+path = "src/bin/server.rs"
+
+[[example]]
+name = "ownership_demo"
+path = "examples/ownership_demo.rs"
+
+[[example]]
+name = "concurrency_demo"
+path = "examples/concurrency_demo.rs"
+
+[[example]]
+name = "error_handling_demo"
+path = "examples/error_handling_demo.rs"
+
+[[bench]]
+name = "performance_bench"
+harness = false
+
+[profile.dev]
+# 开发配置
+opt-level = 0
+debug = true
+split-debuginfo = "unpacked"
+debug-assertions = true
+overflow-checks = true
+lto = false
+panic = "unwind"
+incremental = true
+codegen-units = 256
+rpath = false
+
+[profile.release]
+# 发布配置
+opt-level = 3
+debug = false
+split-debuginfo = "packed"
+debug-assertions = false
+overflow-checks = false
+lto = true
+panic = "abort"
+incremental = false
+codegen-units = 1
+rpath = false
+
+[profile.test]
+# 测试配置
+opt-level = 0
+debug = 2
+debug-assertions = true
+overflow-checks = true
+lto = false
+panic = "unwind"
+incremental = true
+codegen-units = 256
+
+[profile.bench]
+# 基准测试配置
+opt-level = 3
+debug = false
+debug-assertions = false
+overflow-checks = false
+lto = true
+panic = "abort"
+incremental = false
+codegen-units = 1
+
+# 工作空间配置（如果需要）
+# [workspace]
+# members = [
+#     "crates/*",
+# ]
+
+# 补丁配置（如果需要特定版本）
+# [patch.crates-io]
+# some-crate = { git = "https://github.com/example/some-crate", branch = "main" }
+
+# 目标特定依赖
+[target.'cfg(unix)'.dependencies]
+# Unix特定依赖
+
+[target.'cfg(windows)'.dependencies]
+# Windows特定依赖
+
+# 构建脚本配置
+# [build-dependencies]
+# cc = "1.0"
+
+# 文档配置
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
+# Cargo配置
+[package.metadata.cargo-udeps.ignore]
+normal = []
+development = []
+build = []

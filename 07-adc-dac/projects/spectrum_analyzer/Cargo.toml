@@ -1,0 +1,128 @@
+[package]
+name = "spectrum_analyzer"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Rust Developer <dev@example.com>"]
+description = "频谱分析仪 - 实时FFT频域分析与信号处理"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+keywords = ["embedded", "fft", "spectrum", "signal-processing", "no-std"]
+categories = ["embedded", "hardware-support", "algorithms"]
+
+[dependencies]
+# 核心嵌入式依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = "1.0"
+nb = "1.1"
+
+# 调试和日志
+cortex-m-semihosting = "0.5"
+panic-halt = "0.2"
+rtt-target = { version = "0.4", features = ["cortex-m"] }
+log = "0.4"
+
+# 数学和信号处理
+libm = "0.2"
+micromath = "2.0"
+microfft = "0.5"
+num-complex = { version = "0.4", default-features = false }
+fixed = "1.24"
+
+# 数据结构和集合
+heapless = "0.8"
+
+# 时间和测量
+fugit = "0.3"
+embedded-time = "0.12"
+
+# DMA和内存管理
+linked_list_allocator = "0.10"
+
+# 序列化和反序列化
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+postcard = "1.0"
+
+# 原子操作和并发
+atomic-polyfill = "1.0"
+critical-section = "1.1"
+
+# 平台特定HAL库 (条件编译)
+[target.'cfg(feature = "stm32f4xx")'.dependencies]
+stm32f4xx-hal = { version = "0.20", features = ["rt", "stm32f407"] }
+
+[target.'cfg(feature = "stm32f1xx")'.dependencies]
+stm32f1xx-hal = { version = "0.10", features = ["rt", "stm32f103", "medium"] }
+
+[target.'cfg(feature = "stm32f3xx")'.dependencies]
+stm32f3xx-hal = { version = "0.10", features = ["rt", "stm32f303xc"] }
+
+[dev-dependencies]
+# 测试和基准测试
+criterion = { version = "0.5", default-features = false }
+proptest = { version = "1.0", default-features = false, features = ["std"] }
+
+[features]
+default = ["stm32f4xx"]
+stm32f4xx = []
+stm32f1xx = []
+stm32f3xx = []
+
+# 功能特性
+real-time-fft = []
+windowing = []
+peak-detection = []
+waterfall-display = []
+frequency-tracking = []
+
+[[bin]]
+name = "spectrum_analyzer"
+path = "src/main.rs"
+
+[[example]]
+name = "basic_fft"
+path = "examples/basic_fft.rs"
+
+[[example]]
+name = "real_time_spectrum"
+path = "examples/real_time_spectrum.rs"
+
+[[example]]
+name = "peak_detection"
+path = "examples/peak_detection.rs"
+
+# 优化配置
+[profile.dev]
+opt-level = 2
+debug = true
+lto = false
+codegen-units = 16
+panic = "abort"
+incremental = true
+overflow-checks = true
+
+[profile.release]
+opt-level = 3
+debug = false
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
+overflow-checks = false
+
+[profile.fft]
+inherits = "release"
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+debug = false
+
+[profile.size]
+inherits = "release"
+opt-level = "s"
+lto = "fat"
+codegen-units = 1
+
+# 构建脚本配置
+[build-dependencies]
+cc = "1.0"

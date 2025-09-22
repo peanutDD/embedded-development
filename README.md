@@ -37,18 +37,18 @@
 | [第1章](01-rust-basics/) | Rust基础 | 语法、所有权、生命周期 | 基础语法示例 |
 | [第2章](02-environment-setup/) | 环境搭建 | 工具链、调试器、开发板 | 环境配置 |
 | [第3章](03-embedded-concepts/) | 嵌入式概念 | HAL设计、寄存器操作 | 硬件抽象层 |
-| [第4章](04-gpio-control/) | GPIO控制 | 数字I/O、中断处理 | LED控制系统 |
+| [第4章](04-gpio-control/) | GPIO控制 | 数字I/O、高级GPIO | LED控制系统 |
 | [第5章](05-serial-communication/) | 串口通信 | UART协议、数据传输 | 数据记录器 |
 | [第6章](06-timers-interrupts/) | 定时器与中断 | 定时器配置、中断处理 | 定时任务系统 |
-| [第7章](07-adc-dac/) | ADC与DAC | 模拟信号处理 | 数字电压表 |
+| [第7章](07-adc-dac-interrupts/) | ADC/DAC与中断 | 模拟信号、中断驱动 | 数字电压表 |
 
 ### 🚀 进阶篇
 
 | 章节 | 标题 | 主要内容 | 项目 |
 |------|------|----------|------|
-| [第8章](08-communication-protocols-i2c-spi/) | I2C/SPI通信 | I2C/SPI协议、设备驱动 | 传感器集线器 |
-| [第9章](09-rtos/) | 实时操作系统 | RTOS集成、任务调度 | 多任务系统 |
-| [第10章](10-sensor-system/) | 传感器系统 | 传感器集成、数据处理 | 环境监测站 |
+| [第8章](08-communication-protocols/) | 通信协议 | I2C/SPI/数字IO | 传感器集线器 |
+| [第9章](09-rtos-basics/) | RTOS基础 | 实时系统、任务调度 | 多任务系统 |
+| [第10章](10-sensors-actuators/) | 传感器执行器 | 传感器集成、数据处理 | 环境监测站 |
 | [第11章](11-power-management/) | 电源管理 | 低功耗设计、电源优化 | 节能控制器 |
 | [第12章](12-industrial-projects/) | 工业项目 | 工业控制、自动化 | 工业控制系统 |
 | [第13章](13-security-encryption/) | 安全加密 | 加密算法、安全通信 | 安全通信模块 |
@@ -58,11 +58,11 @@
 
 | 章节 | 标题 | 主要内容 | 项目 |
 |------|------|----------|------|
-| [第15章](15-rtos-integration/) | RTOS集成 | 高级RTOS特性、系统优化 | 复杂实时系统 |
+| [第15章](15-rtos-advanced/) | 高级RTOS | 高级RTOS特性、系统优化 | 复杂实时系统 |
 | [第16章](16-performance-optimization/) | 性能优化 | 代码优化、内存管理 | 高性能控制器 |
-| [第17章](17-machine-learning-ai/) | 机器学习与AI | 嵌入式AI、TinyML | 智能识别系统 |
+| [第17章](17-embedded-ai/) | 嵌入式AI | 嵌入式AI、TinyML | 智能识别系统 |
 | [第18章](18-testing-debugging/) | 测试与调试 | 单元测试、集成测试 | 测试框架 |
-| [第19章](19-system-integration-deployment/) | 系统集成与部署 | 系统集成、部署策略 | 完整产品系统 |
+| [第19章](19-system-integration/) | 系统集成 | 系统集成、部署策略 | 完整产品系统 |
 
 ## 🛠️ 项目结构
 
@@ -71,28 +71,29 @@ embedded-development/
 ├── 📁 01-rust-basics/           # Rust基础语法和概念
 ├── 📁 02-environment-setup/     # 开发环境配置
 ├── 📁 03-embedded-concepts/     # 嵌入式基础概念
-├── 📁 04-gpio-control/          # GPIO控制和数字I/O
+├── 📁 04-gpio-control/          # GPIO控制和高级GPIO
 ├── 📁 05-serial-communication/  # 串口通信
 ├── 📁 06-timers-interrupts/     # 定时器和中断
-├── 📁 07-adc-dac/              # 模拟信号处理
-├── 📁 08-communication-protocols-i2c-spi/ # I2C/SPI通信协议
-├── 📁 09-rtos/                 # 实时操作系统
-├── 📁 10-sensor-system/        # 传感器系统集成
-├── 📁 11-power-management/     # 电源管理
-├── 📁 12-industrial-projects/  # 工业项目应用
-├── 📁 13-security-encryption/  # 安全和加密
+├── 📁 07-adc-dac-interrupts/    # ADC/DAC和中断驱动
+├── 📁 08-communication-protocols/ # 通信协议(I2C/SPI/数字IO)
+├── 📁 09-rtos-basics/           # RTOS基础
+├── 📁 10-sensors-actuators/     # 传感器和执行器系统
+├── 📁 11-power-management/      # 电源管理
+├── 📁 12-industrial-projects/   # 工业项目应用
+├── 📁 13-security-encryption/   # 安全和加密
 ├── 📁 14-wireless-communication/ # 无线通信
-├── 📁 15-rtos-integration/     # 高级RTOS集成
+├── 📁 15-rtos-advanced/         # 高级RTOS特性
 ├── 📁 16-performance-optimization/ # 性能优化
-├── 📁 17-machine-learning-ai/  # 机器学习和AI
-├── 📁 18-testing-debugging/    # 测试和调试
-├── 📁 19-system-integration-deployment/ # 系统集成部署
-├── 📁 docs/                    # 文档和指南
-├── 📁 scripts/                 # 构建和验证脚本
-├── 📁 tests/                   # 集成测试
-├── 📄 Cargo.toml              # 工作空间配置
-├── 📄 README.md               # 项目说明
-└── 📄 LICENSE                 # 许可证
+├── 📁 17-embedded-ai/           # 嵌入式AI和机器学习
+├── 📁 18-testing-debugging/     # 测试和调试
+├── 📁 19-system-integration/    # 系统集成和部署
+├── 📁 docs/                     # 文档和指南
+├── 📁 examples/                 # 跨平台示例
+├── 📁 scripts/                  # 构建和验证脚本
+├── 📁 tests/                    # 集成测试
+├── 📄 Cargo.toml               # 工作空间配置
+├── 📄 README.md                # 项目说明
+└── 📄 LICENSE                  # 许可证
 ```
 
 ## 🚀 快速开始

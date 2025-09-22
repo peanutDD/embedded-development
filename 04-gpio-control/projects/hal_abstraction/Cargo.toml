@@ -1,0 +1,91 @@
+[package]
+name = "hal_abstraction"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "GPIO HAL抽象层设计和实现示例"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+
+[dependencies]
+# 核心嵌入式库
+embedded-hal = "1.0"
+embedded-hal-nb = "1.0"
+nb = "1.1"
+
+# 异步支持
+embedded-hal-async = "1.0"
+futures = { version = "0.3", default-features = false }
+
+# 错误处理
+thiserror-no-std = "2.0"
+
+# 日志记录
+log = "0.4"
+rtt-target = { version = "0.5", features = ["cortex-m"] }
+
+# 数学和统计
+heapless = "0.8"
+micromath = "2.0"
+
+# 平台特定HAL (可选特性)
+stm32f4xx-hal = { version = "0.20", optional = true }
+esp32-hal = { version = "0.17", optional = true }
+rp-pico = { version = "0.8", optional = true }
+nrf52840-hal = { version = "0.16", optional = true }
+
+# 测试依赖
+[dev-dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+critical-section = "1.1"
+
+[features]
+default = []
+
+# 平台支持特性
+stm32f4 = ["stm32f4xx-hal"]
+esp32 = ["esp32-hal"]
+rp2040 = ["rp-pico"]
+nrf52 = ["nrf52840-hal"]
+
+# 功能特性
+interrupt-support = []
+dma-support = []
+async-support = ["embedded-hal-async"]
+bulk-operations = []
+
+# 调试特性
+hardware-test = []
+benchmark = []
+
+[[bin]]
+name = "trait_demo"
+path = "src/bin/trait_demo.rs"
+
+[[bin]]
+name = "type_safety_demo"
+path = "src/bin/type_safety_demo.rs"
+
+[[bin]]
+name = "platform_abstraction"
+path = "src/bin/platform_abstraction.rs"
+
+[[bin]]
+name = "performance_test"
+path = "src/bin/performance_test.rs"
+
+[[bin]]
+name = "error_handling_demo"
+path = "src/bin/error_handling_demo.rs"
+
+[profile.dev]
+debug = true
+opt-level = "s"
+
+[profile.release]
+debug = true
+lto = true
+opt-level = "z"
+codegen-units = 1

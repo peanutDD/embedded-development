@@ -12,7 +12,7 @@ fn main() {
     
     // 运行一些示例
     println!("示例运行:");
-    println!("exercise_1_result: {}", exercise_1());
+    println!("exercise_1_result: {:?}", exercise_1());
     println!("exercise_2_result: {:?}", exercise_2());
     println!("exercise_3_result: {}", exercise_3(5));
 }

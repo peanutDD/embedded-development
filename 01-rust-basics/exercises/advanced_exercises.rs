@@ -179,7 +179,7 @@ impl<T> Point<T> {
 
 impl<T> Point<T>
 where
-    T: std::ops::Add<Output = T> + std::ops::Mul<Output = T> + Copy,
+    T: std::ops::Add<Output = T> + std::ops::Mul<Output = T> + std::ops::Sub<Output = T> + Copy,
 {
     fn distance_squared(&self, other: &Point<T>) -> T {
         // TODO: 计算两点间距离的平方
@@ -386,13 +386,13 @@ impl Node {
 /// 要求:
 /// 使用RefCell实现一个可以在不可变引用下修改的计数器
 #[derive(Debug)]
-struct Counter {
+struct RefCellCounter {
     value: RefCell<i32>,
 }
 
-impl Counter {
+impl RefCellCounter {
     fn new() -> Self {
-        Counter {
+        RefCellCounter {
             value: RefCell::new(0),
         }
     }
@@ -731,7 +731,7 @@ mod tests {
     
     #[test]
     fn test_counter_refcell() {
-        let counter = Counter::new();
+        let counter = RefCellCounter::new();
         assert_eq!(counter.get(), 0);
         
         counter.increment();

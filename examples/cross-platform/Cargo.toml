@@ -1,0 +1,108 @@
+[package]
+name = "cross-platform-examples"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "跨平台嵌入式开发示例"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+
+[dependencies]
+# 核心嵌入式依赖
+embedded-hal = "1.0.0-rc.2"  # 与其他项目保持一致
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+
+# 异步支持
+embassy-executor = { version = "0.3", features = ["arch-cortex-m", "executor-thread", "integrated-timers"], optional = true }
+embassy-time = { version = "0.1", features = ["defmt", "defmt-timestamp-uptime", "tick-hz-32_768"], optional = true }
+embassy-sync = { version = "0.3", optional = true }
+
+# 数据结构和算法
+heapless = { version = "0.7", default-features = false }
+nb = "1.0"
+hash32 = "0.2"
+
+# 数学和统计
+micromath = { version = "2.0", optional = true }
+libm = { version = "0.2", optional = true }
+
+# 序列化
+serde = { version = "1.0", default-features = false, features = ["derive"], optional = true }
+postcard = { version = "1.0", default-features = false, features = ["heapless"], optional = true }
+
+# 错误处理
+thiserror-no-std = "2.0"
+
+# 日志和调试
+log = "0.4"
+defmt = { version = "0.3", optional = true }
+defmt-rtt = { version = "0.4", optional = true }
+
+# 测试支持
+# embedded-test = { version = "0.1", optional = true }  # 暂时注释掉，版本被撤回
+
+# 平台特定依赖 (可选)
+[dependencies.stm32f4xx-hal]
+version = "0.19"  # 更新版本以兼容embedded-hal 1.0
+optional = true
+features = ["rt", "stm32f407"]
+
+[dependencies.esp32-hal]
+version = "0.15"
+optional = true
+# features = ["esp32"]  # 暂时注释掉不存在的特性
+
+[dependencies.rp2040-hal]
+version = "0.8"
+optional = true
+features = ["rt"]
+
+[dependencies.nrf52840-hal]
+version = "0.16"
+optional = true
+features = ["rt"]
+
+# 开发依赖
+[dev-dependencies]
+panic-halt = "0.2"
+
+[dependencies.cortex-m-semihosting]
+version = "0.5"
+optional = true
+
+# 特性配置
+[features]
+default = []
+
+# 平台特性
+stm32 = ["stm32f4xx-hal"]
+esp32 = ["esp32-hal"]
+rp2040 = ["rp2040-hal"]
+nrf52 = ["nrf52840-hal"]
+
+# 功能特性
+async = ["embassy-executor", "embassy-time", "embassy-sync"]
+serde-support = ["serde", "postcard"]
+math = ["micromath", "libm"]
+testing = []  # 移除embedded-test依赖
+debug = ["defmt", "defmt-rtt", "cortex-m-semihosting"]
+
+# 优化配置
+[profile.dev]
+debug = true
+opt-level = 1
+overflow-checks = true
+
+[profile.release]
+debug = false
+opt-level = "s"  # 优化代码大小
+lto = true
+codegen-units = 1
+panic = "abort"
+overflow-checks = false
+
+# 文档配置
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]

@@ -1,0 +1,165 @@
+[package]
+name = "system-integration"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@embedded.com>"]
+description = "系统集成项目 - 综合嵌入式系统设计与实现"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/embedded-dev/system-integration"
+keywords = ["embedded", "system-integration", "traffic-light", "iot", "automation"]
+categories = ["embedded", "hardware-support", "no-std"]
+
+[dependencies]
+# 核心嵌入式依赖
+embedded-hal = "1.0"
+nb = "1.1"
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+
+# 调试和日志
+defmt = "0.3"
+defmt-rtt = "0.4"
+panic-probe = { version = "0.3", features = ["print-defmt"] }
+
+# 数据结构和算法
+heapless = "0.8"
+nalgebra = { version = "0.32", default-features = false, features = ["libm"] }
+micromath = "2.1"
+
+# 时间和定时器
+fugit = "0.3"
+systick-monotonic = "1.0"
+
+# 通信协议
+embedded-can = "0.4"
+modbus-core = "0.3"
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+postcard = "1.0"
+
+# 状态机和控制
+sm = "0.9"
+pid = "4.0"
+control = "0.8"
+
+# 网络和IoT
+smoltcp = { version = "0.11", default-features = false, features = ["proto-ipv4", "socket-tcp", "socket-udp"] }
+embedded-mqtt = "0.1"
+coap-lite = "0.11"
+
+# 存储和文件系统
+embedded-storage = "0.3"
+sequential-storage = "2.0"
+littlefs2 = "0.4"
+
+# 加密和安全
+aes = { version = "0.8", default-features = false }
+sha2 = { version = "0.10", default-features = false }
+rand_core = "0.6"
+
+# 显示和用户界面
+embedded-graphics = "0.8"
+embedded-text = "0.6"
+tinybmp = "0.5"
+
+# 传感器和执行器
+accelerometer = "0.12"
+magnetometer = "0.5"
+temperature-sensor = "0.2"
+
+# 平台特定HAL库
+[target.'cfg(feature = "stm32f4xx")'.dependencies]
+stm32f4xx-hal = { version = "0.20", features = ["rt", "stm32f407"] }
+
+[target.'cfg(feature = "esp32")'.dependencies]
+esp32-hal = "0.19"
+esp-backtrace = { version = "0.11", features = ["esp32", "panic-handler", "exception-handler", "print-defmt"] }
+
+[target.'cfg(feature = "rp2040")'.dependencies]
+rp2040-hal = { version = "0.9", features = ["rt", "critical-section-impl"] }
+rp2040-boot2 = "0.3"
+
+[target.'cfg(feature = "nrf52840")'.dependencies]
+nrf52840-hal = { version = "0.16", features = ["rt"] }
+
+# 多二进制目标配置
+[[bin]]
+name = "traffic_light_system"
+path = "src/bin/traffic_light_system.rs"
+
+[[bin]]
+name = "smart_home_controller"
+path = "src/bin/smart_home_controller.rs"
+
+[[bin]]
+name = "industrial_automation"
+path = "src/bin/industrial_automation.rs"
+
+[[bin]]
+name = "iot_gateway"
+path = "src/bin/iot_gateway.rs"
+
+[[bin]]
+name = "environmental_monitor"
+path = "src/bin/environmental_monitor.rs"
+
+# 功能特性配置
+[features]
+default = ["stm32f4xx"]
+stm32f4xx = []
+esp32 = []
+rp2040 = []
+nrf52840 = []
+
+# 网络功能
+network = ["smoltcp", "embedded-mqtt", "coap-lite"]
+# 存储功能
+storage = ["embedded-storage", "sequential-storage", "littlefs2"]
+# 安全功能
+security = ["aes", "sha2", "rand_core"]
+# 显示功能
+display = ["embedded-graphics", "embedded-text", "tinybmp"]
+# 传感器功能
+sensors = ["accelerometer", "magnetometer", "temperature-sensor"]
+
+# 开发配置
+[profile.dev]
+debug = 2
+opt-level = "s"
+overflow-checks = true
+lto = false
+codegen-units = 16
+panic = "abort"
+incremental = true
+
+# 发布配置
+[profile.release]
+debug = false
+opt-level = "z"
+overflow-checks = false
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
+
+# 测试配置
+[profile.test]
+debug = 2
+opt-level = 1
+overflow-checks = true
+
+# 示例配置
+[[example]]
+name = "basic_integration"
+path = "examples/basic_integration.rs"
+
+[[example]]
+name = "modbus_communication"
+path = "examples/modbus_communication.rs"
+
+[[example]]
+name = "can_network"
+path = "examples/can_network.rs"
+
+[[example]]
+name = "wireless_sensor_network"
+path = "examples/wireless_sensor_network.rs"

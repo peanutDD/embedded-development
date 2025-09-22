@@ -14,6 +14,9 @@ members = [
     # 嵌入式概念示例
     "03-embedded-concepts/examples/memory-layout",
     
+    # 示例项目
+    "examples/cross-platform",
+    
     # 测试工具
     "tests",
 ]

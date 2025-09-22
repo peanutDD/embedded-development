@@ -26,6 +26,14 @@ use stm32f4xx_hal::{
     timer::{Timer, Counter},
 };
 
+// GPIO分析模块
+mod gpio_analyzer;
+mod electrical_test;
+mod timing_test;
+mod power_test;
+
+use gpio_analyzer::*;
+
 /// GPIO电气特性分析结构体
 #[derive(Debug, Clone)]
 struct ElectricalCharacteristics {

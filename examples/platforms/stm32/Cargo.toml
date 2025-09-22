@@ -1,0 +1,83 @@
+[package]
+name = "stm32-examples"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "STM32平台特定的嵌入式开发示例"
+license = "MIT OR Apache-2.0"
+
+# 添加空的workspace表以避免工作空间冲突
+[workspace]
+
+[dependencies]
+# 核心嵌入式依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = "1.0"
+nb = "1.0"
+
+# STM32 HAL库
+stm32f4xx-hal = { version = "0.20", features = ["stm32f407"] }
+stm32f1xx-hal = { version = "0.10", features = ["stm32f103", "medium"] }
+stm32l4xx-hal = { version = "0.7", features = ["stm32l476"] }
+
+# 调试和日志
+defmt = "0.3"
+defmt-rtt = "0.4"
+panic-probe = { version = "0.3", features = ["print-defmt"] }
+
+# 数据结构
+heapless = "0.8"
+
+# 时间处理
+fugit = "0.3"
+
+# 数学和统计
+micromath = "2.0"
+libm = "0.2"
+
+# 同步和并发
+critical-section = "1.1"
+atomic-polyfill = "1.0"
+
+# USB支持
+usb-device = "0.3"
+usbd-serial = "0.2"
+
+# 网络支持（对于支持以太网的STM32）
+smoltcp = { version = "0.11", default-features = false, features = ["std", "log", "medium-ethernet", "proto-ipv4", "socket-tcp", "socket-udp"] }
+
+# 加密支持
+aes = { version = "0.8", default-features = false }
+sha2 = { version = "0.10", default-features = false }
+
+[dev-dependencies]
+cortex-m-semihosting = "0.5"
+
+# 平台特定配置
+[features]
+default = ["stm32f407"]
+stm32f103 = ["stm32f1xx-hal/stm32f103"]
+stm32f407 = ["stm32f4xx-hal/stm32f407"]
+stm32l476 = ["stm32l4xx-hal/stm32l476"]
+
+# 优化配置
+[profile.dev]
+debug = 2
+opt-level = "s"
+overflow-checks = true
+
+[profile.release]
+debug = 2
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+overflow-checks = false
+
+# 内存配置
+[profile.dev.package."*"]
+opt-level = "s"
+
+[profile.release.package."*"]
+opt-level = "z"

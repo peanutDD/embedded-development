@@ -1,0 +1,119 @@
+[package]
+name = "advanced-gpio"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "Advanced GPIO techniques for embedded systems"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+keywords = ["embedded", "gpio", "advanced", "techniques", "no-std"]
+categories = ["embedded", "hardware-support"]
+
+[dependencies]
+# 核心嵌入式依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+embedded-hal = "1.0"
+nb = "1.0"
+
+# 调试和日志
+cortex-m-semihosting = "0.5"
+log = "0.4"
+rtt-target = { version = "0.4", optional = true }
+
+# 数据结构
+heapless = "0.8"
+arrayvec = "0.7"
+tinyvec = "1.6"
+
+# 时间处理
+fugit = "0.3"
+embedded-time = "0.12"
+
+# 数学和统计
+micromath = "2.0"
+num-traits = { version = "0.2", default-features = false }
+libm = "0.2"
+
+# 同步和并发
+critical-section = "1.1"
+atomic-polyfill = "1.0"
+portable-atomic = "1.4"
+
+# 状态机
+smlang = "0.6"
+
+# 序列化（可选）
+serde = { version = "1.0", default-features = false, optional = true }
+postcard = { version = "1.0", optional = true }
+
+# 加密和安全（可选）
+aes = { version = "0.8", default-features = false, optional = true }
+sha2 = { version = "0.10", default-features = false, optional = true }
+
+# 平台特定的HAL库
+[target.'cfg(target_arch = "arm")'.dependencies]
+stm32f4xx-hal = { version = "0.19", optional = true }
+stm32f1xx-hal = { version = "0.10", optional = true }
+esp32-hal = { version = "0.17", optional = true }
+rp2040-hal = { version = "0.9", optional = true }
+nrf52840-hal = { version = "0.16", optional = true }
+
+[features]
+default = ["std"]
+std = []
+rtt = ["rtt-target"]
+serde-support = ["serde", "postcard"]
+crypto = ["aes", "sha2"]
+
+# 平台特定功能
+stm32f4 = ["stm32f4xx-hal"]
+stm32f1 = ["stm32f1xx-hal"]
+esp32 = ["esp32-hal"]
+rp2040 = ["rp2040-hal"]
+nrf52 = ["nrf52840-hal"]
+
+# 多个二进制目标
+[[bin]]
+name = "gpio_expander"
+path = "src/bin/gpio_expander.rs"
+
+[[bin]]
+name = "pin_multiplexer"
+path = "src/bin/pin_multiplexer.rs"
+
+[[bin]]
+name = "signal_conditioning"
+path = "src/bin/signal_conditioning.rs"
+
+[[bin]]
+name = "power_management"
+path = "src/bin/power_management.rs"
+
+[[bin]]
+name = "high_speed_io"
+path = "src/bin/high_speed_io.rs"
+
+[[bin]]
+name = "analog_switch"
+path = "src/bin/analog_switch.rs"
+
+[profile.dev]
+debug = true
+opt-level = 1
+overflow-checks = true
+
+[profile.release]
+debug = false
+opt-level = "s"  # 优化代码大小
+lto = true
+codegen-units = 1
+panic = "abort"
+overflow-checks = false
+
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.release.package."*"]
+opt-level = "s"

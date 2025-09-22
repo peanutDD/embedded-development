@@ -1,0 +1,85 @@
+[package]
+name = "input_capture"
+version = "0.1.0"
+edition = "2021"
+description = "Input capture and measurement system for embedded development"
+authors = ["Embedded Developer"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/embedded-dev/timers-interrupts"
+
+[dependencies]
+# 核心嵌入式库
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = "0.2"
+nb = "1.0"
+panic-halt = "0.2"
+
+# 调试和日志
+cortex-m-semihosting = "0.5"
+log = "0.4"
+
+# 数学和统计
+libm = "0.2"
+micromath = "2.0"
+
+# 时间处理
+fugit = "0.3"
+
+# 数据结构
+heapless = "0.7"
+
+# 数据处理
+num-traits = { version = "0.2", default-features = false }
+
+# 平台特定的HAL库
+[target.'cfg(feature = "stm32f4xx")'.dependencies]
+stm32f4xx-hal = { version = "0.14", features = ["rt", "stm32f407"] }
+
+[target.'cfg(feature = "esp32")'.dependencies]
+esp32-hal = "0.15"
+
+[target.'cfg(feature = "rp2040")'.dependencies]
+rp2040-hal = { version = "0.8", features = ["rt"] }
+
+[target.'cfg(feature = "nrf52840")'.dependencies]
+nrf52840-hal = "0.16"
+
+# 开发依赖
+[dev-dependencies]
+approx = "0.5"
+
+# 多个二进制目标
+[[bin]]
+name = "frequency_meter"
+path = "src/bin/frequency_meter.rs"
+
+[[bin]]
+name = "pulse_counter"
+path = "src/bin/pulse_counter.rs"
+
+[[bin]]
+name = "encoder_reader"
+path = "src/bin/encoder_reader.rs"
+
+[[bin]]
+name = "ultrasonic_sensor"
+path = "src/bin/ultrasonic_sensor.rs"
+
+# 特性配置
+[features]
+default = ["stm32f4xx"]
+stm32f4xx = []
+esp32 = []
+rp2040 = []
+nrf52840 = []
+
+# 发布配置
+[profile.release]
+debug = true
+lto = true
+opt-level = "s"
+
+[profile.dev]
+debug = true
+opt-level = 1

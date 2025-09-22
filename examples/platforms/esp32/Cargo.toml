@@ -1,0 +1,140 @@
+[package]
+name = "esp32-examples"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Development Course"]
+description = "ESP32平台嵌入式开发示例"
+license = "MIT OR Apache-2.0"
+
+# 添加空的workspace表以避免工作空间冲突
+[workspace]
+
+[dependencies]
+# ESP32核心依赖
+esp-idf-svc = { version = "0.48", default-features = false }
+esp-idf-hal = { version = "0.43", default-features = false }
+esp-idf-sys = { version = "0.34", default-features = false }
+
+# 嵌入式HAL
+embedded-hal = "1.0"
+embedded-hal-async = "1.0"
+embedded-io = "0.6"
+embedded-io-async = "0.6"
+
+# 异步运行时
+embassy-executor = { version = "0.5", features = ["task-arena-size-32768"] }
+embassy-time = { version = "0.3", features = ["generic-queue-8"] }
+embassy-sync = "0.5"
+embassy-futures = "0.1"
+
+# 网络支持
+esp-wifi = { version = "0.7", features = ["esp32", "phy-enable-usb", "utils"] }
+smoltcp = { version = "0.11", default-features = false, features = [
+    "medium-ethernet",
+    "proto-ipv4",
+    "proto-ipv6", 
+    "socket-tcp",
+    "socket-udp",
+    "socket-icmp"
+] }
+
+# HTTP客户端/服务器
+embedded-svc = { version = "0.27", default-features = false }
+
+# JSON处理
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+serde_json = { version = "1.0", default-features = false, features = ["alloc"] }
+
+# 数据结构
+heapless = "0.8"
+nb = "1.0"
+
+# 时间处理
+chrono = { version = "0.4", default-features = false, features = ["alloc"] }
+
+# 数学和统计
+micromath = "2.0"
+libm = "0.2"
+
+# 加密支持
+aes = { version = "0.8", default-features = false }
+sha2 = { version = "0.10", default-features = false }
+
+# 显示支持
+embedded-graphics = "0.8"
+ssd1306 = "0.8"
+
+# 传感器支持
+bme280 = "0.5"
+mpu6050 = "0.1"
+
+# 日志和调试
+log = "0.4"
+esp-println = { version = "0.10", features = ["esp32"] }
+esp-backtrace = { version = "0.13", features = ["esp32", "exception-handler", "panic-handler", "println"] }
+
+[build-dependencies]
+embuild = "0.31"
+
+# 平台特定配置
+[features]
+default = ["std"]
+std = ["esp-idf-svc/binstart", "esp-idf-svc/alloc"]
+
+# 二进制目标
+[[bin]]
+name = "basic_gpio"
+path = "src/bin/basic_gpio.rs"
+
+[[bin]]
+name = "wifi_connection"
+path = "src/bin/wifi_connection.rs"
+
+[[bin]]
+name = "http_server"
+path = "src/bin/http_server.rs"
+
+[[bin]]
+name = "mqtt_client"
+path = "src/bin/mqtt_client.rs"
+
+[[bin]]
+name = "i2c_sensor"
+path = "src/bin/i2c_sensor.rs"
+
+[[bin]]
+name = "spi_display"
+path = "src/bin/spi_display.rs"
+
+[[bin]]
+name = "adc_reading"
+path = "src/bin/adc_reading.rs"
+
+[[bin]]
+name = "pwm_control"
+path = "src/bin/pwm_control.rs"
+
+[[bin]]
+name = "bluetooth_beacon"
+path = "src/bin/bluetooth_beacon.rs"
+
+[[bin]]
+name = "ota_update"
+path = "src/bin/ota_update.rs"
+
+# 优化配置
+[profile.dev]
+debug = true
+opt-level = "z"
+
+[profile.release]
+opt-level = "s"
+debug = true
+strip = false
+overflow-checks = false
+lto = "fat"
+codegen-units = 1
+
+# ESP-IDF配置
+[package.metadata.esp-idf-sys]
+esp_idf_version = "v5.1.2"

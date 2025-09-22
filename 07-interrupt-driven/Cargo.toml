@@ -1,0 +1,89 @@
+[package]
+name = "interrupt-driven"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "中断驱动编程项目 - 展示事件驱动架构和异步处理"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+
+[dependencies]
+# 核心嵌入式依赖
+embedded-hal = "1.0"
+nb = "1.1"
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+
+# 调试和日志
+defmt = "0.3"
+defmt-rtt = "0.4"
+panic-probe = { version = "0.3", features = ["print-defmt"] }
+
+# 数据结构和集合
+heapless = "0.8"
+ringbuffer = "0.15"
+
+# 时间处理
+fugit = "0.3"
+
+# 数学和统计
+micromath = "2.0"
+libm = "0.2"
+
+# 同步和并发
+critical-section = "1.1"
+atomic-polyfill = "1.0"
+
+# 状态机
+smlang = "0.7"
+
+# 平台特定HAL库 (条件编译)
+[target.'cfg(feature = "stm32f4xx")'.dependencies]
+stm32f4xx-hal = { version = "0.20", features = ["rt", "stm32f407"] }
+
+[target.'cfg(feature = "esp32")'.dependencies]
+esp32-hal = "0.20"
+esp-backtrace = { version = "0.13", features = ["esp32", "exception-handler", "panic-handler", "println"] }
+
+[target.'cfg(feature = "rp2040")'.dependencies]
+rp-pico = "0.9"
+rp2040-hal = "0.10"
+
+[target.'cfg(feature = "nrf52")'.dependencies]
+nrf52840-hal = "0.16"
+
+# 多个二进制目标
+[[bin]]
+name = "event_processor"
+path = "src/bin/event_processor.rs"
+
+[[bin]]
+name = "async_handler"
+path = "src/bin/async_handler.rs"
+
+[[bin]]
+name = "state_machine"
+path = "src/bin/state_machine.rs"
+
+[[bin]]
+name = "buffer_manager"
+path = "src/bin/buffer_manager.rs"
+
+[features]
+default = ["stm32f4xx"]
+stm32f4xx = []
+esp32 = []
+rp2040 = []
+nrf52 = []
+
+# 开发配置
+[profile.dev]
+debug = 2
+opt-level = "s"
+
+# 发布配置
+[profile.release]
+debug = 2
+lto = true
+opt-level = "z"
+codegen-units = 1

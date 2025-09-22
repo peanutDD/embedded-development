@@ -1,0 +1,162 @@
+[package]
+name = "nrf52-examples"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Development Course"]
+description = "nRF52平台嵌入式开发示例"
+license = "MIT OR Apache-2.0"
+
+# 添加空的workspace表以避免工作空间冲突
+[workspace]
+
+[dependencies]
+# nRF52核心依赖
+nrf52840-hal = { version = "0.16", features = ["rt"], optional = true }
+nrf52832-hal = { version = "0.16", features = ["rt"], optional = true }
+nrf-softdevice = { version = "0.1", features = ["nrf52840", "s140", "ble-peripheral", "ble-central"], optional = true }
+
+# 核心嵌入式依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = "1.0"
+embedded-hal-async = "1.0"
+embedded-io = "0.6"
+nb = "1.0"
+
+# 异步支持
+embassy-executor = { version = "0.5", features = ["arch-cortex-m", "executor-thread", "executor-interrupt", "defmt", "integrated-timers"], optional = true }
+embassy-time = { version = "0.3", features = ["defmt", "defmt-timestamp-uptime"], optional = true }
+embassy-nrf = { version = "0.1", features = ["defmt", "nrf52840", "time-driver-rtc1", "gpiote", "unstable-pac"], optional = true }
+embassy-sync = { version = "0.5", optional = true }
+embassy-futures = { version = "0.1", optional = true }
+
+# 蓝牙支持
+rubble = { version = "0.0.4", default-features = false, optional = true }
+rubble-nrf5x = { version = "0.0.4", optional = true }
+
+# USB支持
+usb-device = { version = "0.3", optional = true }
+usbd-serial = { version = "0.2", optional = true }
+usbd-hid = { version = "0.7", optional = true }
+
+# 显示支持
+embedded-graphics = { version = "0.8", optional = true }
+ssd1306 = { version = "0.8", optional = true }
+st7789 = { version = "0.7", optional = true }
+
+# 传感器支持
+bme280 = { version = "0.5", optional = true }
+mpu6050 = { version = "0.1", optional = true }
+lis3dh = { version = "0.4", optional = true }
+lsm303agr = { version = "0.3", optional = true }
+
+# 数据结构
+heapless = "0.8"
+
+# 时间处理
+fugit = "0.3"
+
+# 数学和统计
+micromath = "2.0"
+libm = "0.2"
+
+# 同步和并发
+critical-section = "1.1"
+atomic-polyfill = "1.0"
+
+# 加密支持
+aes = { version = "0.8", default-features = false }
+sha2 = { version = "0.10", default-features = false }
+ccm = { version = "0.5", default-features = false }
+
+# 调试和日志
+defmt = "0.3"
+defmt-rtt = "0.4"
+panic-probe = { version = "0.3", features = ["print-defmt"] }
+
+# 随机数生成
+rand = { version = "0.8", default-features = false, features = ["small_rng"] }
+
+# 固定点数学
+fixed = "1.24"
+fixed-macro = "1.2"
+
+# NFC支持
+nfc = { version = "0.1", default-features = false, optional = true }
+
+[dev-dependencies]
+cortex-m-semihosting = "0.5"
+
+# 平台特定配置
+[features]
+default = ["nrf52840"]
+nrf52832 = ["nrf52832-hal"]
+nrf52840 = ["nrf52840-hal"]
+embassy = ["embassy-executor", "embassy-time", "embassy-nrf"]
+bluetooth = ["nrf-softdevice", "rubble"]
+usb = ["usb-device", "usbd-serial"]
+display = ["embedded-graphics", "ssd1306"]
+sensors = ["bme280", "mpu6050", "lsm303agr"]
+nfc = ["dep:nfc"]
+
+# 二进制目标
+[[bin]]
+name = "basic_gpio"
+path = "src/bin/basic_gpio.rs"
+
+[[bin]]
+name = "uart_communication"
+path = "src/bin/uart_communication.rs"
+
+[[bin]]
+name = "i2c_sensor"
+path = "src/bin/i2c_sensor.rs"
+
+[[bin]]
+name = "spi_display"
+path = "src/bin/spi_display.rs"
+
+[[bin]]
+name = "adc_reading"
+path = "src/bin/adc_reading.rs"
+
+[[bin]]
+name = "pwm_control"
+path = "src/bin/pwm_control.rs"
+
+[[bin]]
+name = "bluetooth_beacon"
+path = "src/bin/bluetooth_beacon.rs"
+
+[[bin]]
+name = "ble_peripheral"
+path = "src/bin/ble_peripheral.rs"
+
+[[bin]]
+name = "nfc_tag"
+path = "src/bin/nfc_tag.rs"
+
+[[bin]]
+name = "low_power"
+path = "src/bin/low_power.rs"
+
+# 优化配置
+[profile.dev]
+debug = 2
+opt-level = "s"
+overflow-checks = true
+
+[profile.release]
+debug = 2
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+overflow-checks = false
+
+# 内存配置
+[profile.dev.package."*"]
+opt-level = "s"
+
+[profile.release.package."*"]
+opt-level = "z"

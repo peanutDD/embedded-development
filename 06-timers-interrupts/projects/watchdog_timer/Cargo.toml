@@ -1,0 +1,98 @@
+[package]
+name = "watchdog_timer"
+version = "0.1.0"
+edition = "2021"
+description = "Watchdog timer implementation for embedded systems"
+authors = ["Embedded Developer <dev@example.com>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+keywords = ["embedded", "watchdog", "timer", "safety", "no-std"]
+categories = ["embedded", "no-std"]
+
+[dependencies]
+# 核心嵌入式依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = "0.2"
+nb = "1.0"
+panic-halt = "0.2"
+
+# 调试和日志
+defmt = { version = "0.3", optional = true }
+defmt-rtt = { version = "0.4", optional = true }
+
+# 数学和统计
+libm = "0.2"
+micromath = "2.0"
+
+# 时间处理
+fugit = "0.3"
+embedded-time = "0.12"
+
+# 数据结构
+heapless = "0.7"
+nb = "1.0"
+
+# 数据处理
+serde = { version = "1.0", default-features = false, optional = true }
+
+# 平台特定的HAL库
+[target.'cfg(feature = "stm32f4xx")'.dependencies]
+stm32f4xx-hal = { version = "0.14", features = ["rt", "stm32f407"] }
+
+[target.'cfg(feature = "stm32f1xx")'.dependencies]
+stm32f1xx-hal = { version = "0.10", features = ["rt", "stm32f103", "medium"] }
+
+[target.'cfg(feature = "esp32")'.dependencies]
+esp32-hal = "0.15"
+esp-backtrace = { version = "0.8", features = ["esp32", "panic-handler", "exception-handler", "print-uart"] }
+
+[target.'cfg(feature = "rp2040")'.dependencies]
+rp2040-hal = { version = "0.8", features = ["rt"] }
+rp2040-boot2 = "0.2"
+
+[target.'cfg(feature = "nrf52")'.dependencies]
+nrf52840-hal = { version = "0.16", features = ["rt"] }
+
+# 多个二进制目标
+[[bin]]
+name = "basic_watchdog"
+path = "src/bin/basic_watchdog.rs"
+
+[[bin]]
+name = "advanced_watchdog"
+path = "src/bin/advanced_watchdog.rs"
+
+[[bin]]
+name = "system_monitor"
+path = "src/bin/system_monitor.rs"
+
+[[bin]]
+name = "fault_recovery"
+path = "src/bin/fault_recovery.rs"
+
+[dev-dependencies]
+# 测试依赖
+embedded-hal-mock = "0.9"
+
+[features]
+default = ["stm32f4xx"]
+stm32f4xx = []
+stm32f1xx = []
+esp32 = []
+rp2040 = []
+nrf52 = []
+defmt-logging = ["defmt", "defmt-rtt"]
+serde-support = ["serde"]
+
+# 发布配置
+[profile.release]
+debug = true
+lto = true
+opt-level = "s"
+overflow-checks = false
+
+[profile.dev]
+debug = true
+opt-level = 1
+overflow-checks = true

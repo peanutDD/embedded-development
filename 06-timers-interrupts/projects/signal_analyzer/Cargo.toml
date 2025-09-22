@@ -1,0 +1,75 @@
+[package]
+name = "signal_analyzer"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Rust Developer <dev@example.com>"]
+description = "实时信号分析仪 - 频率测量、脉宽检测、波形分析"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+keywords = ["embedded", "signal", "analyzer", "frequency", "stm32"]
+categories = ["embedded", "hardware-support"]
+
+[dependencies]
+# 核心嵌入式依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = "1.0"
+nb = "1.1"
+
+# 调试和日志
+panic-halt = "0.2"
+rtt-target = { version = "0.4", features = ["cortex-m"] }
+log = "0.4"
+
+# 数学计算
+libm = "0.2"
+micromath = "2.0"
+heapless = "0.8"
+
+# 时间处理
+fugit = "0.3"
+
+# 数据处理
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+postcard = "1.0"
+
+# DSP算法
+microfft = "0.5"
+
+# 平台特定HAL库
+[target.'cfg(feature = "stm32f4xx")'.dependencies]
+stm32f4xx-hal = { version = "0.20", features = ["rt", "stm32f407"] }
+
+[target.'cfg(feature = "stm32f1xx")'.dependencies]
+stm32f1xx-hal = { version = "0.10", features = ["rt", "stm32f103", "medium"] }
+
+[features]
+default = ["stm32f4xx"]
+stm32f4xx = []
+stm32f1xx = []
+dsp = ["microfft"]
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+
+[[bin]]
+name = "frequency_counter"
+path = "src/bin/frequency_counter.rs"
+
+[[bin]]
+name = "pulse_analyzer"
+path = "src/bin/pulse_analyzer.rs"
+
+[[bin]]
+name = "spectrum_analyzer"
+path = "src/bin/spectrum_analyzer.rs"
+
+[profile.dev]
+debug = true
+opt-level = "s"
+
+[profile.release]
+debug = true
+lto = true
+opt-level = "s"

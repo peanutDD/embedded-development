@@ -1,0 +1,70 @@
+[package]
+name = "pwm_controller"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Rust Developer <dev@example.com>"]
+description = "多通道PWM控制器 - 电机驱动、LED调光、舵机控制"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+keywords = ["embedded", "pwm", "motor", "servo", "stm32"]
+categories = ["embedded", "hardware-support"]
+
+[dependencies]
+# 核心嵌入式依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = "1.0"
+nb = "1.1"
+
+# 调试和日志
+panic-halt = "0.2"
+rtt-target = { version = "0.4", features = ["cortex-m"] }
+log = "0.4"
+
+# 数学计算
+libm = "0.2"
+micromath = "2.0"
+heapless = "0.8"
+
+# 时间处理
+fugit = "0.3"
+
+# 数据结构
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+
+# 平台特定HAL库
+[target.'cfg(feature = "stm32f4xx")'.dependencies]
+stm32f4xx-hal = { version = "0.20", features = ["rt", "stm32f407"] }
+
+[target.'cfg(feature = "stm32f1xx")'.dependencies]
+stm32f1xx-hal = { version = "0.10", features = ["rt", "stm32f103", "medium"] }
+
+[features]
+default = ["stm32f4xx"]
+stm32f4xx = []
+stm32f1xx = []
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+
+[[bin]]
+name = "servo_demo"
+path = "src/bin/servo_demo.rs"
+
+[[bin]]
+name = "motor_driver"
+path = "src/bin/motor_driver.rs"
+
+[[bin]]
+name = "led_dimmer"
+path = "src/bin/led_dimmer.rs"
+
+[profile.dev]
+debug = true
+opt-level = "s"
+
+[profile.release]
+debug = true
+lto = true
+opt-level = "s"

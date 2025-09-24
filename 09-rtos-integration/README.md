@@ -120,7 +120,7 @@
 ## 项目结构
 
 ```
-08-rtos-integration/
+09-rtos-integration/
 ├── README.md                    # 本文档
 ├── 01-rtos-fundamentals.md     # RTOS基础理论
 ├── 02-rtic-framework.md        # RTIC框架详解

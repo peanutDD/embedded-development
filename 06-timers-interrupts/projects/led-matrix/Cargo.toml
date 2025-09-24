@@ -1,0 +1,34 @@
+[package]
+name = "led-matrix"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+nb = "1.0"
+embedded-hal = "0.2"
+stm32f4xx-hal = { version = "0.14", features = ["stm32f401"] }
+heapless = "0.7"
+micromath = "2.0"
+
+[[bin]]
+name = "basic_display"
+path = "src/basic_display.rs"
+
+[[bin]]
+name = "scrolling_text"
+path = "src/scrolling_text.rs"
+
+[[bin]]
+name = "animation_effects"
+path = "src/animation_effects.rs"
+
+[[bin]]
+name = "game_display"
+path = "src/game_display.rs"
+
+[profile.release]
+debug = true
+lto = true

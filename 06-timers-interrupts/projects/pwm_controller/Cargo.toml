@@ -49,6 +49,22 @@ name = "main"
 path = "src/main.rs"
 
 [[bin]]
+name = "motor_control"
+path = "src/bin/motor_control.rs"
+
+[[bin]]
+name = "led_dimming"
+path = "src/bin/led_dimming.rs"
+
+[[bin]]
+name = "servo_control"
+path = "src/bin/servo_control.rs"
+
+[[bin]]
+name = "multi_channel_pwm"
+path = "src/bin/multi_channel_pwm.rs"
+
+[[bin]]
 name = "servo_demo"
 path = "src/bin/servo_demo.rs"
 

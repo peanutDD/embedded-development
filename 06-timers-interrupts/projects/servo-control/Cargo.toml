@@ -1,0 +1,34 @@
+[package]
+name = "servo-control"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+nb = "1.0"
+embedded-hal = "0.2"
+stm32f4xx-hal = { version = "0.14", features = ["stm32f401"] }
+heapless = "0.7"
+micromath = "2.0"
+
+[[bin]]
+name = "single_servo"
+path = "src/single_servo.rs"
+
+[[bin]]
+name = "multi_servo"
+path = "src/multi_servo.rs"
+
+[[bin]]
+name = "servo_sweep"
+path = "src/servo_sweep.rs"
+
+[[bin]]
+name = "servo_calibration"
+path = "src/servo_calibration.rs"
+
+[profile.release]
+debug = true
+lto = true

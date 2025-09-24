@@ -48,6 +48,23 @@ stm32f3xx-hal = { version = "0.10", features = ["rt", "stm32f303xc"] }
 [dev-dependencies]
 # 测试和基准测试
 criterion = { version = "0.5", default-features = false }
+
+# 二进制文件配置
+[[bin]]
+name = "microsecond_timer"
+path = "src/bin/microsecond_timer.rs"
+
+[[bin]]
+name = "time_measurement"
+path = "src/bin/time_measurement.rs"
+
+[[bin]]
+name = "frequency_generator"
+path = "src/bin/frequency_generator.rs"
+
+[[bin]]
+name = "timing_analysis"
+path = "src/bin/timing_analysis.rs"
 proptest = { version = "1.0", default-features = false, features = ["std"] }
 
 [features]

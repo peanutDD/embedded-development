@@ -1,0 +1,35 @@
+[package]
+name = "motor-driver"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+nb = "1.0"
+embedded-hal = "0.2"
+stm32f4xx-hal = { version = "0.14", features = ["stm32f401"] }
+heapless = "0.7"
+micromath = "2.0"
+pid = "4.0"
+
+[[bin]]
+name = "dc_motor_control"
+path = "src/dc_motor_control.rs"
+
+[[bin]]
+name = "stepper_motor"
+path = "src/stepper_motor.rs"
+
+[[bin]]
+name = "brushless_motor"
+path = "src/brushless_motor.rs"
+
+[[bin]]
+name = "motor_encoder"
+path = "src/motor_encoder.rs"
+
+[profile.release]
+debug = true
+lto = true

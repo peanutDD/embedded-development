@@ -32,9 +32,20 @@ cortex-m = { version = "0.7", features = ["critical-section-single-core"] }
 critical-section = "1.1"
 
 [[bin]]
-name = "basic-timer"
-test = false
-bench = false
+name = "timer_interrupt"
+path = "src/timer_interrupt.rs"
+
+[[bin]]
+name = "precise_timing"
+path = "src/precise_timing.rs"
+
+[[bin]]
+name = "timer_cascade"
+path = "src/timer_cascade.rs"
+
+[[bin]]
+name = "timer_pwm"
+path = "src/timer_pwm.rs"
 
 [profile.dev]
 codegen-units = 1

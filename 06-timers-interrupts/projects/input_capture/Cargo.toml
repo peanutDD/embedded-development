@@ -49,6 +49,40 @@ nrf52840-hal = "0.16"
 [dev-dependencies]
 approx = "0.5"
 
+# 二进制文件配置
+[[bin]]
+name = "frequency_measurement"
+path = "src/bin/frequency_measurement.rs"
+
+[[bin]]
+name = "pulse_width_measurement"
+path = "src/bin/pulse_width_measurement.rs"
+
+[[bin]]
+name = "encoder_interface"
+path = "src/bin/encoder_interface.rs"
+
+[[bin]]
+name = "signal_analyzer"
+path = "src/bin/signal_analyzer.rs"
+
+# 二进制文件配置
+[[bin]]
+name = "frequency_meter"
+path = "src/bin/frequency_meter.rs"
+
+[[bin]]
+name = "pulse_width_meter"
+path = "src/bin/pulse_width_meter.rs"
+
+[[bin]]
+name = "encoder_reader"
+path = "src/bin/encoder_reader.rs"
+
+[[bin]]
+name = "signal_analyzer"
+path = "src/bin/signal_analyzer.rs"
+
 # 多个二进制目标
 [[bin]]
 name = "frequency_meter"

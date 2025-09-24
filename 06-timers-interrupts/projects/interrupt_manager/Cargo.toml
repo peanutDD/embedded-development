@@ -49,6 +49,23 @@ critical-section = "1.1"
 [target.'cfg(feature = "stm32f4xx")'.dependencies]
 stm32f4xx-hal = { version = "0.20", features = ["rt", "stm32f407"] }
 
+# 二进制文件配置
+[[bin]]
+name = "priority_manager"
+path = "src/bin/priority_manager.rs"
+
+[[bin]]
+name = "interrupt_profiler"
+path = "src/bin/interrupt_profiler.rs"
+
+[[bin]]
+name = "nested_interrupts"
+path = "src/bin/nested_interrupts.rs"
+
+[[bin]]
+name = "interrupt_scheduler"
+path = "src/bin/interrupt_scheduler.rs"
+
 [target.'cfg(feature = "stm32f1xx")'.dependencies]
 stm32f1xx-hal = { version = "0.10", features = ["rt", "stm32f103", "medium"] }
 

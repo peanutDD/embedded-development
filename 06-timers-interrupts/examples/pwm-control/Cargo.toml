@@ -1,0 +1,31 @@
+[package]
+name = "pwm-control"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+nb = "1.0"
+embedded-hal = "0.2"
+
+[dependencies.stm32f4xx-hal]
+version = "0.14"
+features = ["stm32f407", "rt"]
+
+[[bin]]
+name = "led_dimmer"
+path = "src/led_dimmer.rs"
+
+[[bin]]
+name = "servo_control"
+path = "src/servo_control.rs"
+
+[[bin]]
+name = "motor_speed"
+path = "src/motor_speed.rs"
+
+[[bin]]
+name = "rgb_led"
+path = "src/rgb_led.rs"

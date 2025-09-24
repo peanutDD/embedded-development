@@ -256,15 +256,12 @@ fn raw_to_voltage(raw_value: u16, range: VoltageRange) -> f32 {
 }
 
 // 多次采样平均
-fn measure_voltage_averaged<T>(
+fn measure_voltage_averaged(
     adc: &mut Adc<pac::ADC1>,
-    pin: &mut T,
+    pin: &mut Pin<'A', 0, Analog>,
     samples: usize,
     range: VoltageRange,
-) -> f32
-where
-    T: embedded_hal::adc::Channel<pac::ADC1, ID = u8>,
-{
+) -> f32 {
     let mut sum = 0u32;
     
     for _ in 0..samples {

@@ -137,7 +137,7 @@ strip = true
 [profile.dev]
 opt-level = 0
 debug = true
-panic = "unwind"
+panic = "abort"
 
 # 嵌入式发布配置
 [profile.release-embedded]

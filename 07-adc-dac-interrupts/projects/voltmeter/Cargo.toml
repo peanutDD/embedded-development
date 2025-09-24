@@ -47,6 +47,7 @@ debug-assertions = true
 incremental = false
 opt-level = 1
 overflow-checks = true
+panic = "abort"
 
 [profile.release]
 codegen-units = 1

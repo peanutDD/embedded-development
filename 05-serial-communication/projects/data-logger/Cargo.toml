@@ -1,0 +1,30 @@
+[package]
+name = "data-logger"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+nb = "1.0"
+embedded-hal = "0.2"
+stm32f4xx-hal = { version = "0.14", features = ["stm32f401", "rt"] }
+heapless = "0.7"
+rtic = { version = "2.0", features = ["thumbv7-backend"] }
+embedded-storage = "0.3"
+serde = { version = "1.0", default-features = false }
+postcard = "1.0"
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+
+[profile.dev]
+debug = true
+opt-level = "s"
+
+[profile.release]
+debug = true
+lto = true
+opt-level = "s"

@@ -1,0 +1,86 @@
+[package]
+name = "async_uart"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Rust Developer <dev@embedded-rust.com>"]
+description = "异步UART通信实现 - 基于async/await的高效串口通信"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/embedded-rust/async-uart"
+keywords = ["embedded", "async", "uart", "dma", "futures"]
+categories = ["embedded", "asynchronous"]
+
+[dependencies]
+# 核心嵌入式依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+embedded-hal = "1.0"
+embedded-hal-async = "1.0"
+nb = "1.1"
+
+# 异步运行时和futures
+embassy-futures = "0.1"
+futures = { version = "0.3", default-features = false, features = ["async-await"] }
+pin-project = "1.1"
+
+# 数据结构和集合
+heapless = { version = "0.8", features = ["serde"] }
+arrayvec = "0.7"
+ringbuffer = "0.15"
+
+# 序列化和反序列化
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+postcard = { version = "1.0", features = ["heapless"] }
+
+# 状态机和协议处理
+sm = "0.9"
+async-trait = { version = "0.1", default-features = false }
+
+# 错误处理
+thiserror-no-std = "2.0"
+
+# 时间和定时器
+fugit = "0.3"
+
+# DMA和内存管理
+linked_list_allocator = "0.10"
+static_cell = "2.0"
+
+# 数学和算法
+crc = "3.0"
+
+[dev-dependencies]
+# 测试框架
+tokio = { version = "1.0", features = ["full"] }
+tokio-test = "0.4"
+criterion = { version = "0.5", features = ["html_reports", "async_tokio"] }
+
+# 模拟和测试工具
+embedded-hal-mock = "0.10"
+
+[[bench]]
+name = "performance_benchmarks"
+harness = false
+
+[features]
+default = ["std-support"]
+std-support = []
+
+# 优化配置
+[profile.dev]
+opt-level = 1
+debug = true
+lto = false
+codegen-units = 16
+panic = "abort"
+incremental = true
+overflow-checks = true
+
+[profile.release]
+opt-level = 3
+debug = false
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
+overflow-checks = false

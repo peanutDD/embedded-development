@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="900" height="700" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .wire { stroke: #000; stroke-width: 2; fill: none; }
+      .component { stroke: #000; stroke-width: 2; fill: #fff; }
+      .text { font-family: Arial, sans-serif; font-size: 12px; text-anchor: middle; }
+      .label { font-family: Arial, sans-serif; font-size: 10px; text-anchor: middle; }
+      .title { font-family: Arial, sans-serif; font-size: 16px; font-weight: bold; text-anchor: middle; }
+      .mcu { fill: #e6f3ff; stroke: #0066cc; stroke-width: 2; }
+      .led-red { fill: #ffcccc; stroke: #cc0000; stroke-width: 2; }
+      .led-yellow { fill: #ffffcc; stroke: #cccc00; stroke-width: 2; }
+      .led-green { fill: #ccffcc; stroke: #00cc00; stroke-width: 2; }
+      .resistor { fill: #ffffcc; stroke: #cc6600; stroke-width: 2; }
+      .button { fill: #ccccff; stroke: #6666cc; stroke-width: 2; }
+    </style>
+  </defs>
+  
+  <!-- 标题 -->
+  <text x="450" y="30" class="title">智能交通灯控制系统</text>
+  
+  <!-- 微控制器 -->
+  <rect x="50" y="100" width="120" height="300" class="mcu"/>
+  <text x="110" y="120" class="text">STM32F4</text>
+  <text x="110" y="135" class="text">微控制器</text>
+  
+  <!-- GPIO引脚定义 -->
+  <circle cx="170" cy="160" r="3" fill="#000"/>
+  <text x="220" y="165" class="label">PC13 (红灯1)</text>
+  
+  <circle cx="170" cy="180" r="3" fill="#000"/>
+  <text x="220" y="185" class="label">PC14 (黄灯1)</text>
+  
+  <circle cx="170" cy="200" r="3" fill="#000"/>
+  <text x="220" y="205" class="label">PC15 (绿灯1)</text>
+  
+  <circle cx="170" cy="240" r="3" fill="#000"/>
+  <text x="220" y="245" class="label">PA0 (红灯2)</text>
+  
+  <circle cx="170" cy="260" r="3" fill="#000"/>
+  <text x="220" y="265" class="label">PA1 (黄灯2)</text>
+  
+  <circle cx="170" cy="280" r="3" fill="#000"/>
+  <text x="220" y="285" class="label">PA2 (绿灯2)</text>
+  
+  <circle cx="170" cy="320" r="3" fill="#000"/>
+  <text x="220" y="325" class="label">PB0 (按钮)</text>
+  
+  <circle cx="170" cy="350" r="3" fill="#000"/>
+  <text x="190" y="355" class="label">3.3V</text>
+  
+  <circle cx="170" cy="380" r="3" fill="#000"/>
+  <text x="190" y="385" class="label">GND</text>
+  
+  <!-- 交通灯组1 (南北方向) -->
+  <text x="350" y="80" class="text">南北方向交通灯</text>
+  
+  <!-- 红灯1 -->
+  <rect x="300" y="150" width="40" height="20" class="resistor"/>
+  <text x="320" y="165" class="text">330Ω</text>
+  <polygon points="360,150 380,160 360,170" class="led-red"/>
+  <line x1="380" y1="150" x2="380" y2="170" stroke="#cc0000" stroke-width="2"/>
+  <text x="370" y="145" class="label">红灯</text>
+  
+  <!-- 黄灯1 -->
+  <rect x="300" y="170" width="40" height="20" class="resistor"/>
+  <text x="320" y="185" class="text">330Ω</text>
+  <polygon points="360,170 380,180 360,190" class="led-yellow"/>
+  <line x1="380" y1="170" x2="380" y2="190" stroke="#cccc00" stroke-width="2"/>
+  <text x="370" y="205" class="label">黄灯</text>
+  
+  <!-- 绿灯1 -->
+  <rect x="300" y="190" width="40" height="20" class="resistor"/>
+  <text x="320" y="205" class="text">330Ω</text>
+  <polygon points="360,190 380,200 360,210" class="led-green"/>
+  <line x1="380" y1="190" x2="380" y2="210" stroke="#00cc00" stroke-width="2"/>
+  <text x="370" y="225" class="label">绿灯</text>
+  
+  <!-- 交通灯组1连线 -->
+  <line x1="170" y1="160" x2="300" y2="160" class="wire"/>
+  <line x1="170" y1="180" x2="300" y2="180" class="wire"/>
+  <line x1="170" y1="200" x2="300" y2="200" class="wire"/>
+  
+  <line x1="380" y1="160" x2="400" y2="160" class="wire"/>
+  <line x1="380" y1="180" x2="400" y2="180" class="wire"/>
+  <line x1="380" y1="200" x2="400" y2="200" class="wire"/>
+  <line x1="400" y1="160" x2="400" y2="380" class="wire"/>
+  <line x1="400" y1="180" x2="400" y2="380" class="wire"/>
+  <line x1="400" y1="200" x2="400" y2="380" class="wire"/>
+  
+  <!-- 交通灯组2 (东西方向) -->
+  <text x="550" y="80" class="text">东西方向交通灯</text>
+  
+  <!-- 红灯2 -->
+  <rect x="500" y="230" width="40" height="20" class="resistor"/>
+  <text x="520" y="245" class="text">330Ω</text>
+  <polygon points="560,230 580,240 560,250" class="led-red"/>
+  <line x1="580" y1="230" x2="580" y2="250" stroke="#cc0000" stroke-width="2"/>
+  <text x="570" y="225" class="label">红灯</text>
+  
+  <!-- 黄灯2 -->
+  <rect x="500" y="250" width="40" height="20" class="resistor"/>
+  <text x="520" y="265" class="text">330Ω</text>
+  <polygon points="560,250 580,260 560,270" class="led-yellow"/>
+  <line x1="580" y1="250" x2="580" y2="270" stroke="#cccc00" stroke-width="2"/>
+  <text x="570" y="285" class="label">黄灯</text>
+  
+  <!-- 绿灯2 -->
+  <rect x="500" y="270" width="40" height="20" class="resistor"/>
+  <text x="520" y="285" class="text">330Ω</text>
+  <polygon points="560,270 580,280 560,290" class="led-green"/>
+  <line x1="580" y1="270" x2="580" y2="290" stroke="#00cc00" stroke-width="2"/>
+  <text x="570" y="305" class="label">绿灯</text>
+  
+  <!-- 交通灯组2连线 -->
+  <line x1="170" y1="240" x2="500" y2="240" class="wire"/>
+  <line x1="170" y1="260" x2="500" y2="260" class="wire"/>
+  <line x1="170" y1="280" x2="500" y2="280" class="wire"/>
+  
+  <line x1="580" y1="240" x2="600" y2="240" class="wire"/>
+  <line x1="580" y1="260" x2="600" y2="260" class="wire"/>
+  <line x1="580" y1="280" x2="600" y2="280" class="wire"/>
+  <line x1="600" y1="240" x2="600" y2="380" class="wire"/>
+  <line x1="600" y1="260" x2="600" y2="380" class="wire"/>
+  <line x1="600" y1="280" x2="600" y2="380" class="wire"/>
+  
+  <!-- 行人按钮 -->
+  <text x="750" y="80" class="text">行人过街按钮</text>
+  
+  <!-- 上拉电阻 -->
+  <rect x="700" y="100" width="20" height="60" class="resistor"/>
+  <text x="710" y="95" class="text">10kΩ</text>
+  
+  <!-- 按钮 -->
+  <rect x="720" y="310" width="40" height="20" class="button"/>
+  <text x="740" y="325" class="text">行人按钮</text>
+  
+  <!-- 按钮电路连线 -->
+  <line x1="170" y1="320" x2="710" y2="320" class="wire"/>
+  <line x1="710" y1="160" x2="710" y2="320" class="wire"/>
+  <line x1="710" y1="320" x2="720" y2="320" class="wire"/>
+  <line x1="760" y1="320" x2="780" y2="320" class="wire"/>
+  <line x1="780" y1="320" x2="780" y2="380" class="wire"/>
+  
+  <!-- VCC连线 -->
+  <line x1="170" y1="350" x2="710" y2="350" class="wire"/>
+  <line x1="710" y1="350" x2="710" y2="100" class="wire"/>
+  
+  <!-- GND连线 -->
+  <line x1="170" y1="380" x2="780" y2="380" class="wire"/>
+  
+  <!-- 状态机图 -->
+  <rect x="50" y="450" width="400" height="200" stroke="#000" stroke-width="1" fill="#f8f8f8"/>
+  <text x="250" y="470" class="text">交通灯状态机</text>
+  
+  <!-- 状态1 -->
+  <circle cx="120" cy="520" r="30" stroke="#cc0000" stroke-width="2" fill="#ffcccc"/>
+  <text x="120" y="525" class="label">南北绿灯</text>
+  <text x="120" y="540" class="label">东西红灯</text>
+  
+  <!-- 状态2 -->
+  <circle cx="250" cy="520" r="30" stroke="#cccc00" stroke-width="2" fill="#ffffcc"/>
+  <text x="250" y="525" class="label">南北黄灯</text>
+  <text x="250" y="540" class="label">东西红灯</text>
+  
+  <!-- 状态3 -->
+  <circle cx="380" cy="520" r="30" stroke="#00cc00" stroke-width="2" fill="#ccffcc"/>
+  <text x="380" y="525" class="label">南北红灯</text>
+  <text x="380" y="540" class="label">东西绿灯</text>
+  
+  <!-- 状态4 -->
+  <circle cx="250" cy="600" r="30" stroke="#cccc00" stroke-width="2" fill="#ffffcc"/>
+  <text x="250" y="605" class="label">南北红灯</text>
+  <text x="250" y="620" class="label">东西黄灯</text>
+  
+  <!-- 状态转换箭头 -->
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="7" 
+            refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#000"/>
+    </marker>
+  </defs>
+  
+  <line x1="150" y1="520" x2="220" y2="520" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+  <text x="185" y="515" class="label">30s</text>
+  
+  <line x1="280" y1="520" x2="350" y2="520" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+  <text x="315" y="515" class="label">3s</text>
+  
+  <line x1="380" y1="550" x2="280" y2="580" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+  <text x="330" y="575" class="label">30s</text>
+  
+  <line x1="220" y1="600" x2="150" y2="530" stroke="#000" stroke-width="1" marker-end="url(#arrow)"/>
+  <text x="175" y="575" class="label">3s</text>
+  
+  <!-- 系统参数 -->
+  <text x="500" y="450" class="text">系统参数：</text>
+  <text x="500" y="470" class="label">• 绿灯时间: 30秒</text>
+  <text x="500" y="485" class="label">• 黄灯时间: 3秒</text>
+  <text x="500" y="500" class="label">• 红灯时间: 33秒</text>
+  <text x="500" y="515" class="label">• 总周期: 66秒</text>
+  
+  <text x="500" y="540" class="text">扩展功能：</text>
+  <text x="500" y="560" class="label">• 行人过街请求</text>
+  <text x="500" y="575" class="label">• 夜间闪烁模式</text>
+  <text x="500" y="590" class="label">• 车流量检测</text>
+  <text x="500" y="605" class="label">• 紧急车辆优先</text>
+  <text x="500" y="620" class="label">• 远程监控管理</text>
+</svg>

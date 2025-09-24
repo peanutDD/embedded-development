@@ -1,0 +1,40 @@
+[package]
+name = "stm32f4-gpio-examples"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "STM32F4 GPIO control examples"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+# Core libraries
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+
+# STM32F4 HAL
+stm32f4xx-hal = { version = "0.21", features = ["stm32f407", "rt"] }
+embedded-hal = "1.0"
+
+# Utilities
+nb = "1.0"
+heapless = "0.8"
+
+# Debug and logging
+defmt = "0.3"
+defmt-rtt = "0.4"
+
+# Time and delay
+fugit = "0.3"
+
+[profile.dev]
+debug = true
+opt-level = 1
+overflow-checks = true
+
+[profile.release]
+debug = false
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"

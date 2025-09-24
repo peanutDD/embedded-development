@@ -19,18 +19,18 @@ embedded-hal-async = "1.0"
 nb = "1.1"
 
 # 异步运行时和futures
-embassy-executor = "0.5"
-embassy-time = "0.3"
+embassy-executor = { version = "0.5", optional = true }
+embassy-time = { version = "0.3", optional = true }
 embassy-futures = "0.1"
 futures = { version = "0.3", default-features = false, features = ["async-await"] }
 pin-project = "1.1"
 
 # 调试和日志
 cortex-m-semihosting = "0.5"
-log = "0.4"
-rtt-target = { version = "0.4", features = ["cortex-m"] }
-defmt = "0.3"
-defmt-rtt = "0.4"
+log = { version = "0.4", optional = true }
+rtt-target = { version = "0.4", optional = true }
+defmt = { version = "0.3", optional = true }
+defmt-rtt = { version = "0.4", optional = true }
 
 # 数据结构和集合
 heapless = { version = "0.8", features = ["serde"] }
@@ -69,7 +69,7 @@ embassy-stm32 = { version = "0.1", features = ["stm32f407vg", "time-driver-any",
 
 [target.'cfg(feature = "esp32")'.dependencies]
 esp32-hal = { version = "0.17", features = ["rt", "async"] }
-embassy-executor = { version = "0.5", features = ["arch-xtensa", "executor-thread"] }
+embassy-executor = { version = "0.5", features = ["arch-xtensa", "executor-thread"], optional = true }
 
 [target.'cfg(feature = "rp2040")'.dependencies]
 rp2040-hal = { version = "0.9", features = ["rt", "critical-section-impl"] }
@@ -82,10 +82,16 @@ embassy-nrf = { version = "0.1", features = ["nrf52840", "time-driver-rtc1", "gp
 [dev-dependencies]
 # 测试框架
 defmt-test = "0.3"
+tokio = { version = "1.0", features = ["full"] }
 tokio-test = "0.4"
+criterion = { version = "0.5", features = ["html_reports", "async_tokio"] }
 
 # 模拟和测试工具
 embedded-hal-mock = "0.10"
+
+[[bench]]
+name = "performance_benchmarks"
+harness = false
 
 [features]
 default = ["std-support"]

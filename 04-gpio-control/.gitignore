@@ -1,0 +1,46 @@
+# Rust编译产物
+/target/
+**/*.rs.bk
+Cargo.lock
+
+# IDE文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 调试文件
+*.pdb
+*.map
+*.elf
+*.bin
+*.hex
+
+# 临时文件
+*.tmp
+*.temp
+*.log
+
+# 嵌入式开发相关
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+
+# 文档生成
+/doc/
+/docs/build/
+
+# 测试覆盖率
+/coverage/
+*.profraw
+
+# 环境配置
+.env
+.env.local

@@ -1,0 +1,18 @@
+[target.thumbv7em-none-eabihf]
+# Use probe-rs for flashing and debugging
+runner = "probe-rs run --chip STM32F407VGTx"
+
+# Use the Tlink.x script from the cortex-m-rt crate
+rustflags = [
+  "-C", "linker=flip-link",
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+]
+
+[build]
+# Set the default target for this project
+target = "thumbv7em-none-eabihf"
+
+[env]
+# Enable defmt logging
+DEFMT_LOG = "debug"

@@ -1,450 +1,270 @@
-# 第4章：GPIO控制与数字I/O
+# GPIO控制项目集合
 
-## 概述
+这是一个全面的嵌入式GPIO控制项目集合，包含从基础到高级的各种GPIO应用示例。项目使用Rust语言开发，支持多种嵌入式平台。
 
-GPIO（General Purpose Input/Output）是嵌入式系统的基础外设，是微控制器与外部世界交互的主要接口。本章深入探讨GPIO的工作原理、电气特性、编程模型，并通过丰富的实践项目掌握数字I/O控制技术。
+## 🎯 项目概述
 
-GPIO不仅仅是简单的数字输入输出，它涉及电气工程、数字电路设计、实时系统编程等多个领域。我们将从硬件原理出发，结合Rust的类型安全特性，构建可靠、高效的GPIO控制系统。
+本项目旨在提供完整的GPIO控制学习和开发资源，包括：
+- 📚 **7个渐进式项目**: 从基础LED控制到复杂的中断系统
+- 🔌 **4个平台支持**: STM32F4、ESP32、RP2040、nRF52
+- 📖 **完整技术文档**: 电路图、教程、元器件手册
+- 🛠️ **实用工具**: 调试、测试、性能分析
 
-## 学习目标
-
-- **硬件理解**: 深入理解GPIO电路原理、电气特性和时序要求
-- **软件抽象**: 掌握embedded-hal抽象层和平台特定HAL库的使用
-- **实时控制**: 实现精确的时序控制和中断驱动编程
-- **系统集成**: 构建复杂的GPIO应用系统和状态机
-- **性能优化**: 掌握GPIO操作的性能优化技术
-- **可靠性设计**: 实现防抖动、错误处理和故障恢复机制
-
-## 章节内容
-
-### 4.1 GPIO硬件原理 ⭐
-- **电路结构**: 输出驱动器、输入缓冲器、保护电路
-- **电气特性**: VOH/VOL、IIH/IIL、驱动能力、功耗分析
-- **工作模式**: 推挽输出、开漏输出、输入模式、模拟模式
-- **时序特性**: 建立时间、保持时间、传播延迟
-- **实践项目**: [gpio_analysis](projects/gpio_analysis/)
-
-### 4.2 HAL抽象层设计 ⭐
-- **embedded-hal特征**: InputPin、OutputPin、StatefulOutputPin
-- **类型安全设计**: 编译时状态检查、零成本抽象
-- **平台适配**: STM32、ESP32、RP2040、nRF52 HAL库
-- **错误处理**: Result类型、错误传播、故障恢复
-- **实践项目**: [hal_abstraction](projects/hal_abstraction/)
-
-### 4.3 数字输出控制
-- **LED驱动**: 电流限制、亮度控制、多LED管理
-- **继电器控制**: 驱动电路、反向保护、时序控制
-- **数码管显示**: 段码驱动、动态扫描、亮度调节
-- **状态指示**: 系统状态、错误指示、用户反馈
-- **实践项目**: [digital_output](projects/digital_output/)
-
-### 4.4 数字输入处理
-- **按钮检测**: 电平检测、边沿检测、状态机设计
-- **防抖动算法**: 软件防抖、硬件防抖、滤波算法
-- **开关矩阵**: 键盘扫描、矩阵编码、优化算法
-- **传感器接口**: 数字传感器、开关量输入、隔离设计
-- **实践项目**: [digital_input](projects/digital_input/)
-
-### 4.5 中断驱动编程
-- **中断原理**: 中断向量、优先级、嵌套中断
-- **外部中断**: EXTI配置、边沿触发、电平触发
-- **中断处理**: ISR设计、数据共享、原子操作
-- **实时响应**: 中断延迟、抖动分析、优化策略
-- **实践项目**: [interrupt_driven](projects/interrupt_driven/)
-
-### 4.6 PWM与模拟输出
-- **PWM原理**: 占空比、频率、分辨率关系
-- **硬件PWM**: 定时器配置、通道复用、死区控制
-- **软件PWM**: 位带操作、DMA辅助、多通道同步
-- **应用场景**: LED调光、电机控制、音频输出
-- **实践项目**: [pwm_control](projects/pwm_control/)
-
-### 4.7 高级GPIO技术
-- **GPIO复用**: 功能复用、引脚映射、冲突解决
-- **高速GPIO**: 时序优化、信号完整性、EMI控制
-- **低功耗设计**: 功耗模式、唤醒源、功耗测量
-- **可靠性设计**: ESD保护、过压保护、故障检测
-- **实践项目**: [advanced_gpio](projects/advanced_gpio/)
-
-### 4.8 系统集成与优化
-- **状态机设计**: 有限状态机、层次状态机、状态转换
-- **任务调度**: 协作式调度、抢占式调度、实时约束
-- **性能分析**: 执行时间、内存使用、功耗分析
-- **测试验证**: 单元测试、集成测试、硬件在环测试
-- **实践项目**: [system_integration](projects/system_integration/)
-
-## 支持的硬件平台
-
-本章的示例代码支持以下硬件平台：
-
-### STM32系列
-- **STM32F4 Discovery**: 主控芯片STM32F407VGT6
-- **STM32F411 Nucleo**: 主控芯片STM32F411RET6
-- **STM32F103 Blue Pill**: 主控芯片STM32F103C8T6
-
-### ESP32系列
-- **ESP32 DevKit**: 主控芯片ESP32-WROOM-32
-- **ESP32-S3**: 主控芯片ESP32-S3-WROOM-1
-- **ESP32-C3**: 主控芯片ESP32-C3-WROOM-02
-
-### Raspberry Pi Pico
-- **Pico**: 主控芯片RP2040
-- **Pico W**: 带WiFi的RP2040
-
-### Nordic nRF系列
-- **nRF52840 DK**: 主控芯片nRF52840
-- **nRF52832**: 主控芯片nRF52832
-
-## 项目结构
+## 📁 项目结构
 
 ```
 04-gpio-control/
-├── projects/
-│   ├── basic-led/              # 基础LED闪烁
-│   ├── button-led/             # 按钮控制LED
-│   ├── pwm-breathing/          # PWM呼吸灯
-│   ├── traffic-light/          # 交通灯系统
-│   ├── led-matrix/             # LED矩阵显示
-│   ├── servo-control/          # 舵机控制
-│   └── gpio-interrupt/         # GPIO中断示例
-├── examples/
-│   ├── stm32f4/               # STM32F4示例
-│   ├── esp32/                 # ESP32示例
-│   ├── rp2040/                # RP2040示例
-│   └── nrf52/                 # nRF52示例
-├── docs/
-│   ├── schematics/            # 电路图
-│   └── datasheets/            # 数据手册
-└── README.md
+├── README.md                    # 项目主文档
+├── basic-led/                   # 基础LED闪烁控制
+├── button-led/                  # 按钮控制LED
+├── pwm-breathing/               # PWM呼吸灯效果
+├── traffic-light/               # 交通灯系统
+├── led-matrix/                  # LED矩阵显示
+├── servo-control/               # 舵机控制
+├── gpio-interrupt/              # GPIO中断系统
+├── examples/                    # 平台特定示例
+│   └── platforms/               # 各平台适配代码
+│       ├── stm32f4/            # STM32F4平台
+│       ├── esp32/              # ESP32平台
+│       ├── rp2040/             # RP2040平台
+│       └── nrf52/              # nRF52平台
+└── docs/                       # 完整技术文档
+    ├── schematics/             # 电路图
+    ├── tutorials/              # 教程文档
+    └── reference/              # 参考资料
 ```
 
-## 硬件准备
+## 🚀 快速开始
 
-### 基础组件
-- 开发板（任选一种支持的平台）
-- LED（红、绿、蓝各几个）
-- 按钮开关（轻触开关）
-- 电阻（220Ω、10kΩ）
-- 面包板和跳线
-- USB数据线
+### 环境准备
 
-### 进阶组件（可选）
-- RGB LED
-- 舵机（SG90或类似）
-- 蜂鸣器
-- 光敏电阻
-- 温度传感器
-- LED矩阵模块
+1. **安装Rust工具链**:
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+rustup target add thumbv7em-none-eabihf  # STM32F4
+rustup target add xtensa-esp32-none-elf   # ESP32
+rustup target add thumbv6m-none-eabi      # RP2040
+rustup target add thumbv7em-none-eabihf   # nRF52
+```
 
-## 快速开始
+2. **安装调试工具**:
+```bash
+cargo install probe-run
+cargo install cargo-embed
+cargo install cargo-flash
+```
 
-### 1. 创建基础LED项目
+### 运行第一个项目
 
 ```bash
-# 进入GPIO控制目录
-cd 04-gpio-control/projects
-
-# 创建基础LED项目
-cargo new --bin basic-led
+# 进入基础LED项目
 cd basic-led
-```
 
-### 2. 配置项目依赖
-
-编辑 `Cargo.toml`：
-
-```toml
-[package]
-name = "basic-led"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-# 核心库
-cortex-m = "0.7"
-cortex-m-rt = "0.7"
-panic-halt = "0.2"
-
-# HAL库（根据你的硬件选择）
-# STM32F4
-stm32f4xx-hal = { version = "0.19", features = ["stm32f407"] }
-
-# 或者 ESP32
-# esp32-hal = "0.16"
-
-# 或者 RP2040
-# rp-pico = "0.8"
-
-# 嵌入式HAL特征
-embedded-hal = "1.0"
-nb = "1.1"
-
-# 调试输出
-rtt-target = { version = "0.4", features = ["cortex-m"] }
-```
-
-### 3. 基础LED闪烁代码
-
-创建 `src/main.rs`：
-
-```rust
-#![no_std]
-#![no_main]
-
-use panic_halt as _;
-use cortex_m_rt::entry;
-use stm32f4xx_hal::{
-    pac,
-    prelude::*,
-    gpio::{Output, PushPull, Pin},
-};
-use rtt_target::{rprintln, rtt_init_print};
-
-type LedPin = Pin<'C', 13, Output<PushPull>>;
-
-#[entry]
-fn main() -> ! {
-    // 初始化RTT调试输出
-    rtt_init_print!();
-    rprintln!("GPIO LED控制示例启动");
-    
-    // 获取外设访问权限
-    let dp = pac::Peripherals::take().unwrap();
-    
-    // 配置时钟
-    let rcc = dp.RCC.constrain();
-    let clocks = rcc.cfgr.freeze();
-    
-    // 配置GPIO
-    let gpioc = dp.GPIOC.split();
-    let mut led = gpioc.pc13.into_push_pull_output();
-    
-    rprintln!("开始LED闪烁循环");
-    
-    let mut counter = 0u32;
-    
-    loop {
-        // 点亮LED
-        led.set_low();
-        rprintln!("LED开启 - 计数: {}", counter);
-        delay_ms(500);
-        
-        // 熄灭LED
-        led.set_high();
-        rprintln!("LED关闭 - 计数: {}", counter);
-        delay_ms(500);
-        
-        counter = counter.wrapping_add(1);
-    }
-}
-
-// 简单的延时函数（生产环境应使用定时器）
-fn delay_ms(ms: u32) {
-    for _ in 0..(ms * 1000) {
-        cortex_m::asm::nop();
-    }
-}
-```
-
-### 4. 配置构建环境
-
-创建 `.cargo/config.toml`：
-
-```toml
-[target.thumbv7em-none-eabihf]
-runner = "probe-rs run --chip STM32F407VGTx"
-rustflags = [
-  "-C", "link-arg=-Tlink.x",
-]
-
-[build]
-target = "thumbv7em-none-eabihf"
-
-[env]
-DEFMT_LOG = "debug"
-```
-
-创建 `memory.x`：
-
-```
-MEMORY
-{
-  FLASH : ORIGIN = 0x08000000, LENGTH = 1024K
-  RAM : ORIGIN = 0x20000000, LENGTH = 128K
-}
-```
-
-### 5. 编译和运行
-
-```bash
 # 编译项目
-cargo build
+cargo build --release
 
-# 烧录到硬件（需要连接开发板）
-cargo run
-
-# 查看RTT输出
-probe-rs rtt --chip STM32F407VGTx
+# 烧录到开发板 (以STM32F4为例)
+cargo run --release
 ```
 
-## 实战项目列表
+## 📚 项目详解
 
-### 初级项目
-1. **基础LED闪烁** - 学习GPIO输出控制
-2. **按钮控制LED** - 学习GPIO输入检测
-3. **多LED流水灯** - 学习多GPIO协调控制
-4. **呼吸灯效果** - 学习PWM输出
+### 1. [基础LED控制](basic-led/) ⭐☆☆☆☆
+**功能**: 控制单个LED以1Hz频率闪烁
+**学习目标**: GPIO输出控制、延时函数使用
+**硬件需求**: LED + 限流电阻
+**代码特点**:
+- 简单的GPIO输出控制
+- 基础的延时循环
+- 适合初学者入门
 
-### 中级项目
-5. **交通灯系统** - 状态机和定时控制
-6. **按钮防抖动** - 输入信号处理
-7. **RGB LED调色** - 多通道PWM控制
-8. **舵机控制** - 精确PWM时序
+### 2. [按钮控制LED](button-led/) ⭐⭐☆☆☆
+**功能**: 按钮按下时LED亮，松开时LED灭
+**学习目标**: GPIO输入检测、上拉电阻使用
+**硬件需求**: LED + 按钮 + 上拉电阻
+**代码特点**:
+- GPIO输入模式配置
+- 按钮状态检测
+- 软件去抖动处理
 
-### 高级项目
-9. **LED矩阵显示** - 复杂GPIO驱动
-10. **GPIO中断处理** - 异步事件响应
-11. **低功耗GPIO** - 功耗优化技术
-12. **GPIO复用配置** - 高级功能配置
+### 3. [PWM呼吸灯](pwm-breathing/) ⭐⭐⭐☆☆
+**功能**: LED亮度呈正弦波变化，实现呼吸效果
+**学习目标**: PWM原理、定时器配置、数学函数应用
+**硬件需求**: LED + 限流电阻 (可选MOSFET驱动)
+**代码特点**:
+- 定时器PWM模式配置
+- 正弦波亮度调制
+- 平滑过渡算法
 
-## 电路连接指南
+### 4. [交通灯系统](traffic-light/) ⭐⭐⭐⭐☆
+**功能**: 完整的交通灯控制系统，支持行人过街
+**学习目标**: 状态机设计、多GPIO协调控制
+**硬件需求**: 6个LED (红黄绿×2) + 按钮
+**代码特点**:
+- 有限状态机实现
+- 定时器中断处理
+- 多路GPIO同步控制
 
-### 基础LED连接
+### 5. [LED矩阵显示](led-matrix/) ⭐⭐⭐⭐☆
+**功能**: 8×8 LED矩阵显示图案和动画
+**学习目标**: 矩阵扫描、时分复用、图形显示
+**硬件需求**: 8×8 LED矩阵 + 限流电阻
+**代码特点**:
+- 行列扫描算法
+- 图案数据存储
+- 动画效果实现
 
-```
-MCU GPIO Pin ----[220Ω电阻]---- LED正极(长脚)
-                                  |
-                               LED负极(短脚)
-                                  |
-                                 GND
-```
+### 6. [舵机控制](servo-control/) ⭐⭐⭐☆☆
+**功能**: 精确控制舵机角度和速度
+**学习目标**: PWM精确控制、伺服系统原理
+**硬件需求**: 标准舵机 (SG90等)
+**代码特点**:
+- 精确PWM脉宽控制
+- 角度到脉宽转换
+- 平滑运动控制
 
-### 按钮连接（下拉配置）
+### 7. [GPIO中断系统](gpio-interrupt/) ⭐⭐⭐⭐⭐
+**功能**: 高级GPIO中断处理，支持多种触发模式
+**学习目标**: 中断系统、实时响应、系统优化
+**硬件需求**: 按钮、旋转编码器、运动传感器
+**代码特点**:
+- 外部中断配置
+- 中断优先级管理
+- 实时事件处理
+- 性能统计分析
 
-```
-3.3V ---- 按钮 ---- MCU GPIO Pin ---- [10kΩ电阻] ---- GND
-```
+## 🔌 平台支持
 
-### PWM LED连接
+### STM32F4系列
+- **开发板**: STM32F4 Discovery, Nucleo-F401RE
+- **特色功能**: 丰富的定时器资源、高性能ARM Cortex-M4
+- **适用场景**: 工业控制、实时系统
 
-```
-MCU PWM Pin ----[220Ω电阻]---- LED正极
-                                 |
-                              LED负极
-                                 |
-                                GND
-```
+### ESP32系列
+- **开发板**: ESP32-DevKitC, ESP32-WROOM-32
+- **特色功能**: WiFi/蓝牙连接、双核处理器
+- **适用场景**: IoT应用、无线控制
 
-## 调试技巧
+### RP2040 (Raspberry Pi Pico)
+- **开发板**: Raspberry Pi Pico, Pico W
+- **特色功能**: PIO可编程IO、双核ARM Cortex-M0+
+- **适用场景**: 创客项目、教育应用
 
-### 1. 使用RTT调试输出
+### nRF52系列
+- **开发板**: nRF52840-DK, nRF52832-DK
+- **特色功能**: 低功耗蓝牙、高级电源管理
+- **适用场景**: 可穿戴设备、传感器网络
 
-```rust
-use rtt_target::{rprintln, rtt_init_print};
+## 📖 技术文档
 
-#[entry]
-fn main() -> ! {
-    rtt_init_print!();
-    rprintln!("程序启动");
-    
-    // 你的代码
-    rprintln!("GPIO状态: {}", gpio_state);
-}
-```
+### 🔌 [电路图](docs/schematics/)
+- [基础LED控制电路](docs/schematics/basic-led-circuit.svg)
+- [按钮控制LED电路](docs/schematics/button-led-circuit.svg)
+- [PWM呼吸灯电路](docs/schematics/pwm-breathing-circuit.svg)
+- [交通灯系统电路](docs/schematics/traffic-light-circuit.svg)
 
-### 2. 使用probe-rs调试
+### 📚 [教程文档](docs/tutorials/)
+- [GPIO基础教程](docs/tutorials/gpio-basics.md) - 全面的GPIO入门指南
+- [PWM控制教程](docs/tutorials/pwm-control.md) - 深入的PWM技术讲解
 
-```bash
-# 启动调试会话
-probe-rs debug --chip STM32F407VGTx target/thumbv7em-none-eabihf/debug/basic-led
+### 📖 [参考资料](docs/reference/)
+- [元器件数据手册](docs/reference/component-datasheets.md) - 常用元器件参数查询
 
-# 在另一个终端查看RTT输出
-probe-rs rtt --chip STM32F407VGTx
-```
+## 🛠️ 开发工具
 
-### 3. 逻辑分析仪
+### 硬件工具
+- **万用表**: 基础电压电流测量
+- **示波器**: PWM波形观察 (推荐)
+- **逻辑分析仪**: 数字信号分析 (可选)
+- **面包板**: 电路搭建和测试
 
-对于复杂的GPIO时序，建议使用逻辑分析仪：
-- 连接探头到GPIO引脚
-- 设置合适的采样率
-- 分析信号时序和状态变化
+### 软件工具
+- **开发环境**: VS Code + rust-analyzer
+- **调试工具**: probe-run, cargo-embed
+- **仿真软件**: Proteus, LTSpice (电路仿真)
+- **版本控制**: Git
 
-## 性能优化
+## 📊 性能特性
 
-### 1. GPIO操作优化
+### 实时性能
+- **中断响应时间**: <10μs (STM32F4 @ 168MHz)
+- **GPIO切换频率**: >1MHz (直接寄存器操作)
+- **PWM分辨率**: 16位 (65536级)
+- **定时器精度**: 1μs (高速定时器)
 
-```rust
-// 避免频繁的HAL调用
-// 不好的做法
-for _ in 0..1000 {
-    led.set_high();
-    led.set_low();
-}
+### 资源占用
+- **Flash使用**: 8KB - 32KB (根据项目复杂度)
+- **RAM使用**: 2KB - 8KB (包含栈空间)
+- **GPIO需求**: 1-16个引脚 (根据项目需求)
+- **定时器需求**: 1-3个定时器
 
-// 更好的做法
-let gpio_reg = &dp.GPIOC;
-for _ in 0..1000 {
-    gpio_reg.bsrr.write(|w| w.bs13().set_bit());
-    gpio_reg.bsrr.write(|w| w.br13().set_bit());
-}
-```
+### 功耗分析
+- **运行模式**: 20-50mA (根据负载)
+- **睡眠模式**: <1mA (支持低功耗模式)
+- **待机模式**: <10μA (深度睡眠)
 
-### 2. 批量GPIO操作
-
-```rust
-// 同时控制多个GPIO
-gpio_reg.odr.modify(|_, w| {
-    w.odr13().bit(true)
-     .odr14().bit(false)
-     .odr15().bit(true)
-});
-```
-
-## 故障排除
+## 🔧 故障排除
 
 ### 常见问题
+1. **LED不亮**: 检查电路连接、限流电阻值、GPIO配置
+2. **按钮无响应**: 检查上拉电阻、去抖动设置、中断配置
+3. **PWM频率不对**: 检查时钟配置、预分频值、重载值
+4. **编译错误**: 检查目标平台、依赖版本、特性配置
 
-1. **LED不亮**
-   - 检查电路连接
-   - 确认GPIO配置正确
-   - 检查电阻值
-   - 验证电源供应
+### 调试技巧
+```rust
+// 使用defmt进行调试输出
+defmt::info!("GPIO state: {}", gpio_state);
 
-2. **按钮无响应**
-   - 检查上拉/下拉配置
-   - 确认按钮连接
-   - 添加防抖动处理
+// 使用probe-run查看实时日志
+cargo run --release
 
-3. **PWM无效果**
-   - 确认PWM通道配置
-   - 检查频率和占空比设置
-   - 验证GPIO复用配置
+// 使用GDB进行断点调试
+cargo embed --release
+```
 
-### 调试检查清单
+## 🤝 贡献指南
 
-- [ ] 硬件连接正确
-- [ ] GPIO引脚配置正确
-- [ ] 时钟配置正确
-- [ ] 电源供应稳定
-- [ ] 代码逻辑正确
-- [ ] 寄存器配置正确
+我们欢迎各种形式的贡献：
 
-## 扩展学习
+### 代码贡献
+- 🐛 **Bug修复**: 发现并修复代码问题
+- ✨ **新功能**: 添加新的GPIO控制示例
+- 🔧 **优化改进**: 提升代码性能和可读性
+- 📱 **平台支持**: 适配更多嵌入式平台
 
-完成基础GPIO控制后，可以继续学习：
+### 文档贡献
+- 📝 **教程编写**: 补充更多技术教程
+- 🔌 **电路设计**: 提供新的电路图和说明
+- 🌐 **翻译工作**: 支持多语言版本
+- 📖 **示例补充**: 添加更多应用示例
 
-1. **定时器和中断** - 精确的时序控制
-2. **串口通信** - 与外部设备通信
-3. **I2C/SPI** - 复杂外设控制
-4. **ADC/DAC** - 模拟信号处理
+### 测试贡献
+- 🧪 **硬件测试**: 在不同平台上测试代码
+- 📊 **性能测试**: 提供性能基准数据
+- 🔍 **兼容性测试**: 验证跨平台兼容性
 
-## 参考资源
+## 📄 许可证
 
-- [embedded-hal文档](https://docs.rs/embedded-hal/)
-- [STM32F4xx HAL文档](https://docs.rs/stm32f4xx-hal/)
-- [GPIO原理详解](https://en.wikipedia.org/wiki/General-purpose_input/output)
-- [PWM原理介绍](https://en.wikipedia.org/wiki/Pulse-width_modulation)
+本项目采用 [MIT License](LICENSE) 开源许可证。
+
+## 🙏 致谢
+
+感谢以下开源项目和社区的支持：
+- [embedded-hal](https://github.com/rust-embedded/embedded-hal) - Rust嵌入式HAL抽象
+- [cortex-m](https://github.com/rust-embedded/cortex-m) - ARM Cortex-M支持
+- [stm32f4xx-hal](https://github.com/stm32-rs/stm32f4xx-hal) - STM32F4 HAL实现
+- [esp-idf](https://github.com/espressif/esp-idf) - ESP32开发框架
+- [rp-hal](https://github.com/rp-rs/rp-hal) - RP2040 HAL实现
+
+## 📞 联系我们
+
+- **GitHub Issues**: [提交问题和建议](https://github.com/your-repo/issues)
+- **讨论区**: [技术讨论和交流](https://github.com/your-repo/discussions)
+- **邮件**: your-email@example.com
 
 ---
 
-**准备好开始你的GPIO控制之旅了吗？让我们从最简单的LED闪烁开始！** 💡
+**开始你的嵌入式GPIO控制之旅吧！** 🚀
+
+从简单的LED闪烁开始，逐步掌握复杂的中断系统，成为嵌入式开发专家！

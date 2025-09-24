@@ -1,0 +1,39 @@
+[package]
+name = "dma-transfer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+nb = "1.0"
+embedded-hal = "0.2"
+stm32f4xx-hal = { version = "0.14", features = ["stm32f401", "rt"] }
+heapless = "0.7"
+embedded-dma = "0.2"
+
+[[bin]]
+name = "basic_dma"
+path = "src/basic_dma.rs"
+
+[[bin]]
+name = "circular_dma"
+path = "src/circular_dma.rs"
+
+[[bin]]
+name = "double_buffer"
+path = "src/double_buffer.rs"
+
+[[bin]]
+name = "high_speed_logger"
+path = "src/high_speed_logger.rs"
+
+[profile.dev]
+debug = true
+opt-level = "s"
+
+[profile.release]
+debug = true
+lto = true
+opt-level = "s"

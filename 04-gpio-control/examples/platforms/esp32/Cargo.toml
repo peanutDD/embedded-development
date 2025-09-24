@@ -1,0 +1,40 @@
+[package]
+name = "esp32-gpio-examples"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "ESP32 GPIO control examples"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+# ESP32 specific
+esp32-hal = "0.20"
+esp-backtrace = { version = "0.13", features = ["esp32", "exception-handler", "panic-handler", "println"] }
+esp-println = { version = "0.11", features = ["esp32", "log"] }
+
+# Core libraries
+embedded-hal = "1.0"
+nb = "1.0"
+heapless = "0.8"
+
+# Async support
+embassy-executor = { version = "0.5", features = ["task-arena-size-32768"] }
+embassy-time = "0.3"
+embassy-sync = "0.6"
+
+# Logging
+log = "0.4"
+
+# Utilities
+fugit = "0.3"
+
+[profile.dev]
+debug = true
+opt-level = 1
+overflow-checks = true
+
+[profile.release]
+debug = false
+opt-level = "s"
+lto = true
+codegen-units = 1

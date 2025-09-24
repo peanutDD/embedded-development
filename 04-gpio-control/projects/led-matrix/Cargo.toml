@@ -1,0 +1,49 @@
+[package]
+name = "led-matrix"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# 核心库
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+
+# HAL库 - STM32F4系列
+stm32f4xx-hal = { version = "0.21", features = ["stm32f407"] }
+
+# 嵌入式HAL特征
+embedded-hal = "1.0"
+nb = "1.0"
+
+# 数学和时间处理
+libm = "0.2"
+heapless = "0.8"
+
+# 调试输出
+rtt-target = { version = "0.5", features = ["cortex-m"] }
+defmt = "0.3"
+defmt-rtt = "0.4"
+
+# 图形和显示
+embedded-graphics = "0.8"
+micromath = "2.0"
+
+# 位操作
+bitflags = "2.0"
+
+[dev-dependencies]
+# 测试依赖
+cortex-m-semihosting = "0.5"
+
+[profile.dev]
+debug = true
+opt-level = 1
+overflow-checks = true
+
+[profile.release]
+debug = false
+opt-level = "s"
+lto = true
+codegen-units = 1
+overflow-checks = false

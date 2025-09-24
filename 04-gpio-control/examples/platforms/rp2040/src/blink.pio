@@ -1,0 +1,32 @@
+; PIO program for LED blinking
+; This program toggles a GPIO pin at a specified rate
+
+.program blink
+.side_set 1
+
+; Set pin as output and initialize to 0
+    set pindirs, 1 side 0 [31]  ; Set pin direction to output, initial value 0, delay 31 cycles
+
+; Main loop - toggle the pin
+loop:
+    set pins, 1 side 1 [31]     ; Set pin high, side-set high, delay 31 cycles  
+    set pins, 0 side 0 [31]     ; Set pin low, side-set low, delay 31 cycles
+    jmp loop                    ; Jump back to loop
+
+% c-sdk {
+// Helper function to initialize the PIO program
+static inline void blink_program_init(PIO pio, uint sm, uint offset, uint pin) {
+    pio_gpio_init(pio, pin);
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 1, true);
+    
+    pio_sm_config c = blink_program_get_default_config(offset);
+    sm_config_set_sideset_pins(&c, pin);
+    sm_config_set_set_pins(&c, pin, 1);
+    
+    // Set clock divider for desired blink rate
+    sm_config_set_clkdiv(&c, 125000000.0 / (2 * 32 * 1)); // 1 Hz blink rate
+    
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}

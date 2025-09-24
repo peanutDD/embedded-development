@@ -1,0 +1,53 @@
+[package]
+name = "nrf52-gpio-examples"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "nRF52 GPIO control examples"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+# nRF52 specific
+nrf52840-hal = "0.16"
+nrf52840-pac = "0.12"
+
+# Core libraries
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = "1.0"
+panic-halt = "0.2"
+
+# Utilities
+nb = "1.0"
+heapless = "0.8"
+fugit = "0.3"
+
+# Debug and logging
+defmt = "0.3"
+defmt-rtt = "0.4"
+
+# Bluetooth and wireless
+nrf-softdevice = { version = "0.1", features = ["nrf52840", "s140"] }
+nrf-softdevice-s140 = "0.1"
+
+# USB support
+usb-device = "0.3"
+usbd-serial = "0.2"
+
+# Async support
+embassy-executor = { version = "0.5", features = ["task-arena-size-32768"] }
+embassy-time = "0.3"
+embassy-sync = "0.6"
+embassy-nrf = { version = "0.1", features = ["nrf52840", "time-driver-rtc1", "gpiote", "unstable-pac"] }
+
+[profile.dev]
+debug = true
+opt-level = 1
+overflow-checks = true
+
+[profile.release]
+debug = false
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"

@@ -1,0 +1,48 @@
+[package]
+name = "rp2040-gpio-examples"
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <your.email@example.com>"]
+description = "RP2040 GPIO control examples"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+# RP2040 specific
+rp-pico = "0.9"
+rp2040-hal = "0.10"
+rp2040-boot2 = "0.3"
+
+# Core libraries
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+embedded-hal = "1.0"
+panic-halt = "0.2"
+
+# Utilities
+nb = "1.0"
+heapless = "0.8"
+fugit = "0.3"
+
+# Debug and logging
+defmt = "0.3"
+defmt-rtt = "0.4"
+
+# PIO (Programmable I/O)
+pio-proc = "0.2"
+pio = "0.2"
+
+# USB support
+usb-device = "0.3"
+usbd-serial = "0.2"
+
+[profile.dev]
+debug = true
+opt-level = 1
+overflow-checks = true
+
+[profile.release]
+debug = false
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"

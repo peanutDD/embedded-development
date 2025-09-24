@@ -1,0 +1,67 @@
+# Rust
+/target/
+**/*.rs.bk
+*.pdb
+Cargo.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Coverage directory used by tools like istanbul
+coverage
+
+# Dependency directories
+node_modules
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Embedded specific
+*.bin
+*.hex
+*.elf
+*.map
+
+# Documentation build
+/docs/_build/
+/docs/build/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Benchmark results
+/benches/target/
+criterion/
+
+# Test results
+/tests/target/
+
+# Build artifacts
+/build/
+/dist/

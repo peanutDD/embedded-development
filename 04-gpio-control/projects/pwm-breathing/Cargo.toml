@@ -1,0 +1,35 @@
+[package]
+name = "pwm-breathing"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+# 核心库
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+
+# HAL库 - STM32F4
+stm32f4xx-hal = { version = "0.19", features = ["stm32f407"] }
+
+# 嵌入式HAL特征
+embedded-hal = "1.0"
+nb = "1.1"
+
+# 数学库
+micromath = "2.0"
+
+# 调试输出
+rtt-target = { version = "0.4", features = ["cortex-m"] }
+
+# 时间处理
+fugit = "0.3"
+
+[profile.dev]
+debug = true
+opt-level = "s"
+
+[profile.release]
+debug = true
+lto = true
+opt-level = "s"

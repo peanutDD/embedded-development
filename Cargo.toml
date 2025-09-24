@@ -7,9 +7,9 @@ members = [
     "01-rust-basics",
     "04-gpio-control/projects/basic-led",
     "04-gpio-control/projects/button-led", 
-    "07-adc-dac/examples/basic-adc",
-    "07-adc-dac/examples/dac-generator",
-    "07-adc-dac/projects/voltmeter",
+    "07-adc-dac-interrupts/examples/basic-adc",
+    "07-adc-dac-interrupts/examples/dac-generator",
+    "07-adc-dac-interrupts/projects/voltmeter",
     
     # 嵌入式概念示例
     "03-embedded-concepts/examples/memory-layout",
@@ -37,10 +37,14 @@ exclude = [
     "*/projects/*",
     "!04-gpio-control/projects/basic-led",
     "!04-gpio-control/projects/button-led",
-    "!07-adc-dac/examples/basic-adc", 
-    "!07-adc-dac/examples/dac-generator",
-    "!07-adc-dac/projects/voltmeter",
+    "!07-adc-dac-interrupts/examples/basic-adc", 
+    "!07-adc-dac-interrupts/examples/dac-generator",
+    "!07-adc-dac-interrupts/projects/voltmeter",
     "!03-embedded-concepts/examples/memory-layout",
+    # 明确排除可能导致性能问题的ESP32示例
+    "04-gpio-control/examples/platforms/esp32",
+    "04-gpio-control/examples/platforms/*",
+    "04-gpio-control/examples/advanced-gpio",
 ]
 
 # 工作空间级别的包信息

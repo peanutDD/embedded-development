@@ -1,0 +1,53 @@
+[package]
+name = "protocol-bridge"
+version = "0.1.0"
+authors = ["Embedded Developer <dev@example.com>"]
+edition = "2021"
+description = "I2C-SPI Protocol Bridge Example for STM32F4"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+stm32f4xx-hal = { version = "0.21", features = ["stm32f401", "rt"] }
+embedded-hal = "1.0"
+nb = "1.0"
+defmt = "0.3"
+defmt-rtt = "0.4"
+heapless = "0.8"
+fugit = "0.3"
+crc = "3.0"
+
+[profile.dev]
+debug = true
+opt-level = 1
+overflow-checks = true
+
+[profile.release]
+debug = false
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+runner = "probe-rs run --chip STM32F401RETx"
+rustflags = [
+  "-C", "linker=flip-link",
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+]
+
+[target.thumbv7em-none-eabihf]
+runner = "probe-rs run --chip STM32F401RETx"
+rustflags = [
+  "-C", "linker=flip-link",
+  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tdefmt.x",
+]

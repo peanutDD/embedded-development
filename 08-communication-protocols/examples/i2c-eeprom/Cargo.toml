@@ -2,20 +2,58 @@
 name = "i2c-eeprom-example"
 version = "0.1.0"
 edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "I2C EEPROM操作示例 - 演示24C系列EEPROM的读写操作"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
 
 [dependencies]
+# 核心嵌入式依赖
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
-stm32f4xx-hal = { version = "0.14", features = ["stm32f401"] }
+embedded-hal = "1.0"
 nb = "1.0"
+
+# STM32F4 HAL
+stm32f4xx-hal = { version = "0.20", features = ["rt", "stm32f407"] }
+
+# 调试和错误处理
 panic-halt = "0.2"
+defmt = "0.3"
+defmt-rtt = "0.4"
+
+# 数据结构
+heapless = "0.8"
+
+# 时间处理
+fugit = "0.3"
+
+# CRC校验
+crc = { version = "3.0", default-features = false }
+
+[[bin]]
+name = "basic-eeprom"
+path = "src/main.rs"
+
+[[bin]]
+name = "advanced-eeprom"
+path = "src/bin/advanced.rs"
+
+[[bin]]
+name = "eeprom-filesystem"
+path = "src/bin/filesystem.rs"
 
 [profile.dev]
 debug = true
 lto = false
+opt-level = 1
 
 [profile.release]
 debug = true
 lto = true
 codegen-units = 1
 opt-level = "s"
+
+# 目标平台配置
+[build]
+target = "thumbv7em-none-eabihf"

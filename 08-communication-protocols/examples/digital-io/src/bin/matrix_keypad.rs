@@ -1,24 +1,497 @@
 #![no_std]
 #![no_main]
 
-//! # 矩阵键盘控制程序
+//! # 矩阵键盘扫描示例
 //! 
-//! 演示矩阵键盘的完整功能：
-//! - 4x4矩阵键盘扫描
-//! - 按键防抖和幽灵检测
-//! - 按键映射和功能处理
-//! - 多键组合和快捷键
+//! 演示4x4矩阵键盘的扫描和处理：
+//! - 行列扫描算法
+//! - 按键防抖
+//! - 多键检测
+//! - 按键映射
 
-use panic_halt as _;
 use cortex_m_rt::entry;
-use heapless::{Vec, String, FnvIndexMap};
+use stm32f4xx_hal::{
+    gpio::{
+        gpioa::{PA0, PA1, PA2, PA3, PA4, PA5, PA6, PA7},
+        gpioc::PC13,
+        Input, Output, PullUp, PushPull,
+    },
+    pac,
+    prelude::*,
+};
+use panic_probe as _;
+use heapless::{Vec, String};
 use critical_section::Mutex;
 use core::cell::RefCell;
 
-use digital_io::{
-    MatrixKeypadController, ScanConfig, DebounceConfig,
-    KeyEvent, KeyHistory,
-};
+// 矩阵键盘配置
+const ROWS: usize = 4;
+const COLS: usize = 4;
+const DEBOUNCE_TIME: u32 = 20; // 20ms
+const LONG_PRESS_TIME: u32 = 1000; // 1秒
+const REPEAT_TIME: u32 = 200; // 200ms重复间隔
+
+// 全局键盘状态
+static KEYPAD_STATE: Mutex<RefCell<KeypadState>> = Mutex::new(RefCell::new(KeypadState::new()));
+
+/// 键盘状态
+#[derive(Debug, Clone)]
+pub struct KeypadState {
+    pub current_keys: [[bool; COLS]; ROWS],
+    pub last_keys: [[bool; COLS]; ROWS],
+    pub stable_keys: [[bool; COLS]; ROWS],
+    pub key_press_time: [[u32; COLS]; ROWS],
+    pub last_scan_time: u32,
+    pub pressed_keys: Vec<KeyEvent, 16>,
+    pub key_sequence: String<64>,
+}
+
+impl KeypadState {
+    pub const fn new() -> Self {
+        Self {
+            current_keys: [[false; COLS]; ROWS],
+            last_keys: [[false; COLS]; ROWS],
+            stable_keys: [[false; COLS]; ROWS],
+            key_press_time: [[0; COLS]; ROWS],
+            last_scan_time: 0,
+            pressed_keys: Vec::new(),
+            key_sequence: String::new(),
+        }
+    }
+    
+    pub fn update_key(&mut self, row: usize, col: usize, pressed: bool) {
+        if row < ROWS && col < COLS {
+            self.current_keys[row][col] = pressed;
+        }
+    }
+    
+    pub fn get_pressed_count(&self) -> usize {
+        let mut count = 0;
+        for row in 0..ROWS {
+            for col in 0..COLS {
+                if self.stable_keys[row][col] {
+                    count += 1;
+                }
+            }
+        }
+        count
+    }
+    
+    pub fn get_pressed_keys(&self) -> Vec<(usize, usize), 16> {
+        let mut keys = Vec::new();
+        for row in 0..ROWS {
+            for col in 0..COLS {
+                if self.stable_keys[row][col] {
+                    keys.push((row, col)).ok();
+                }
+            }
+        }
+        keys
+    }
+    
+    pub fn add_to_sequence(&mut self, key_char: char) {
+        if self.key_sequence.len() < self.key_sequence.capacity() - 1 {
+            self.key_sequence.push(key_char).ok();
+        }
+    }
+    
+    pub fn clear_sequence(&mut self) {
+        self.key_sequence.clear();
+    }
+}
+
+/// 按键事件
+#[derive(Debug, Clone, Copy)]
+pub struct KeyEvent {
+    pub row: u8,
+    pub col: u8,
+    pub event_type: KeyEventType,
+    pub timestamp: u32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum KeyEventType {
+    Pressed,
+    Released,
+    LongPress,
+    Repeat,
+}
+
+/// 矩阵键盘控制器
+pub struct MatrixKeypad {
+    // 行输出引脚 (驱动)
+    pub row_pins: RowPins,
+    // 列输入引脚 (读取)
+    pub col_pins: ColPins,
+    // 键盘映射
+    pub key_map: [[char; COLS]; ROWS],
+    // 扫描状态
+    pub current_row: usize,
+    pub scan_counter: u32,
+}
+
+pub struct RowPins {
+    pub row0: PA0<Output<PushPull>>,
+    pub row1: PA1<Output<PushPull>>,
+    pub row2: PA2<Output<PushPull>>,
+    pub row3: PA3<Output<PushPull>>,
+}
+
+pub struct ColPins {
+    pub col0: PA4<Input<PullUp>>,
+    pub col1: PA5<Input<PullUp>>,
+    pub col2: PA6<Input<PullUp>>,
+    pub col3: PA7<Input<PullUp>>,
+}
+
+impl MatrixKeypad {
+    pub fn new(row_pins: RowPins, col_pins: ColPins) -> Self {
+        // 标准4x4键盘布局
+        let key_map = [
+            ['1', '2', '3', 'A'],
+            ['4', '5', '6', 'B'],
+            ['7', '8', '9', 'C'],
+            ['*', '0', '#', 'D'],
+        ];
+        
+        Self {
+            row_pins,
+            col_pins,
+            key_map,
+            current_row: 0,
+            scan_counter: 0,
+        }
+    }
+    
+    /// 扫描键盘
+    pub fn scan(&mut self) -> Vec<KeyEvent, 16> {
+        let mut events = Vec::new();
+        self.scan_counter += 1;
+        
+        // 扫描所有行
+        for row in 0..ROWS {
+            // 设置当前行为低电平，其他行为高电平
+            self.set_row_state(row, false);
+            self.set_other_rows_state(row, true);
+            
+            // 短暂延时让信号稳定
+            delay_us(10);
+            
+            // 读取所有列
+            for col in 0..COLS {
+                let pressed = !self.read_column(col); // 按键按下时为低电平
+                
+                // 更新键盘状态
+                critical_section::with(|cs| {
+                    KEYPAD_STATE.borrow(cs).borrow_mut().update_key(row, col, pressed);
+                });
+                
+                // 处理按键事件
+                if let Some(event) = self.process_key_change(row, col, pressed) {
+                    events.push(event).ok();
+                }
+            }
+        }
+        
+        // 所有行设为高电平
+        self.set_all_rows_state(true);
+        
+        events
+    }
+    
+    /// 处理按键状态变化
+    fn process_key_change(&mut self, row: usize, col: usize, pressed: bool) -> Option<KeyEvent> {
+        let current_time = get_system_time();
+        
+        critical_section::with(|cs| {
+            let mut state = KEYPAD_STATE.borrow(cs).borrow_mut();
+            
+            // 防抖处理
+            if pressed != state.last_keys[row][col] {
+                state.last_keys[row][col] = pressed;
+                state.last_scan_time = current_time;
+                return None;
+            }
+            
+            // 检查防抖时间
+            if current_time - state.last_scan_time < DEBOUNCE_TIME {
+                return None;
+            }
+            
+            // 状态稳定且发生变化
+            if pressed != state.stable_keys[row][col] {
+                state.stable_keys[row][col] = pressed;
+                
+                if pressed {
+                    // 按键按下
+                    state.key_press_time[row][col] = current_time;
+                    
+                    // 添加到按键序列
+                    let key_char = self.key_map[row][col];
+                    state.add_to_sequence(key_char);
+                    
+                    return Some(KeyEvent {
+                        row: row as u8,
+                        col: col as u8,
+                        event_type: KeyEventType::Pressed,
+                        timestamp: current_time,
+                    });
+                } else {
+                    // 按键释放
+                    return Some(KeyEvent {
+                        row: row as u8,
+                        col: col as u8,
+                        event_type: KeyEventType::Released,
+                        timestamp: current_time,
+                    });
+                }
+            }
+            
+            // 检查长按
+            if pressed && state.stable_keys[row][col] {
+                let press_duration = current_time - state.key_press_time[row][col];
+                
+                if press_duration > LONG_PRESS_TIME && press_duration % REPEAT_TIME == 0 {
+                    return Some(KeyEvent {
+                        row: row as u8,
+                        col: col as u8,
+                        event_type: if press_duration == LONG_PRESS_TIME {
+                            KeyEventType::LongPress
+                        } else {
+                            KeyEventType::Repeat
+                        },
+                        timestamp: current_time,
+                    });
+                }
+            }
+            
+            None
+        })
+    }
+    
+    /// 设置指定行的状态
+    fn set_row_state(&mut self, row: usize, high: bool) {
+        match row {
+            0 => if high { self.row_pins.row0.set_high(); } else { self.row_pins.row0.set_low(); },
+            1 => if high { self.row_pins.row1.set_high(); } else { self.row_pins.row1.set_low(); },
+            2 => if high { self.row_pins.row2.set_high(); } else { self.row_pins.row2.set_low(); },
+            3 => if high { self.row_pins.row3.set_high(); } else { self.row_pins.row3.set_low(); },
+            _ => {}
+        }
+    }
+    
+    /// 设置除指定行外的其他行状态
+    fn set_other_rows_state(&mut self, exclude_row: usize, high: bool) {
+        for row in 0..ROWS {
+            if row != exclude_row {
+                self.set_row_state(row, high);
+            }
+        }
+    }
+    
+    /// 设置所有行的状态
+    fn set_all_rows_state(&mut self, high: bool) {
+        for row in 0..ROWS {
+            self.set_row_state(row, high);
+        }
+    }
+    
+    /// 读取指定列的状态
+    fn read_column(&self, col: usize) -> bool {
+        match col {
+            0 => self.col_pins.col0.is_high(),
+            1 => self.col_pins.col1.is_high(),
+            2 => self.col_pins.col2.is_high(),
+            3 => self.col_pins.col3.is_high(),
+            _ => true,
+        }
+    }
+    
+    /// 获取按键字符
+    pub fn get_key_char(&self, row: usize, col: usize) -> char {
+        if row < ROWS && col < COLS {
+            self.key_map[row][col]
+        } else {
+            '\0'
+        }
+    }
+    
+    /// 设置自定义键盘映射
+    pub fn set_key_map(&mut self, key_map: [[char; COLS]; ROWS]) {
+        self.key_map = key_map;
+    }
+}
+
+/// LED显示控制器
+pub struct LedDisplay {
+    pub status_led: PC13<Output<PushPull>>,
+    pub blink_counter: u32,
+    pub display_mode: DisplayMode,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum DisplayMode {
+    Idle,
+    KeyPressed,
+    MultiKey,
+    Sequence,
+    Error,
+}
+
+impl LedDisplay {
+    pub fn new(status_led: PC13<Output<PushPull>>) -> Self {
+        Self {
+            status_led,
+            blink_counter: 0,
+            display_mode: DisplayMode::Idle,
+        }
+    }
+    
+    pub fn set_mode(&mut self, mode: DisplayMode) {
+        self.display_mode = mode;
+        self.blink_counter = 0;
+    }
+    
+    pub fn update(&mut self) {
+        self.blink_counter += 1;
+        
+        match self.display_mode {
+            DisplayMode::Idle => {
+                // 慢速闪烁
+                if self.blink_counter % 2000 < 100 {
+                    self.status_led.set_low();
+                } else {
+                    self.status_led.set_high();
+                }
+            },
+            DisplayMode::KeyPressed => {
+                // 快速闪烁
+                if self.blink_counter % 200 < 100 {
+                    self.status_led.set_low();
+                } else {
+                    self.status_led.set_high();
+                }
+            },
+            DisplayMode::MultiKey => {
+                // 双闪模式
+                let phase = self.blink_counter % 800;
+                if phase < 100 || (phase >= 200 && phase < 300) {
+                    self.status_led.set_low();
+                } else {
+                    self.status_led.set_high();
+                }
+            },
+            DisplayMode::Sequence => {
+                // 常亮
+                self.status_led.set_low();
+            },
+            DisplayMode::Error => {
+                // 快速三闪
+                let phase = self.blink_counter % 1000;
+                if phase < 100 || (phase >= 150 && phase < 250) || (phase >= 300 && phase < 400) {
+                    self.status_led.set_low();
+                } else {
+                    self.status_led.set_high();
+                }
+            },
+        }
+    }
+}
+
+/// 键盘应用处理器
+pub struct KeypadApplication {
+    pub password: String<16>,
+    pub input_buffer: String<16>,
+    pub correct_password: &'static str,
+    pub attempt_count: u8,
+    pub locked: bool,
+    pub lock_time: u32,
+}
+
+impl KeypadApplication {
+    pub fn new(correct_password: &'static str) -> Self {
+        Self {
+            password: String::new(),
+            input_buffer: String::new(),
+            correct_password,
+            attempt_count: 0,
+            locked: false,
+            lock_time: 0,
+        }
+    }
+    
+    pub fn process_key(&mut self, key_char: char) -> AppEvent {
+        if self.locked {
+            let current_time = get_system_time();
+            if current_time - self.lock_time > 30000 { // 30秒锁定
+                self.locked = false;
+                self.attempt_count = 0;
+            } else {
+                return AppEvent::Locked;
+            }
+        }
+        
+        match key_char {
+            '0'..='9' | 'A'..='D' => {
+                // 数字和字母键
+                if self.input_buffer.len() < self.input_buffer.capacity() - 1 {
+                    self.input_buffer.push(key_char).ok();
+                    AppEvent::InputChar(key_char)
+                } else {
+                    AppEvent::BufferFull
+                }
+            },
+            '#' => {
+                // 确认键
+                self.check_password()
+            },
+            '*' => {
+                // 清除键
+                self.input_buffer.clear();
+                AppEvent::Cleared
+            },
+            _ => AppEvent::InvalidKey,
+        }
+    }
+    
+    fn check_password(&mut self) -> AppEvent {
+        if self.input_buffer.as_str() == self.correct_password {
+            self.input_buffer.clear();
+            self.attempt_count = 0;
+            AppEvent::PasswordCorrect
+        } else {
+            self.input_buffer.clear();
+            self.attempt_count += 1;
+            
+            if self.attempt_count >= 3 {
+                self.locked = true;
+                self.lock_time = get_system_time();
+                AppEvent::Locked
+            } else {
+                AppEvent::PasswordIncorrect(self.attempt_count)
+            }
+        }
+    }
+    
+    pub fn get_input_length(&self) -> usize {
+        self.input_buffer.len()
+    }
+    
+    pub fn is_locked(&self) -> bool {
+        self.locked
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub enum AppEvent {
+    InputChar(char),
+    PasswordCorrect,
+    PasswordIncorrect(u8),
+    Cleared,
+    BufferFull,
+    InvalidKey,
+    Locked,
+}
 
 /// 键盘映射
 #[derive(Debug, Clone, Copy, PartialEq)]

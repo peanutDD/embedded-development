@@ -1,30 +1,52 @@
 [package]
-name = "spi-flash-example"
+name = "spi-flash"
 version = "0.1.0"
 edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "SPI Flash memory examples for STM32F4"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
 
 [dependencies]
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
 panic-halt = "0.2"
 nb = "1.0"
+embedded-hal = "0.2"
+defmt = "0.3"
+defmt-rtt = "0.4"
+heapless = "0.7"
+fugit = "0.3"
+crc = "3.0"
+bitfield = "0.13"
 
 [dependencies.stm32f4xx-hal]
 version = "0.14"
-features = ["stm32f401", "rt"]
-
-[[bin]]
-name = "spi-flash"
-path = "src/main.rs"
+features = ["stm32f401", "rt", "defmt"]
 
 [profile.dev]
 debug = true
-lto = false
+opt-level = 0
 
 [profile.release]
 debug = true
-lto = true
 opt-level = "s"
+lto = true
+
+[[bin]]
+name = "basic"
+path = "src/main.rs"
+
+[[bin]]
+name = "advanced"
+path = "src/bin/advanced.rs"
+
+[[bin]]
+name = "filesystem"
+path = "src/bin/filesystem.rs"
+
+[build-dependencies]
+cc = "1.0"
 
 # 目标平台配置
 [build]

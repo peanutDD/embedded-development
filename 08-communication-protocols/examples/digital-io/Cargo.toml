@@ -1,93 +1,88 @@
 [package]
-name = "digital-io"
+name = "digital-io-example"
 version = "0.1.0"
-edition = "2021"
-authors = ["Embedded Developer <dev@example.com>"]
-description = "数字IO控制项目 - 展示数字输入输出的高级控制技术"
+authors = ["Your Name <your.email@example.com>"]
+description = "Digital I/O control examples for embedded systems"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/example/embedded-development"
+repository = "https://github.com/your-username/embedded-development"
+edition = "2021"
 
 [dependencies]
-# 核心嵌入式依赖
+# Core embedded dependencies
 embedded-hal = "1.0"
 nb = "1.1"
 cortex-m = "0.7"
 cortex-m-rt = "0.7"
 
-# 调试和日志
+# Debug and logging
 defmt = "0.3"
 defmt-rtt = "0.4"
 panic-probe = { version = "0.3", features = ["print-defmt"] }
 
-# 数据结构和集合
+# Data structures
 heapless = "0.8"
 bitfield = "0.14"
 
-# 时间处理
+# Time handling
 fugit = "0.3"
 
-# 数学和统计
+# Math libraries
 micromath = "2.0"
 libm = "0.2"
 
-# 同步和并发
+# Synchronization
 critical-section = "1.1"
 atomic-polyfill = "1.0"
 
-# 状态机
-smlang = "0.7"
+# State machine
+smlang = "0.6"
 
-# 平台特定HAL库 (条件编译)
+# Platform-specific HAL dependencies
 [target.'cfg(feature = "stm32f4xx")'.dependencies]
 stm32f4xx-hal = { version = "0.20", features = ["rt", "stm32f407"] }
 
 [target.'cfg(feature = "esp32")'.dependencies]
-esp32-hal = "0.20"
-esp-backtrace = { version = "0.13", features = ["esp32", "exception-handler", "panic-handler", "println"] }
+esp32-hal = "0.17"
 
 [target.'cfg(feature = "rp2040")'.dependencies]
-rp-pico = "0.9"
-rp2040-hal = "0.10"
-
-[target.'cfg(feature = "nrf52")'.dependencies]
-nrf52840-hal = "0.16"
-
-# 多个二进制目标
-[[bin]]
-name = "digital_output"
-path = "src/bin/digital_output.rs"
-
-[[bin]]
-name = "digital_input"
-path = "src/bin/digital_input.rs"
-
-[[bin]]
-name = "matrix_control"
-path = "src/bin/matrix_control.rs"
-
-[[bin]]
-name = "shift_register"
-path = "src/bin/shift_register.rs"
-
-[[bin]]
-name = "io_expander"
-path = "src/bin/io_expander.rs"
+rp2040-hal = "0.9"
 
 [features]
 default = ["stm32f4xx"]
 stm32f4xx = []
 esp32 = []
 rp2040 = []
-nrf52 = []
 
-# 开发配置
+# Binary targets
+[[bin]]
+name = "basic"
+path = "src/bin/basic.rs"
+
+[[bin]]
+name = "matrix-keypad"
+path = "src/bin/matrix_keypad.rs"
+
+[[bin]]
+name = "led-matrix"
+path = "src/bin/led_matrix.rs"
+
+[[bin]]
+name = "shift-register"
+path = "src/bin/shift_register.rs"
+
+[[bin]]
+name = "main"
+path = "src/main.rs"
+
 [profile.dev]
 debug = 2
 opt-level = "s"
 
-# 发布配置
 [profile.release]
 debug = 2
 lto = true
 opt-level = "z"
-codegen-units = 1
+
+# Target configuration
+[build]
+target = "thumbv7em-none-eabihf"

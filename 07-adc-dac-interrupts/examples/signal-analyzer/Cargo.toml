@@ -1,0 +1,36 @@
+[package]
+name = "signal-analyzer"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+nb = "1.0"
+heapless = "0.8"
+micromath = "2.0"
+
+[dependencies.stm32f4xx-hal]
+version = "0.20"
+features = ["stm32f407", "rt"]
+
+[[bin]]
+name = "fft_analyzer"
+path = "src/bin/fft_analyzer.rs"
+
+[[bin]]
+name = "spectrum_analyzer"
+path = "src/bin/spectrum_analyzer.rs"
+
+[[bin]]
+name = "filter_analyzer"
+path = "src/bin/filter_analyzer.rs"
+
+[[bin]]
+name = "harmonic_analyzer"
+path = "src/bin/harmonic_analyzer.rs"
+
+[[bin]]
+name = "real_time_analyzer"
+path = "src/bin/real_time_analyzer.rs"

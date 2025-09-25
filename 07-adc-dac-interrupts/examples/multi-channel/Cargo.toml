@@ -1,0 +1,39 @@
+[package]
+name = "multi-channel-adc"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+nb = "1.0"
+embedded-hal = "0.2"
+stm32f4xx-hal = { version = "0.14", features = ["stm32f407", "rt"] }
+heapless = "0.7"
+micromath = "2.0"
+
+[[bin]]
+name = "basic_multi_channel"
+path = "src/bin/basic_multi_channel.rs"
+
+[[bin]]
+name = "scan_mode"
+path = "src/bin/scan_mode.rs"
+
+[[bin]]
+name = "injected_channels"
+path = "src/bin/injected_channels.rs"
+
+[[bin]]
+name = "multi_adc_sync"
+path = "src/bin/multi_adc_sync.rs"
+
+[profile.dev]
+debug = true
+opt-level = 1
+
+[profile.release]
+debug = true
+lto = true
+opt-level = "s"

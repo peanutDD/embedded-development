@@ -1,0 +1,34 @@
+[package]
+name = "function-generator"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+stm32f4xx-hal = { version = "0.21", features = ["stm32f407"] }
+nb = "1.0"
+embedded-hal = "0.2"
+heapless = "0.8"
+micromath = "2.0"
+
+[[bin]]
+name = "basic_generator"
+path = "src/bin/basic_generator.rs"
+
+[[bin]]
+name = "waveform_generator"
+path = "src/bin/waveform_generator.rs"
+
+[[bin]]
+name = "sweep_generator"
+path = "src/bin/sweep_generator.rs"
+
+[[bin]]
+name = "modulation_generator"
+path = "src/bin/modulation_generator.rs"
+
+[[bin]]
+name = "arbitrary_generator"
+path = "src/bin/arbitrary_generator.rs"

@@ -1,0 +1,33 @@
+[package]
+name = "oscilloscope"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+stm32f4xx-hal = { version = "0.21", features = ["stm32f407"] }
+nb = "1.0"
+embedded-hal = "0.2"
+heapless = "0.8"
+
+[[bin]]
+name = "basic_oscilloscope"
+path = "src/bin/basic_oscilloscope.rs"
+
+[[bin]]
+name = "dual_channel_scope"
+path = "src/bin/dual_channel_scope.rs"
+
+[[bin]]
+name = "trigger_scope"
+path = "src/bin/trigger_scope.rs"
+
+[[bin]]
+name = "storage_scope"
+path = "src/bin/storage_scope.rs"
+
+[[bin]]
+name = "advanced_scope"
+path = "src/bin/advanced_scope.rs"

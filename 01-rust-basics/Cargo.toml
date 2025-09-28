@@ -18,6 +18,9 @@ clap = { version = "4.0", features = ["derive"] }
 anyhow = "1.0"
 thiserror = "1.0"
 
+# 宏与代码生成辅助
+paste = "1.0"
+
 # 集合和数据结构
 indexmap = "2.0"
 smallvec = "1.11"

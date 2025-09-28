@@ -381,7 +381,7 @@ fn find_number(numbers: &[i32], target: i32) -> Option<usize> {
     None
 }
 
-fn divide(a: f64, b: f64) -> Result<f64, String> {
+fn divide(a: f64, b: f64) -> std::result::Result<f64, String> {
     if b == 0.0 {
         Err(String::from("除数不能为零"))
     } else {
@@ -473,7 +473,7 @@ impl std::fmt::Display for MathError {
     }
 }
 
-fn safe_divide(a: f64, b: f64) -> Result<f64, MathError> {
+fn safe_divide(a: f64, b: f64) -> std::result::Result<f64, MathError> {
     if b == 0.0 {
         Err(MathError::DivisionByZero)
     } else {
@@ -481,7 +481,7 @@ fn safe_divide(a: f64, b: f64) -> Result<f64, MathError> {
     }
 }
 
-fn safe_sqrt(x: f64) -> Result<f64, MathError> {
+fn safe_sqrt(x: f64) -> std::result::Result<f64, MathError> {
     if x < 0.0 {
         Err(MathError::NegativeSquareRoot)
     } else {

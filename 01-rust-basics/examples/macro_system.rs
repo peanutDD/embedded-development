@@ -172,36 +172,37 @@ macro_rules! builder {
     ($name:ident {
         $($field:ident: $type:ty),*
     }) => {
-        #[derive(Default)]
-        pub struct $name {
-            $($field: Option<$type>),*
-        }
-        
         paste::paste! {
-            impl $name {
+            #[derive(Default)]
+            pub struct [<$name Builder>] {
+                $($field: Option<$type>),*
+            }
+
+            impl [<$name Builder>] {
                 pub fn new() -> Self {
                     Self::default()
                 }
-                
+
                 $(
                     pub fn $field(mut self, value: $type) -> Self {
                         self.$field = Some(value);
                         self
                     }
                 )*
-                
-                pub fn build(self) -> Result<[<$name Built>], String> {
-                    Ok([<$name Built>] {
+
+                pub fn build(self) -> Result<$name, String> {
+                    Ok($name {
                         $(
-                            $field: self.$field.ok_or_else(|| 
+                            $field: self.$field.ok_or_else(||
                                 format!("Missing field: {}", stringify!($field))
                             )?
                         ),*
                     })
                 }
             }
-            
-            pub struct [<$name Built>] {
+
+            #[derive(Debug)]
+            pub struct $name {
                 $($field: $type),*
             }
         }
@@ -216,30 +217,30 @@ macro_rules! state_machine {
             $($from:ident -> $to:ident on $event:ident),*
         }
     }) => {
-        #[derive(Debug, Clone, PartialEq)]
-        pub enum [<$name State>] {
-            $($state),*
-        }
-        
-        #[derive(Debug, Clone)]
-        pub enum [<$name Event>] {
-            $($event),*
-        }
-        
-        pub struct $name {
-            state: [<$name State>],
-        }
-        
         paste::paste! {
+            #[derive(Debug, Clone, PartialEq)]
+            pub enum [<$name State>] {
+                $($state),*
+            }
+
+            #[derive(Debug, Clone)]
+            pub enum [<$name Event>] {
+                $($event),*
+            }
+
+            pub struct $name {
+                state: [<$name State>],
+            }
+
             impl $name {
                 pub fn new(initial_state: [<$name State>]) -> Self {
                     Self { state: initial_state }
                 }
-                
+
                 pub fn current_state(&self) -> &[<$name State>] {
                     &self.state
                 }
-                
+
                 pub fn handle_event(&mut self, event: [<$name Event>]) -> Result<(), String> {
                     let new_state = match (&self.state, &event) {
                         $(
@@ -249,7 +250,7 @@ macro_rules! state_machine {
                         _ => return Err(format!("Invalid transition from {:?} on {:?}", 
                                               self.state, event)),
                     };
-                    
+
                     self.state = new_state;
                     Ok(())
                 }

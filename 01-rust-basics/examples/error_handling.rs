@@ -331,7 +331,7 @@ fn main() {
     let chain_result = "42"
         .parse::<i32>()
         .map(|n| n * 2)
-        .and_then(|n| if n > 50 { Ok(n) } else { Err(ParseIntError::from(std::num::IntErrorKind::InvalidDigit)) })
+        .and_then(|n| if n > 50 { Ok(n) } else { Err("42".parse::<i32>().unwrap_err()) })
         .map(|n| format!("结果: {}", n));
     
     match chain_result {

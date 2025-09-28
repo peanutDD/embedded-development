@@ -339,7 +339,7 @@ fn collection_techniques_demo() {
     println!("  平均分: {:.2}", average);
     
     // 分区操作
-    let (passed, failed): (Vec<_>, Vec<_>) = students
+    let (passed, failed): (Vec<(&str, i32)>, Vec<(&str, i32)>) = students
         .iter()
         .partition(|(_, score)| *score >= 80);
     

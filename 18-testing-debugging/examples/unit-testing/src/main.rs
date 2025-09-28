@@ -7,6 +7,49 @@ use stm32f4xx_hal::{prelude::*, stm32};
 
 // 数学运算模块
 pub mod math {
+    use heapless::FnvIndexMap;
+    
+    /// 素数缓存结构体，用于存储已计算的素数结果
+    pub struct PrimeCache {
+        // 使用FnvIndexMap存储数字和对应的素数判断结果
+        cache: FnvIndexMap<u32, bool, 32>,
+    }
+    
+    impl PrimeCache {
+        /// 创建新的素数缓存
+        pub fn new() -> Self {
+            Self {
+                cache: FnvIndexMap::new(),
+            }
+        }
+        
+        /// 检查数字是否为素数，优先使用缓存
+        pub fn is_prime(&mut self, n: u32) -> bool {
+            // 先检查缓存中是否已有结果
+            if let Some(&result) = self.cache.get(&n) {
+                return result;
+            }
+            
+            // 计算结果
+            let result = is_prime_internal(n);
+            
+            // 尝试存入缓存（如果缓存已满则忽略）
+            let _ = self.cache.insert(n, result);
+            
+            result
+        }
+        
+        /// 获取缓存大小
+        pub fn cache_size(&self) -> usize {
+            self.cache.len()
+        }
+        
+        /// 清空缓存
+        pub fn clear(&mut self) {
+            self.cache.clear();
+        }
+    }
+    
     /// 计算两个数的最大公约数
     pub fn gcd(mut a: u32, mut b: u32) -> u32 {
         while b != 0 {
@@ -30,8 +73,8 @@ pub mod math {
         Some(result)
     }
     
-    /// 判断是否为质数
-    pub fn is_prime(n: u32) -> bool {
+    /// 判断是否为质数（内部实现）
+    fn is_prime_internal(n: u32) -> bool {
         if n < 2 {
             return false;
         }
@@ -49,6 +92,11 @@ pub mod math {
             }
         }
         true
+    }
+    
+    /// 判断是否为质数（公共API，保持兼容性）
+    pub fn is_prime(n: u32) -> bool {
+        is_prime_internal(n)
     }
     
     /// 计算斐波那契数列
@@ -570,6 +618,13 @@ fn run_basic_tests() {
     assert!(math::is_prime(17));
     assert_eq!(math::fibonacci(10), 55);
     
+    // 测试素数缓存
+    let mut prime_cache = math::PrimeCache::new();
+    assert!(prime_cache.is_prime(17));
+    assert!(prime_cache.is_prime(23));
+    assert!(!prime_cache.is_prime(25));
+    assert_eq!(prime_cache.cache_size(), 3);
+    
     // 测试数据结构
     let mut stack = data_structures::Stack::<i32, 5>::new();
     assert!(stack.is_empty());
@@ -618,6 +673,33 @@ mod tests {
         assert!(math::is_prime(17));
         assert!(!math::is_prime(25));
         assert!(math::is_prime(97));
+    }
+    
+    #[test]
+    fn test_prime_cache() {
+        let mut cache = math::PrimeCache::new();
+        
+        // 测试基本功能
+        assert!(cache.is_prime(17));
+        assert!(!cache.is_prime(25));
+        
+        // 测试缓存大小
+        assert_eq!(cache.cache_size(), 2);
+        
+        // 测试缓存命中（重复查询不应增加缓存大小）
+        assert!(cache.is_prime(17));
+        assert_eq!(cache.cache_size(), 2);
+        
+        // 测试清空缓存
+        cache.clear();
+        assert_eq!(cache.cache_size(), 0);
+        
+        // 测试缓存一致性
+        assert!(cache.is_prime(7));
+        assert!(cache.is_prime(11));
+        assert!(cache.is_prime(13));
+        assert!(!cache.is_prime(15));
+        assert_eq!(cache.cache_size(), 4);
     }
     
     #[test]

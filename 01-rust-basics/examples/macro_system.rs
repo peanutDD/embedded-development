@@ -2,34 +2,38 @@
 
 // 1. 基础声明式宏
 macro_rules! say_hello {
-    () => {
-        println!("Hello, World!");
-    };
+  () => {
+    println!("Hello, World!");
+  };
 }
 
 // 2. 带参数的宏
 macro_rules! create_function {
-    ($func_name:ident) => {
-        fn $func_name() {
-            println!("你调用了函数: {}", stringify!($func_name));
-        }
-    };
+  ($func_name:ident) => {
+    fn $func_name() {
+      println!("你调用了函数: {}", stringify!($func_name));
+    }
+  };
 }
 
 // 3. 重载宏（多个模式）
 macro_rules! test {
-    ($left:expr; and $right:expr) => {
-        println!("{:?} and {:?} is {:?}",
-                 stringify!($left),
-                 stringify!($right),
-                 $left && $right)
-    };
-    ($left:expr; or $right:expr) => {
-        println!("{:?} or {:?} is {:?}",
-                 stringify!($left),
-                 stringify!($right),
-                 $left || $right)
-    };
+  ($left:expr; and $right:expr) => {
+    println!(
+      "{:?} and {:?} is {:?}",
+      stringify!($left),
+      stringify!($right),
+      $left && $right
+    )
+  };
+  ($left:expr; or $right:expr) => {
+    println!(
+      "{:?} or {:?} is {:?}",
+      stringify!($left),
+      stringify!($right),
+      $left || $right
+    )
+  };
 }
 
 // 4. 可变参数宏
@@ -63,16 +67,16 @@ macro_rules! debug_print {
 
 // 7. 生成测试用例的宏
 macro_rules! test_case {
-    ($name:ident: $input:expr => $expected:expr) => {
-        #[test]
-        fn $name() {
-            assert_eq!(double($input), $expected);
-        }
-    };
+  ($name:ident: $input:expr => $expected:expr) => {
+    #[test]
+    fn $name() {
+      assert_eq!(double($input), $expected);
+    }
+  };
 }
 
 fn double(x: i32) -> i32 {
-    x * 2
+  x * 2
 }
 
 // 8. 创建枚举和匹配的宏
@@ -82,12 +86,12 @@ macro_rules! create_enum {
         enum $name {
             $($variant),*
         }
-        
+
         impl $name {
             fn variants() -> Vec<$name> {
                 vec![$($name::$variant),*]
             }
-            
+
             fn name(&self) -> &'static str {
                 match self {
                     $($name::$variant => stringify!($variant)),*
@@ -99,13 +103,13 @@ macro_rules! create_enum {
 
 // 9. 实现特征的宏
 macro_rules! impl_display {
-    ($type:ty) => {
-        impl std::fmt::Display for $type {
-            fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-                write!(f, "{:?}", self)
-            }
-        }
-    };
+  ($type:ty) => {
+    impl std::fmt::Display for $type {
+      fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+      }
+    }
+  };
 }
 
 // 10. 日志宏
@@ -133,38 +137,38 @@ macro_rules! calculate {
 
 // 12. 生成getter和setter的宏
 macro_rules! getter_setter {
-    ($field:ident: $type:ty) => {
-        paste::paste! {
-            pub fn [<get_ $field>](&self) -> &$type {
-                &self.$field
-            }
-            
-            pub fn [<set_ $field>](&mut self, value: $type) {
-                self.$field = value;
-            }
+  ($field:ident: $type:ty) => {
+    paste::paste! {
+        pub fn [<get_ $field>](&self) -> &$type {
+            &self.$field
         }
-    };
+
+        pub fn [<set_ $field>](&mut self, value: $type) {
+            self.$field = value;
+        }
+    }
+  };
 }
 
 // 13. 单例模式宏
 macro_rules! singleton {
-    ($name:ident, $type:ty, $init:expr) => {
-        pub struct $name;
-        
-        impl $name {
-            pub fn instance() -> &'static $type {
-                static mut INSTANCE: Option<$type> = None;
-                static ONCE: std::sync::Once = std::sync::Once::new();
-                
-                unsafe {
-                    ONCE.call_once(|| {
-                        INSTANCE = Some($init);
-                    });
-                    INSTANCE.as_ref().unwrap()
-                }
-            }
+  ($name:ident, $type:ty, $init:expr) => {
+    pub struct $name;
+
+    impl $name {
+      pub fn instance() -> &'static $type {
+        static mut INSTANCE: Option<$type> = None;
+        static ONCE: std::sync::Once = std::sync::Once::new();
+
+        unsafe {
+          ONCE.call_once(|| {
+            INSTANCE = Some($init);
+          });
+          INSTANCE.as_ref().unwrap()
         }
-    };
+      }
+    }
+  };
 }
 
 // 14. 构建器模式宏
@@ -244,11 +248,11 @@ macro_rules! state_machine {
                 pub fn handle_event(&mut self, event: [<$name Event>]) -> Result<(), String> {
                     let new_state = match (&self.state, &event) {
                         $(
-                            ([<$name State>]::$from, [<$name Event>]::$event) => 
+                            ([<$name State>]::$from, [<$name Event>]::$event) =>
                                 [<$name State>]::$to,
                         )*
-                        _ => return Err(format!("Invalid transition from {:?} on {:?}", 
-                                              self.state, event)),
+                        _ => return Err(format!("Invalid transition from {:?} on {:?}",
+                            self.state, event)),
                     };
 
                     self.state = new_state;
@@ -267,17 +271,17 @@ create_enum!(Color { Red, Green, Blue });
 
 #[derive(Debug)]
 struct Point {
-    x: i32,
-    y: i32,
+  x: i32,
+  y: i32,
 }
 
 impl_display!(Point);
 
 // 使用构建器宏
 builder!(Person {
-    name: String,
-    age: u32,
-    email: String
+  name: String,
+  age: u32,
+  email: String
 });
 
 // 使用状态机宏
@@ -299,81 +303,81 @@ singleton!(Config, std::collections::HashMap<String, String>, {
 });
 
 fn main() {
-    println!("=== Rust宏系统示例 ===\n");
-    
-    // 1. 基础宏使用
-    say_hello!();
-    
-    // 2. 函数生成宏
-    foo();
-    bar();
-    
-    // 3. 重载宏
-    test!(1i32 + 1 == 2i32; and 2i32 * 2 == 4i32);
-    test!(true; or false);
-    
-    // 4. 可变参数宏
-    println!("最小值: {}", find_min!(1u32, 2u32, 3u32, 4u32));
-    
-    // 5. HashMap创建宏
-    let map = hash_map!{
-        "name" => "Alice",
-        "age" => "30",
-        "city" => "Beijing"
-    };
-    println!("HashMap: {:?}", map);
-    
-    // 6. 调试打印宏
-    debug_print!("这是一个调试消息: {}", 42);
-    
-    // 7. 枚举使用
-    let color = Color::Red;
-    println!("颜色: {:?}, 名称: {}", color, color.name());
-    println!("所有颜色: {:?}", Color::variants());
-    
-    // 8. Display特征
-    let point = Point { x: 10, y: 20 };
-    println!("点: {}", point);
-    
-    // 9. 日志宏
-    log!(info: "应用程序启动");
-    log!(warn: "内存使用率: {}%", 85);
-    log!(error: "连接失败: {}", "timeout");
-    
-    // 10. 编译时计算
-    const RESULT: usize = calculate!(eval 2 + 3 * 4);
-    println!("编译时计算结果: {}", RESULT);
-    
-    // 11. 构建器模式
-    match PersonBuilder::new()
-        .name("张三".to_string())
-        .age(25)
-        .email("zhangsan@example.com".to_string())
-        .build()
-    {
-        Ok(person) => println!("构建的人员: {:?}", person),
-        Err(e) => println!("构建失败: {}", e),
-    }
-    
-    // 12. 状态机
-    let mut traffic_light = TrafficLight::new(TrafficLightState::Red);
-    println!("初始状态: {:?}", traffic_light.current_state());
-    
-    match traffic_light.handle_event(TrafficLightEvent::Go) {
-        Ok(()) => println!("转换后状态: {:?}", traffic_light.current_state()),
-        Err(e) => println!("状态转换失败: {}", e),
-    }
-    
-    // 13. 单例使用
-    let config = Config::instance();
-    println!("配置: {:?}", config);
-    
-    println!("\n=== 宏的优势 ===");
-    println!("1. 代码生成和重复消除");
-    println!("2. 编译时计算和优化");
-    println!("3. DSL（领域特定语言）创建");
-    println!("4. 类型安全的代码生成");
-    println!("5. 零运行时开销");
+  println!("=== Rust宏系统示例 ===\n");
+
+  // 1. 基础宏使用
+  say_hello!();
+
+  // 2. 函数生成宏
+  foo();
+  bar();
+
+  // 3. 重载宏
+  test!(1i32 + 1 == 2i32; and 2i32 * 2 == 4i32);
+  test!(true; or false);
+
+  // 4. 可变参数宏
+  println!("最小值: {}", find_min!(1u32, 2u32, 3u32, 4u32));
+
+  // 5. HashMap创建宏
+  let map = hash_map! {
+      "name" => "Alice",
+      "age" => "30",
+      "city" => "Beijing"
+  };
+  println!("HashMap: {:?}", map);
+
+  // 6. 调试打印宏
+  debug_print!("这是一个调试消息: {}", 42);
+
+  // 7. 枚举使用
+  let color = Color::Red;
+  println!("颜色: {:?}, 名称: {}", color, color.name());
+  println!("所有颜色: {:?}", Color::variants());
+
+  // 8. Display特征
+  let point = Point { x: 10, y: 20 };
+  println!("点: {}", point);
+
+  // 9. 日志宏
+  log!(info: "应用程序启动");
+  log!(warn: "内存使用率: {}%", 85);
+  log!(error: "连接失败: {}", "timeout");
+
+  // 10. 编译时计算
+  const RESULT: usize = calculate!(eval 2 + 3 * 4);
+  println!("编译时计算结果: {}", RESULT);
+
+  // 11. 构建器模式
+  match PersonBuilder::new()
+    .name("张三".to_string())
+    .age(25)
+    .email("zhangsan@example.com".to_string())
+    .build()
+  {
+    Ok(person) => println!("构建的人员: {:?}", person),
+    Err(e) => println!("构建失败: {}", e),
+  }
+
+  // 12. 状态机
+  let mut traffic_light = TrafficLight::new(TrafficLightState::Red);
+  println!("初始状态: {:?}", traffic_light.current_state());
+
+  match traffic_light.handle_event(TrafficLightEvent::Go) {
+    Ok(()) => println!("转换后状态: {:?}", traffic_light.current_state()),
+    Err(e) => println!("状态转换失败: {}", e),
+  }
+
+  // 13. 单例使用
+  let config = Config::instance();
+  println!("配置: {:?}", config);
+
+  println!("\n=== 宏的优势 ===");
+  println!("1. 代码生成和重复消除");
+  println!("2. 编译时计算和优化");
+  println!("3. DSL（领域特定语言）创建");
+  println!("4. 类型安全的代码生成");
+  println!("5. 零运行时开销");
 }
 
 // 宏调试和展开示例
@@ -403,36 +407,36 @@ macro_rules! reverse {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    
-    // 使用测试宏
-    test_case!(test_double_2: 2 => 4);
-    test_case!(test_double_5: 5 => 10);
-    test_case!(test_double_0: 0 => 0);
-    
-    #[test]
-    fn test_find_min() {
-        assert_eq!(find_min!(3, 1, 4, 1, 5), 1);
-    }
-    
-    #[test]
-    fn test_hash_map_macro() {
-        let map = hash_map!{"a" => 1, "b" => 2};
-        assert_eq!(map.get("a"), Some(&1));
-        assert_eq!(map.get("b"), Some(&2));
-    }
-    
-    #[test]
-    fn test_count_macro() {
-        assert_eq!(count!(), 0);
-        assert_eq!(count!(a), 1);
-        assert_eq!(count!(a b c), 3);
-    }
-    
-    #[test]
-    fn test_color_enum() {
-        let red = Color::Red;
-        assert_eq!(red.name(), "Red");
-        assert_eq!(Color::variants().len(), 3);
-    }
+  use super::*;
+
+  // 使用测试宏
+  test_case!(test_double_2: 2 => 4);
+  test_case!(test_double_5: 5 => 10);
+  test_case!(test_double_0: 0 => 0);
+
+  #[test]
+  fn test_find_min() {
+    assert_eq!(find_min!(3, 1, 4, 1, 5), 1);
+  }
+
+  #[test]
+  fn test_hash_map_macro() {
+    let map = hash_map! {"a" => 1, "b" => 2};
+    assert_eq!(map.get("a"), Some(&1));
+    assert_eq!(map.get("b"), Some(&2));
+  }
+
+  #[test]
+  fn test_count_macro() {
+    assert_eq!(count!(), 0);
+    assert_eq!(count!(a), 1);
+    assert_eq!(count!(a b c), 3);
+  }
+
+  #[test]
+  fn test_color_enum() {
+    let red = Color::Red;
+    assert_eq!(red.name(), "Red");
+    assert_eq!(Color::variants().len(), 3);
+  }
 }

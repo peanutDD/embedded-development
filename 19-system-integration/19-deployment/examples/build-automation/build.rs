@@ -4,66 +4,68 @@ use std::path::Path;
 use std::process::Command;
 
 fn main() {
-    // 获取构建时间
-    let build_date = chrono::Utc::now().format("%Y-%m-%d %H:%M:%S UTC").to_string();
-    println!("cargo:rustc-env=BUILD_DATE={}", build_date);
+  // 获取构建时间
+  let build_date = chrono::Utc::now()
+    .format("%Y-%m-%d %H:%M:%S UTC")
+    .to_string();
+  println!("cargo:rustc-env=BUILD_DATE={}", build_date);
 
-    // 获取Git哈希
-    let git_hash = get_git_hash().unwrap_or_else(|| "unknown".to_string());
-    println!("cargo:rustc-env=GIT_HASH={}", git_hash);
+  // 获取Git哈希
+  let git_hash = get_git_hash().unwrap_or_else(|| "unknown".to_string());
+  println!("cargo:rustc-env=GIT_HASH={}", git_hash);
 
-    // 获取目标架构
-    let target = env::var("TARGET").unwrap_or_else(|_| "unknown".to_string());
-    println!("cargo:rustc-env=TARGET={}", target);
+  // 获取目标架构
+  let target = env::var("TARGET").unwrap_or_else(|_| "unknown".to_string());
+  println!("cargo:rustc-env=TARGET={}", target);
 
-    // 获取构建配置
-    let profile = env::var("PROFILE").unwrap_or_else(|_| "debug".to_string());
-    println!("cargo:rustc-env=PROFILE={}", profile);
+  // 获取构建配置
+  let profile = env::var("PROFILE").unwrap_or_else(|_| "debug".to_string());
+  println!("cargo:rustc-env=PROFILE={}", profile);
 
-    // 生成内存布局文件
-    generate_memory_layout();
+  // 生成内存布局文件
+  generate_memory_layout();
 
-    // 生成链接器脚本
-    generate_linker_script();
+  // 生成链接器脚本
+  generate_linker_script();
 
-    // 生成版本信息
-    generate_version_info();
+  // 生成版本信息
+  generate_version_info();
 
-    // 配置构建依赖
-    configure_build_dependencies();
+  // 配置构建依赖
+  configure_build_dependencies();
 
-    // 设置重新构建条件
-    println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rerun-if-changed=memory.x");
-    println!("cargo:rerun-if-changed=link.x");
-    println!("cargo:rerun-if-changed=.git/HEAD");
-    println!("cargo:rerun-if-changed=Cargo.toml");
+  // 设置重新构建条件
+  println!("cargo:rerun-if-changed=build.rs");
+  println!("cargo:rerun-if-changed=memory.x");
+  println!("cargo:rerun-if-changed=link.x");
+  println!("cargo:rerun-if-changed=.git/HEAD");
+  println!("cargo:rerun-if-changed=Cargo.toml");
 }
 
 fn get_git_hash() -> Option<String> {
-    let output = Command::new("git")
-        .args(&["rev-parse", "--short", "HEAD"])
-        .output()
-        .ok()?;
+  let output = Command::new("git")
+    .args(&["rev-parse", "--short", "HEAD"])
+    .output()
+    .ok()?;
 
-    if output.status.success() {
-        let hash = String::from_utf8(output.stdout).ok()?;
-        Some(hash.trim().to_string())
-    } else {
-        None
-    }
+  if output.status.success() {
+    let hash = String::from_utf8(output.stdout).ok()?;
+    Some(hash.trim().to_string())
+  } else {
+    None
+  }
 }
 
 fn generate_memory_layout() {
-    let out_dir = env::var("OUT_DIR").unwrap();
-    let memory_x_path = Path::new(&out_dir).join("memory.x");
+  let out_dir = env::var("OUT_DIR").unwrap();
+  let memory_x_path = Path::new(&out_dir).join("memory.x");
 
-    // 根据目标平台生成不同的内存布局
-    let target = env::var("TARGET").unwrap_or_default();
-    let memory_layout = match target.as_str() {
-        "thumbv7em-none-eabihf" => {
-            // STM32F4系列
-            r#"
+  // 根据目标平台生成不同的内存布局
+  let target = env::var("TARGET").unwrap_or_default();
+  let memory_layout = match target.as_str() {
+    "thumbv7em-none-eabihf" => {
+      // STM32F4系列
+      r#"
 MEMORY
 {
   /* NOTE 1 K = 1 KiBi = 1024 bytes */
@@ -98,10 +100,10 @@ _stack_start = ORIGIN(RAM) + LENGTH(RAM);
    } INSERT AFTER .bss;
 */
 "#
-        }
-        "thumbv6m-none-eabi" => {
-            // STM32F0系列
-            r#"
+    }
+    "thumbv6m-none-eabi" => {
+      // STM32F0系列
+      r#"
 MEMORY
 {
   FLASH : ORIGIN = 0x08000000, LENGTH = 256K
@@ -110,10 +112,10 @@ MEMORY
 
 _stack_start = ORIGIN(RAM) + LENGTH(RAM);
 "#
-        }
-        _ => {
-            // 默认配置
-            r#"
+    }
+    _ => {
+      // 默认配置
+      r#"
 MEMORY
 {
   FLASH : ORIGIN = 0x08000000, LENGTH = 256K
@@ -122,18 +124,18 @@ MEMORY
 
 _stack_start = ORIGIN(RAM) + LENGTH(RAM);
 "#
-        }
-    };
+    }
+  };
 
-    fs::write(&memory_x_path, memory_layout).expect("Failed to write memory.x");
-    println!("cargo:rustc-link-search={}", out_dir);
+  fs::write(&memory_x_path, memory_layout).expect("Failed to write memory.x");
+  println!("cargo:rustc-link-search={}", out_dir);
 }
 
 fn generate_linker_script() {
-    let out_dir = env::var("OUT_DIR").unwrap();
-    let link_x_path = Path::new(&out_dir).join("link.x");
+  let out_dir = env::var("OUT_DIR").unwrap();
+  let link_x_path = Path::new(&out_dir).join("link.x");
 
-    let linker_script = r#"
+  let linker_script = r#"
 /* Linker script for embedded applications */
 
 INCLUDE memory.x
@@ -331,26 +333,26 @@ the -fPIC flag. See the documentation of the `cc::Build.pic` method for details.
 /* Do not exceed this mark in the error messages above                                    | */
 "#;
 
-    fs::write(&link_x_path, linker_script).expect("Failed to write link.x");
+  fs::write(&link_x_path, linker_script).expect("Failed to write link.x");
 }
 
 fn generate_version_info() {
-    let version = env::var("CARGO_PKG_VERSION").unwrap_or_else(|_| "0.0.0".to_string());
-    let name = env::var("CARGO_PKG_NAME").unwrap_or_else(|_| "unknown".to_string());
-    let authors = env::var("CARGO_PKG_AUTHORS").unwrap_or_else(|_| "unknown".to_string());
-    let description = env::var("CARGO_PKG_DESCRIPTION").unwrap_or_else(|_| "".to_string());
+  let version = env::var("CARGO_PKG_VERSION").unwrap_or_else(|_| "0.0.0".to_string());
+  let name = env::var("CARGO_PKG_NAME").unwrap_or_else(|_| "unknown".to_string());
+  let authors = env::var("CARGO_PKG_AUTHORS").unwrap_or_else(|_| "unknown".to_string());
+  let description = env::var("CARGO_PKG_DESCRIPTION").unwrap_or_else(|_| "".to_string());
 
-    println!("cargo:rustc-env=PKG_VERSION={}", version);
-    println!("cargo:rustc-env=PKG_NAME={}", name);
-    println!("cargo:rustc-env=PKG_AUTHORS={}", authors);
-    println!("cargo:rustc-env=PKG_DESCRIPTION={}", description);
+  println!("cargo:rustc-env=PKG_VERSION={}", version);
+  println!("cargo:rustc-env=PKG_NAME={}", name);
+  println!("cargo:rustc-env=PKG_AUTHORS={}", authors);
+  println!("cargo:rustc-env=PKG_DESCRIPTION={}", description);
 
-    // 生成版本信息头文件
-    let out_dir = env::var("OUT_DIR").unwrap();
-    let version_h_path = Path::new(&out_dir).join("version.h");
+  // 生成版本信息头文件
+  let out_dir = env::var("OUT_DIR").unwrap();
+  let version_h_path = Path::new(&out_dir).join("version.h");
 
-    let version_header = format!(
-        r#"
+  let version_header = format!(
+    r#"
 #ifndef VERSION_H
 #define VERSION_H
 
@@ -363,45 +365,45 @@ fn generate_version_info() {
 
 #endif // VERSION_H
 "#,
-        version.split('.').nth(0).unwrap_or("0"),
-        version.split('.').nth(1).unwrap_or("0"),
-        version.split('.').nth(2).unwrap_or("0"),
-        version,
-        chrono::Utc::now().format("%Y-%m-%d %H:%M:%S UTC"),
-        get_git_hash().unwrap_or_else(|| "unknown".to_string())
-    );
+    version.split('.').nth(0).unwrap_or("0"),
+    version.split('.').nth(1).unwrap_or("0"),
+    version.split('.').nth(2).unwrap_or("0"),
+    version,
+    chrono::Utc::now().format("%Y-%m-%d %H:%M:%S UTC"),
+    get_git_hash().unwrap_or_else(|| "unknown".to_string())
+  );
 
-    fs::write(&version_h_path, version_header).expect("Failed to write version.h");
+  fs::write(&version_h_path, version_header).expect("Failed to write version.h");
 }
 
 fn configure_build_dependencies() {
-    // 配置构建时依赖
-    let target = env::var("TARGET").unwrap_or_default();
-    
-    // 根据目标平台配置不同的链接选项
-    match target.as_str() {
-        "thumbv7em-none-eabihf" => {
-            println!("cargo:rustc-link-arg=-Tlink.x");
-            println!("cargo:rustc-link-arg=--nmagic");
-        }
-        "thumbv6m-none-eabi" => {
-            println!("cargo:rustc-link-arg=-Tlink.x");
-            println!("cargo:rustc-link-arg=--nmagic");
-        }
-        _ => {
-            // 其他目标平台的配置
-        }
-    }
+  // 配置构建时依赖
+  let target = env::var("TARGET").unwrap_or_default();
 
-    // 配置优化选项
-    let profile = env::var("PROFILE").unwrap_or_default();
-    match profile.as_str() {
-        "release" => {
-            println!("cargo:rustc-link-arg=-Os"); // 优化大小
-        }
-        "debug" => {
-            println!("cargo:rustc-link-arg=-Og"); // 优化调试体验
-        }
-        _ => {}
+  // 根据目标平台配置不同的链接选项
+  match target.as_str() {
+    "thumbv7em-none-eabihf" => {
+      println!("cargo:rustc-link-arg=-Tlink.x");
+      println!("cargo:rustc-link-arg=--nmagic");
     }
+    "thumbv6m-none-eabi" => {
+      println!("cargo:rustc-link-arg=-Tlink.x");
+      println!("cargo:rustc-link-arg=--nmagic");
+    }
+    _ => {
+      // 其他目标平台的配置
+    }
+  }
+
+  // 配置优化选项
+  let profile = env::var("PROFILE").unwrap_or_default();
+  match profile.as_str() {
+    "release" => {
+      println!("cargo:rustc-link-arg=-Os"); // 优化大小
+    }
+    "debug" => {
+      println!("cargo:rustc-link-arg=-Og"); // 优化调试体验
+    }
+    _ => {}
+  }
 }

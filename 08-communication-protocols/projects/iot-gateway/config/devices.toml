@@ -1,0 +1,322 @@
+# IoT Gateway 设备配置文件
+# 定义连接到网关的各种设备及其配置参数
+
+[gateway]
+# 网关基本信息
+device_id = "iot-gateway-001"
+name = "IoT Gateway Hub"
+location = "Building A, Floor 2"
+firmware_version = "1.0.0"
+hardware_version = "1.0"
+
+# 设备发现配置
+[discovery]
+enabled = true
+scan_interval_ms = 30000  # 30秒扫描一次
+auto_register = true
+timeout_ms = 5000
+
+# I2C设备配置
+[devices.i2c]
+enabled = true
+frequency = 100000  # 100kHz
+sda_pin = 21
+scl_pin = 22
+
+# 温湿度传感器 (SHT30)
+[[devices.i2c.sensors]]
+name = "temperature_humidity_1"
+device_type = "SHT30"
+address = 0x44
+enabled = true
+sample_rate_ms = 2000
+calibration_offset_temp = 0.0
+calibration_offset_humidity = 0.0
+alert_threshold_temp_high = 35.0
+alert_threshold_temp_low = 5.0
+alert_threshold_humidity_high = 80.0
+alert_threshold_humidity_low = 20.0
+
+# 气压传感器 (BMP280)
+[[devices.i2c.sensors]]
+name = "pressure_1"
+device_type = "BMP280"
+address = 0x76
+enabled = true
+sample_rate_ms = 5000
+calibration_offset = 0.0
+alert_threshold_high = 1100.0
+alert_threshold_low = 900.0
+
+# 光照传感器 (BH1750)
+[[devices.i2c.sensors]]
+name = "light_1"
+device_type = "BH1750"
+address = 0x23
+enabled = true
+sample_rate_ms = 1000
+calibration_factor = 1.0
+alert_threshold_high = 50000.0
+alert_threshold_low = 10.0
+
+# 加速度计 (MPU6050)
+[[devices.i2c.sensors]]
+name = "accelerometer_1"
+device_type = "MPU6050"
+address = 0x68
+enabled = true
+sample_rate_ms = 100
+range_accel = 2  # ±2g
+range_gyro = 250  # ±250°/s
+calibration_offset_x = 0.0
+calibration_offset_y = 0.0
+calibration_offset_z = 0.0
+
+# I2C执行器
+[[devices.i2c.actuators]]
+name = "relay_controller_1"
+device_type = "PCF8574"
+address = 0x20
+enabled = true
+channels = 8
+default_state = [false, false, false, false, false, false, false, false]
+
+# SPI设备配置
+[devices.spi]
+enabled = true
+frequency = 1000000  # 1MHz
+mosi_pin = 23
+miso_pin = 19
+sclk_pin = 18
+
+# 显示屏 (ST7735)
+[[devices.spi.displays]]
+name = "lcd_display_1"
+device_type = "ST7735"
+cs_pin = 5
+dc_pin = 2
+rst_pin = 4
+enabled = true
+width = 128
+height = 160
+rotation = 0
+backlight_pin = 15
+backlight_pwm = true
+
+# SD卡存储
+[[devices.spi.storage]]
+name = "sd_card_1"
+device_type = "SD_CARD"
+cs_pin = 13
+enabled = true
+max_file_size_mb = 100
+auto_backup = true
+
+# UART设备配置
+[devices.uart]
+enabled = true
+
+# GPS模块
+[[devices.uart.sensors]]
+name = "gps_1"
+device_type = "NEO_8M"
+uart_port = 1
+baud_rate = 9600
+tx_pin = 17
+rx_pin = 16
+enabled = true
+update_rate_hz = 1
+altitude_offset = 0.0
+
+# LoRa模块
+[[devices.uart.communication]]
+name = "lora_1"
+device_type = "SX1278"
+uart_port = 2
+baud_rate = 115200
+tx_pin = 25
+rx_pin = 26
+enabled = true
+frequency = 433000000  # 433MHz
+spreading_factor = 7
+bandwidth = 125000
+coding_rate = 5
+tx_power = 14
+
+# 模拟设备配置
+[devices.analog]
+enabled = true
+adc_resolution = 12
+reference_voltage = 3.3
+
+# 土壤湿度传感器
+[[devices.analog.sensors]]
+name = "soil_moisture_1"
+device_type = "ANALOG_SOIL"
+adc_pin = 36
+enabled = true
+sample_rate_ms = 10000
+calibration_dry = 4095
+calibration_wet = 1500
+alert_threshold_low = 30.0
+
+# 电池电压监测
+[[devices.analog.sensors]]
+name = "battery_voltage"
+device_type = "VOLTAGE_DIVIDER"
+adc_pin = 39
+enabled = true
+sample_rate_ms = 60000
+voltage_divider_ratio = 2.0
+alert_threshold_low = 3.2
+
+# 数字GPIO设备
+[devices.gpio]
+enabled = true
+
+# 按钮输入
+[[devices.gpio.inputs]]
+name = "user_button_1"
+pin = 0
+enabled = true
+pull_up = true
+debounce_ms = 50
+interrupt_enabled = true
+
+# LED输出
+[[devices.gpio.outputs]]
+name = "status_led"
+pin = 2
+enabled = true
+default_state = false
+pwm_enabled = true
+pwm_frequency = 1000
+
+# 蜂鸣器
+[[devices.gpio.outputs]]
+name = "buzzer_1"
+pin = 12
+enabled = true
+default_state = false
+pwm_enabled = true
+pwm_frequency = 2000
+
+# 设备组配置
+[device_groups]
+
+# 环境监测组
+[device_groups.environment]
+name = "Environmental Monitoring"
+devices = [
+    "temperature_humidity_1",
+    "pressure_1", 
+    "light_1",
+    "soil_moisture_1"
+]
+sample_sync = true
+data_fusion = true
+
+# 安全监控组
+[device_groups.security]
+name = "Security Monitoring"
+devices = [
+    "accelerometer_1",
+    "user_button_1"
+]
+alert_enabled = true
+notification_channels = ["mqtt", "lora"]
+
+# 显示控制组
+[device_groups.display]
+name = "Display Control"
+devices = [
+    "lcd_display_1",
+    "status_led"
+]
+auto_update = true
+update_interval_ms = 5000
+
+# 数据记录配置
+[data_logging]
+enabled = true
+storage_device = "sd_card_1"
+log_level = "info"
+max_log_size_mb = 50
+rotation_enabled = true
+compression = true
+
+# 日志记录的设备
+log_devices = [
+    "temperature_humidity_1",
+    "pressure_1",
+    "light_1",
+    "gps_1",
+    "battery_voltage"
+]
+
+# 报警配置
+[alerts]
+enabled = true
+notification_methods = ["mqtt", "display", "buzzer"]
+
+# 温度报警
+[[alerts.rules]]
+name = "high_temperature"
+device = "temperature_humidity_1"
+parameter = "temperature"
+condition = "greater_than"
+threshold = 35.0
+severity = "warning"
+message = "Temperature too high: {value}°C"
+
+# 湿度报警
+[[alerts.rules]]
+name = "low_humidity"
+device = "temperature_humidity_1"
+parameter = "humidity"
+condition = "less_than"
+threshold = 20.0
+severity = "info"
+message = "Humidity too low: {value}%"
+
+# 电池电压报警
+[[alerts.rules]]
+name = "low_battery"
+device = "battery_voltage"
+parameter = "voltage"
+condition = "less_than"
+threshold = 3.2
+severity = "critical"
+message = "Battery voltage low: {value}V"
+
+# 设备维护配置
+[maintenance]
+enabled = true
+health_check_interval_ms = 300000  # 5分钟
+auto_calibration = true
+calibration_interval_hours = 24
+
+# 需要定期校准的设备
+calibration_devices = [
+    "temperature_humidity_1",
+    "pressure_1",
+    "light_1"
+]
+
+# 设备重启策略
+[restart_policy]
+enabled = true
+max_error_count = 5
+restart_delay_ms = 10000
+escalation_enabled = true
+
+# 设备特定的重启策略
+[[restart_policy.device_rules]]
+device = "gps_1"
+max_error_count = 3
+restart_delay_ms = 30000
+
+[[restart_policy.device_rules]]
+device = "lora_1"
+max_error_count = 2
+restart_delay_ms = 60000

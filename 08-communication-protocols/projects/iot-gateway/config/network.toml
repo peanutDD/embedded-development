@@ -1,0 +1,339 @@
+# IoT Gateway 网络配置文件
+# 定义网关的网络连接和通信协议配置
+
+[gateway_network]
+# 网关网络基本信息
+hostname = "iot-gateway-001"
+mac_address = "auto"  # 自动获取或手动设置
+device_name = "IoT Gateway Hub"
+location_id = "building_a_floor_2"
+
+# WiFi配置
+[wifi]
+enabled = true
+auto_connect = true
+connection_timeout_ms = 30000
+reconnect_attempts = 5
+reconnect_delay_ms = 10000
+
+# 主WiFi网络
+[wifi.primary]
+ssid = "IoT-Network-Main"
+password = "your_wifi_password_here"
+security = "WPA2"  # OPEN, WEP, WPA, WPA2, WPA3
+channel = 0  # 0为自动选择
+hidden = false
+priority = 1
+
+# 备用WiFi网络
+[wifi.secondary]
+ssid = "IoT-Network-Backup"
+password = "backup_wifi_password"
+security = "WPA2"
+channel = 0
+hidden = false
+priority = 2
+
+# WiFi热点模式（当无法连接到网络时启用）
+[wifi.hotspot]
+enabled = true
+ssid = "IoT-Gateway-AP"
+password = "gateway123456"
+security = "WPA2"
+channel = 6
+max_connections = 4
+ip_address = "192.168.4.1"
+subnet_mask = "255.255.255.0"
+
+# 网络接口配置
+[network_interface]
+# DHCP配置
+dhcp_enabled = true
+dhcp_timeout_ms = 60000
+
+# 静态IP配置（当DHCP禁用时使用）
+[network_interface.static]
+ip_address = "192.168.1.100"
+subnet_mask = "255.255.255.0"
+gateway = "192.168.1.1"
+dns_primary = "8.8.8.8"
+dns_secondary = "8.8.4.4"
+
+# 网络质量监控
+[network_monitoring]
+enabled = true
+ping_interval_ms = 30000
+ping_timeout_ms = 5000
+ping_targets = [
+    "8.8.8.8",
+    "1.1.1.1",
+    "192.168.1.1"
+]
+connection_quality_threshold = 80  # 百分比
+
+# MQTT配置
+[mqtt]
+enabled = true
+auto_reconnect = true
+keep_alive_s = 60
+clean_session = true
+qos_level = 1  # 0, 1, 2
+retain_messages = false
+
+# 主MQTT代理
+[mqtt.primary]
+broker_host = "mqtt.iot-platform.com"
+broker_port = 1883
+use_tls = false
+client_id = "iot-gateway-001"
+username = "gateway_user"
+password = "gateway_password"
+connection_timeout_ms = 30000
+reconnect_delay_ms = 5000
+max_reconnect_attempts = 10
+
+# 备用MQTT代理
+[mqtt.secondary]
+broker_host = "backup-mqtt.iot-platform.com"
+broker_port = 1883
+use_tls = false
+client_id = "iot-gateway-001-backup"
+username = "gateway_user"
+password = "gateway_password"
+connection_timeout_ms = 30000
+
+# MQTT TLS配置
+[mqtt.tls]
+enabled = false
+ca_cert_path = "/certs/ca.pem"
+client_cert_path = "/certs/client.pem"
+client_key_path = "/certs/client.key"
+verify_server_cert = true
+server_name = "mqtt.iot-platform.com"
+
+# MQTT主题配置
+[mqtt.topics]
+# 数据发布主题
+data_publish = "devices/{device_id}/data"
+status_publish = "devices/{device_id}/status"
+alert_publish = "devices/{device_id}/alerts"
+heartbeat_publish = "devices/{device_id}/heartbeat"
+
+# 命令订阅主题
+command_subscribe = "devices/{device_id}/commands"
+config_subscribe = "devices/{device_id}/config"
+firmware_subscribe = "devices/{device_id}/firmware"
+
+# 广播主题
+broadcast_subscribe = "broadcast/all"
+group_subscribe = "groups/environment/commands"
+
+# MQTT消息格式
+[mqtt.message_format]
+encoding = "json"  # json, msgpack, protobuf
+compression = false
+timestamp_format = "iso8601"
+include_device_info = true
+
+# HTTP配置
+[http]
+enabled = true
+server_port = 80
+max_connections = 10
+request_timeout_ms = 30000
+enable_cors = true
+
+# HTTP API端点
+[http.endpoints]
+# 设备状态API
+device_status = "/api/v1/devices/status"
+device_data = "/api/v1/devices/data"
+device_config = "/api/v1/devices/config"
+
+# 系统API
+system_info = "/api/v1/system/info"
+system_health = "/api/v1/system/health"
+network_status = "/api/v1/network/status"
+
+# 配置API
+config_get = "/api/v1/config"
+config_set = "/api/v1/config"
+
+# HTTP认证
+[http.auth]
+enabled = true
+method = "basic"  # basic, bearer, api_key
+username = "admin"
+password = "admin123"
+api_key = "your_api_key_here"
+
+# HTTPS配置
+[http.tls]
+enabled = false
+cert_path = "/certs/server.pem"
+key_path = "/certs/server.key"
+port = 443
+
+# CoAP配置
+[coap]
+enabled = false
+port = 5683
+max_message_size = 1024
+ack_timeout_ms = 2000
+max_retransmit = 4
+
+# CoAP资源
+[coap.resources]
+device_data = "/devices/data"
+device_status = "/devices/status"
+system_info = "/system/info"
+
+# LoRa配置
+[lora]
+enabled = true
+frequency = 433000000  # 433MHz
+spreading_factor = 7
+bandwidth = 125000
+coding_rate = 5
+tx_power = 14
+preamble_length = 8
+sync_word = 0x12
+
+# LoRa网络配置
+[lora.network]
+network_id = 0x01
+device_address = 0x1001
+app_session_key = "your_app_session_key_here"
+network_session_key = "your_network_session_key_here"
+
+# LoRaWAN配置（如果使用LoRaWAN）
+[lorawan]
+enabled = false
+device_eui = "your_device_eui_here"
+app_eui = "your_app_eui_here"
+app_key = "your_app_key_here"
+class = "A"  # A, B, C
+adr_enabled = true
+confirmed_uplinks = false
+
+# 蓝牙配置
+[bluetooth]
+enabled = false
+device_name = "IoT Gateway"
+discoverable = true
+pairable = true
+connection_timeout_ms = 30000
+
+# BLE配置
+[bluetooth.ble]
+enabled = true
+advertising_interval_ms = 1000
+connection_interval_ms = 100
+service_uuid = "12345678-1234-1234-1234-123456789abc"
+
+# 网络安全配置
+[security]
+# 防火墙规则
+firewall_enabled = true
+allowed_ports = [80, 443, 1883, 8883, 5683]
+blocked_ips = []
+rate_limiting = true
+max_requests_per_minute = 100
+
+# 加密配置
+[security.encryption]
+enabled = true
+algorithm = "AES-256-GCM"
+key_rotation_interval_hours = 24
+secure_boot = false
+
+# 网络时间同步
+[ntp]
+enabled = true
+servers = [
+    "pool.ntp.org",
+    "time.google.com",
+    "time.cloudflare.com"
+]
+sync_interval_hours = 1
+timezone = "UTC+8"
+
+# 数据传输配置
+[data_transmission]
+# 批量传输
+batch_enabled = true
+batch_size = 10
+batch_timeout_ms = 30000
+
+# 数据压缩
+compression_enabled = true
+compression_algorithm = "gzip"  # gzip, lz4, zstd
+
+# 数据缓存
+cache_enabled = true
+cache_size_mb = 10
+cache_retention_hours = 24
+
+# 离线模式配置
+[offline_mode]
+enabled = true
+max_offline_duration_hours = 72
+data_storage_limit_mb = 100
+sync_on_reconnect = true
+priority_data_only = false
+
+# 网络故障转移
+[failover]
+enabled = true
+primary_network = "wifi"
+fallback_networks = ["lora", "bluetooth"]
+switch_threshold_failures = 3
+switch_delay_ms = 10000
+
+# 自动切换规则
+[[failover.rules]]
+condition = "wifi_disconnected"
+action = "switch_to_lora"
+delay_ms = 30000
+
+[[failover.rules]]
+condition = "mqtt_connection_failed"
+action = "switch_to_http"
+delay_ms = 60000
+
+# 网络诊断
+[diagnostics]
+enabled = true
+log_level = "info"
+network_scan_interval_ms = 300000  # 5分钟
+bandwidth_test_enabled = false
+latency_monitoring = true
+
+# 诊断报告
+[diagnostics.reporting]
+enabled = true
+report_interval_hours = 6
+include_performance_metrics = true
+include_error_logs = true
+max_report_size_kb = 500
+
+# QoS配置
+[qos]
+enabled = true
+priority_queues = 4
+max_queue_size = 100
+
+# 流量优先级
+[qos.traffic_classes]
+critical = ["alerts", "heartbeat"]
+high = ["sensor_data", "status"]
+normal = ["logs", "diagnostics"]
+low = ["firmware_updates", "bulk_data"]
+
+# 带宽管理
+[bandwidth]
+enabled = true
+max_upload_kbps = 1000
+max_download_kbps = 2000
+burst_allowance_kb = 100
+traffic_shaping = true

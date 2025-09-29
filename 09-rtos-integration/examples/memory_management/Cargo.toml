@@ -1,0 +1,176 @@
+[package]
+name = "memory_management_example"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "Memory management example for embedded systems with custom allocators"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/example/embedded-development"
+readme = "README.md"
+keywords = ["embedded", "memory", "allocator", "heap", "stack"]
+categories = ["embedded", "memory-management"]
+
+[dependencies]
+# Core embedded dependencies
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+
+# STM32F4 HAL
+stm32f4xx-hal = { version = "0.19", features = ["stm32f407", "rt"] }
+
+# Memory management
+heapless = "0.7"
+linked_list_allocator = "0.10"
+good_memory_allocator = "0.1"
+
+# Optional: Custom allocator implementations
+# buddy_system_allocator = "0.9"
+# slab_allocator = "0.4"
+# tlsf = "0.3"
+
+# Utilities
+nb = "1.0"
+void = "1.0"
+bitflags = "2.0"
+
+# Logging and debugging
+log = "0.4"
+rtt-target = "0.4"
+rtt-log = "0.1"
+
+# Optional: Memory debugging tools
+# memtrace = "0.1"
+# memory-stats = "1.0"
+
+# Optional: RTOS integration
+# freertos-rust = { version = "0.1", optional = true }
+# rtic = { version = "2.0", optional = true }
+
+[dev-dependencies]
+# Test dependencies
+# embedded-test = "0.1"
+# criterion = "0.5"
+
+[profile.dev]
+codegen-units = 1
+debug = 2
+debug-assertions = true
+incremental = false
+lto = false
+opt-level = "s"
+overflow-checks = true
+
+[profile.release]
+codegen-units = 1
+debug = 2
+debug-assertions = false
+incremental = false
+lto = true
+opt-level = "s"
+overflow-checks = false
+
+# Memory layout optimization
+[profile.dev.package."*"]
+opt-level = "s"
+
+[profile.release.package."*"]
+opt-level = "s"
+
+# Cargo features for different memory management strategies
+[features]
+default = ["heap-allocator", "stack-monitor"]
+
+# Heap memory management
+heap-allocator = ["linked_list_allocator"]
+buddy-allocator = []
+slab-allocator = []
+tlsf-allocator = []
+
+# Stack management
+stack-monitor = []
+stack-guard = []
+stack-overflow-detection = []
+
+# Memory pool management
+memory-pools = []
+fixed-pools = []
+dynamic-pools = []
+
+# Memory protection
+mpu-support = []
+memory-protection = []
+
+# Memory debugging
+memory-debug = []
+leak-detection = []
+corruption-detection = []
+memory-profiling = []
+
+# Performance optimizations
+zero-copy = []
+fast-alloc = []
+cache-optimization = []
+
+# RTOS integration
+freertos = ["freertos-rust"]
+rtic = ["rtic"]
+
+# Advanced features
+atomic-allocator = []
+lock-free = []
+real-time = []
+
+# Safety features
+safe-allocator = []
+bounds-checking = []
+double-free-detection = []
+
+# Statistics and monitoring
+alloc-stats = []
+memory-stats = []
+performance-counters = []
+
+[[example]]
+name = "heap_allocator"
+path = "examples/heap_allocator.rs"
+
+[[example]]
+name = "memory_pools"
+path = "examples/memory_pools.rs"
+
+[[example]]
+name = "stack_monitor"
+path = "examples/stack_monitor.rs"
+
+[[example]]
+name = "memory_protection"
+path = "examples/memory_protection.rs"
+
+[[example]]
+name = "leak_detection"
+path = "examples/leak_detection.rs"
+
+# Build configuration is handled by .cargo/config.toml
+
+# Metadata for cargo-embed and probe-run
+[package.metadata.docs.rs]
+all-features = true
+targets = ["thumbv7em-none-eabihf"]
+
+# Configuration for cargo-embed
+[package.metadata.embed]
+chip = "STM32F407VGTx"
+protocol = "Swd"
+speed = 4000
+
+[package.metadata.embed.gdb]
+enabled = true
+gdb_connection_string = "localhost:3333"
+
+# Memory configuration hints
+# Flash: 1MB (0x08000000 - 0x080FFFFF)
+# RAM: 128KB (0x20000000 - 0x2001FFFF)
+# CCM RAM: 64KB (0x10000000 - 0x1000FFFF)
+# Heap: Configurable size in CCM RAM
+# Stack: 8KB per task (configurable)

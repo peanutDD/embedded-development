@@ -1,0 +1,138 @@
+[package]
+name = "iot-gateway"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "IoT Gateway with RTOS integration for sensor data collection and cloud communication"
+license = "MIT OR Apache-2.0"
+keywords = ["embedded", "iot", "gateway", "rtos", "sensors"]
+categories = ["embedded", "network-programming"]
+
+[dependencies]
+# Core embedded dependencies
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+
+# STM32F4 HAL
+stm32f4xx-hal = { version = "0.19", features = ["stm32f407", "rt"] }
+
+# RTOS framework
+rtic = { version = "2.0", features = ["thumbv7-backend"] }
+
+# Network stack
+smoltcp = { version = "0.10", default-features = false, features = [
+    "std", "log", "medium-ethernet", "proto-ipv4", "proto-tcp", "proto-udp",
+    "proto-dhcpv4", "socket-tcp", "socket-udp", "async"
+]}
+
+# Ethernet driver
+enc28j60 = "0.4"
+
+# Data structures
+heapless = { version = "0.7", features = ["serde"] }
+nb = "1.0"
+void = "1.0"
+
+# Serialization
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+serde-json-core = "0.5"
+postcard = "1.0"
+
+# Cryptography
+aes = "0.8"
+sha2 = "0.10"
+hmac = "0.12"
+
+# Time and monotonic
+dwt-systick-monotonic = "1.1"
+systick-monotonic = "1.0"
+
+# Utilities
+bitflags = "2.0"
+embedded-hal = "0.2"
+embedded-storage = "0.3"
+
+# Logging and debugging
+log = "0.4"
+rtt-target = "0.4"
+rtt-log = "0.1"
+
+# Optional: Additional protocols
+# mqtt-client = { version = "0.1", optional = true }
+# coap-lite = { version = "0.11", optional = true }
+# modbus = { version = "0.1", optional = true }
+
+[dev-dependencies]
+cortex-m-semihosting = "0.5"
+
+[features]
+default = ["ethernet", "json-protocol", "security"]
+
+# Network protocols
+ethernet = ["enc28j60", "smoltcp"]
+wifi = []
+lora = []
+zigbee = []
+
+# Communication protocols
+json-protocol = ["serde-json-core"]
+binary-protocol = ["postcard"]
+mqtt = []
+coap = []
+modbus = []
+
+# Security features
+security = ["aes", "sha2", "hmac"]
+tls = []
+secure-boot = []
+
+# Storage options
+flash-storage = []
+sd-card = []
+external-eeprom = []
+
+# Sensor interfaces
+i2c-sensors = []
+spi-sensors = []
+uart-sensors = []
+analog-sensors = []
+
+# Advanced features
+edge-computing = []
+data-analytics = []
+firmware-update = []
+remote-config = []
+
+# Performance optimizations
+zero-copy = []
+dma-support = []
+interrupt-driven = []
+
+[profile.dev]
+codegen-units = 1
+debug = 2
+debug-assertions = true
+incremental = false
+lto = false
+opt-level = "s"
+overflow-checks = true
+
+[profile.release]
+codegen-units = 1
+debug = 2
+debug-assertions = false
+incremental = false
+lto = true
+opt-level = "s"
+overflow-checks = false
+
+# Metadata for cargo-embed
+[package.metadata.embed]
+chip = "STM32F407VGTx"
+protocol = "Swd"
+speed = 4000
+
+[package.metadata.embed.gdb]
+enabled = true
+gdb_connection_string = "localhost:3333"

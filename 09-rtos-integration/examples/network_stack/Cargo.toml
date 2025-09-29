@@ -1,0 +1,55 @@
+[package]
+name = "network_stack_example"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+stm32f4xx-hal = { version = "0.17", features = ["stm32f407", "rt"] }
+embedded-hal = "0.2"
+heapless = "0.7"
+nb = "1.0"
+smoltcp = { version = "0.10", default-features = false, features = [
+    "std",
+    "log",
+    "medium-ethernet",
+    "proto-ipv4",
+    "proto-tcp",
+    "proto-udp",
+    "proto-dhcpv4",
+    "socket-tcp",
+    "socket-udp",
+    "socket-dhcpv4"
+] }
+log = "0.4"
+rtt-target = { version = "0.4", features = ["cortex-m"] }
+rtt-log = "0.2"
+enc28j60 = "0.4"
+serde = { version = "1.0", default-features = false }
+serde-json-core = "0.5"
+embedded-time = "0.12"
+
+[profile.dev]
+codegen-units = 1
+debug = 2
+debug-assertions = true
+incremental = false
+lto = false
+opt-level = "s"
+overflow-checks = true
+
+[profile.release]
+codegen-units = 1
+debug = 2
+debug-assertions = false
+incremental = false
+lto = true
+opt-level = "s"
+overflow-checks = false
+
+[[bin]]
+name = "network_stack"
+test = false
+bench = false

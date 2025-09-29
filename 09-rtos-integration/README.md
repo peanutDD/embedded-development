@@ -121,31 +121,20 @@
 
 ```
 09-rtos-integration/
-├── README.md                    # 本文档
-├── 01-rtos-fundamentals.md     # RTOS基础理论
-├── 02-rtic-framework.md        # RTIC框架详解
-├── 03-freertos-integration.md  # FreeRTOS集成
-├── 04-basic-task-management.md # 基础任务管理
-├── 05-inter-task-communication.md # 任务间通信
-├── 06-interrupt-handling.md    # 中断处理
-├── 07-memory-management.md     # 内存管理
-├── 08-real-time-analysis.md    # 实时性能分析
-├── examples/                   # 代码示例
-│   ├── rtic-basic/            # RTIC基础示例
-│   ├── rtic-resources/        # RTIC资源共享
-│   ├── freertos-tasks/        # FreeRTOS任务管理
-│   ├── embassy-async/         # Embassy异步示例
-│   └── performance-test/      # 性能测试
-├── projects/                   # 实战项目
-│   ├── multi-sensor-system/   # 多传感器系统
-│   ├── motor-controller/      # 电机控制系统
-│   ├── data-acquisition/      # 数据采集系统
-│   ├── communication-hub/     # 通信集线器
-│   └── industrial-monitor/    # 工业监控系统
-└── docs/                      # 技术文档
-    ├── scheduling-analysis/   # 调度分析
-    ├── timing-requirements/   # 时序要求
-    └── best-practices/        # 最佳实践
+├── README.md                 # 本文档
+├── docs/                     # 详细文档
+├── examples/                 # 示例代码
+│   ├── rtic-basic/          # RTIC基础示例
+│   ├── freertos-basic/      # FreeRTOS基础示例
+│   ├── freertos_tasks/      # FreeRTOS任务管理
+│   ├── embassy-async/       # Embassy异步示例
+│   ├── memory_management/   # 内存管理示例
+│   ├── network_stack/       # 网络协议栈示例
+│   └── basic_rtic/          # 基础RTIC示例
+└── projects/                 # 实战项目
+    ├── task-scheduler/       # 基础任务调度器
+    ├── multi-task-scheduler/ # 多任务调度器
+    └── iot-gateway/         # IoT网关
 ```
 
 ## 快速开始

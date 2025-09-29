@@ -1,0 +1,92 @@
+[package]
+name = "embassy-async"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Developer <dev@example.com>"]
+description = "Embassy async framework example for embedded systems"
+license = "MIT OR Apache-2.0"
+keywords = ["embedded", "async", "embassy", "rtos", "stm32"]
+categories = ["embedded", "asynchronous"]
+
+[dependencies]
+# Embassy framework
+embassy-executor = { version = "0.3", features = ["arch-cortex-m", "executor-thread", "defmt", "integrated-timers"] }
+embassy-time = { version = "0.1", features = ["defmt", "defmt-timestamp-uptime", "tick-hz-32_768"] }
+embassy-stm32 = { version = "0.1", features = ["defmt", "stm32f407vg", "memory-x", "unstable-pac", "time-driver-any", "exti"] }
+embassy-net = { version = "0.2", features = ["defmt", "tcp", "udp", "dhcpv4", "medium-ethernet"] }
+embassy-usb = { version = "0.1", features = ["defmt"] }
+
+# Core embedded dependencies
+cortex-m = { version = "0.7", features = ["inline-asm", "critical-section-single-core"] }
+cortex-m-rt = "0.7"
+
+# Async utilities
+embedded-io-async = "0.6"
+futures = { version = "0.3", default-features = false, features = ["async-await"] }
+
+# Data structures
+heapless = { version = "0.7", features = ["serde"] }
+static_cell = "1.1"
+
+# Serialization
+serde = { version = "1.0", default-features = false, features = ["derive"] }
+serde-json-core = "0.5"
+
+# Logging and debugging
+defmt = "0.3"
+defmt-rtt = "0.4"
+panic-probe = { version = "0.3", features = ["print-defmt"] }
+
+# Utilities
+nb = "1.0"
+void = "1.0"
+bitflags = "2.0"
+
+[dev-dependencies]
+embassy-executor = { version = "0.3", features = ["arch-cortex-m", "executor-thread", "defmt", "integrated-timers"] }
+
+[features]
+default = ["async-tasks", "networking"]
+
+# Core features
+async-tasks = []
+networking = ["embassy-net"]
+usb-device = ["embassy-usb"]
+
+# Sensor interfaces
+i2c-async = []
+spi-async = []
+uart-async = []
+
+# Advanced features
+power-management = []
+real-time-clock = []
+watchdog = []
+
+[profile.dev]
+codegen-units = 1
+debug = 2
+debug-assertions = true
+incremental = false
+lto = false
+opt-level = "s"
+overflow-checks = true
+
+[profile.release]
+codegen-units = 1
+debug = 2
+debug-assertions = false
+incremental = false
+lto = true
+opt-level = "s"
+overflow-checks = false
+
+# Metadata for cargo-embed
+[package.metadata.embed]
+chip = "STM32F407VGTx"
+protocol = "Swd"
+speed = 4000
+
+[package.metadata.embed.gdb]
+enabled = true
+gdb_connection_string = "localhost:3333"

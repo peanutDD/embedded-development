@@ -29,7 +29,7 @@ exclude = [
     "*.md",
     "target",
     "17-embedded-ai/projects/smart-camera",
-    "19-system-integration/projects/iot-platform",
+    "20-system-integration/projects/iot-platform",
     "12-industrial-projects/case-studies/iot-gateway",
     "12-industrial-projects/templates/basic-controller",
     # 排除所有其他examples和projects以减少负载

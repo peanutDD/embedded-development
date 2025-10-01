@@ -614,7 +614,7 @@ impl IntegrationTestManager {
     let name = "系统集成与部署";
 
     let integration_path = format!(
-      "{}/19-system-integration/projects/iot-platform",
+      "{}/20-system-integration/projects/iot-platform",
       self.base_path
     );
     match self.compile_rust_project(&integration_path).await {

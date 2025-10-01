@@ -302,9 +302,9 @@ verify_professional_chapters() {
     fi
     
     # 第19章：系统集成与部署
-    verify_documentation "19-system-integration-deployment" "第19章 系统集成与部署"
-    if [ -d "19-system-integration/projects/iot-platform" ]; then
-    verify_rust_project "19-system-integration/projects/iot-platform" "IoT平台"
+    verify_documentation "20-system-integration" "第20章 系统集成与部署"
+    if [ -d "20-system-integration/projects/iot-platform" ]; then
+    verify_rust_project "20-system-integration/projects/iot-platform" "IoT平台"
     fi
 }
 

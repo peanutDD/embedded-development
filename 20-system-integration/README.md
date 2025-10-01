@@ -76,7 +76,7 @@
 ## 项目结构
 
 ```
-19-system-integration-deployment/
+20-system-integration/
 ├── README.md                    # 本文件
 ├── docs/                        # 详细文档
 │   ├── architecture-design.md   # 架构设计指南

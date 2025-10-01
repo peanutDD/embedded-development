@@ -215,8 +215,8 @@ verify_basic_chapters() {
     
     # 第6章：串口通信
     verify_documentation "06-uart-communication" "第6章 串口通信"
-    if [ -d "06-uart-communication/projects/data_logger" ]; then
-        verify_rust_project "06-uart-communication/projects/data_logger" "数据记录器"
+    if [ -d "06-uart-communication/projects/data-logger" ]; then
+    verify_rust_project "06-uart-communication/projects/data-logger" "数据记录器"
     fi
     
     # 第7章：ADC与DAC
@@ -262,8 +262,8 @@ verify_advanced_chapters() {
     
     # 第13章：中断处理
     verify_documentation "13-interrupt-handling" "第13章 中断处理"
-    if [ -d "13-interrupt-handling/projects/interrupt_manager" ]; then
-        verify_rust_project "13-interrupt-handling/projects/interrupt_manager" "中断管理器"
+    if [ -d "13-interrupt-handling/projects/interrupt-manager" ]; then
+    verify_rust_project "13-interrupt-handling/projects/interrupt-manager" "中断管理器"
     fi
     
     # 第14章：电源管理
@@ -297,14 +297,14 @@ verify_professional_chapters() {
     
     # 第18章：机器学习与AI
     verify_documentation "18-machine-learning-ai" "第18章 机器学习与AI"
-    if [ -d "18-machine-learning-ai/projects/smart_camera" ]; then
-        verify_rust_project "18-machine-learning-ai/projects/smart_camera" "智能摄像头"
+    if [ -d "18-machine-learning-ai/projects/smart-camera" ]; then
+    verify_rust_project "18-machine-learning-ai/projects/smart-camera" "智能摄像头"
     fi
     
     # 第19章：系统集成与部署
     verify_documentation "19-system-integration-deployment" "第19章 系统集成与部署"
-    if [ -d "19-system-integration-deployment/projects/iot_platform" ]; then
-        verify_rust_project "19-system-integration-deployment/projects/iot_platform" "IoT平台"
+    if [ -d "19-system-integration/projects/iot-platform" ]; then
+    verify_rust_project "19-system-integration/projects/iot-platform" "IoT平台"
     fi
 }
 

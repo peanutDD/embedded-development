@@ -301,7 +301,7 @@ impl IntegrationTestManager {
     let name = "串口通信";
 
     let uart_path = format!(
-      "{}/05-serial-communication/projects/data_logger",
+      "{}/05-serial-communication/projects/data-logger",
       self.base_path
     );
     match self.compile_rust_project(&uart_path).await {
@@ -467,7 +467,7 @@ impl IntegrationTestManager {
     let name = "中断处理";
 
     let int_path = format!(
-      "{}/12-industrial-projects/projects/interrupt_manager",
+      "{}/12-industrial-projects/projects/interrupt-manager",
       self.base_path
     );
     match self.compile_rust_project(&int_path).await {
@@ -589,7 +589,7 @@ impl IntegrationTestManager {
     let name = "机器学习与AI";
 
     let ai_path = format!(
-      "{}/17-machine-learning-ai/projects/smart_camera",
+      "{}/17-embedded-ai/projects/smart-camera",
       self.base_path
     );
     match self.compile_rust_project(&ai_path).await {
@@ -614,7 +614,7 @@ impl IntegrationTestManager {
     let name = "系统集成与部署";
 
     let integration_path = format!(
-      "{}/19-system-integration-deployment/projects/iot_platform",
+      "{}/19-system-integration/projects/iot-platform",
       self.base_path
     );
     match self.compile_rust_project(&integration_path).await {

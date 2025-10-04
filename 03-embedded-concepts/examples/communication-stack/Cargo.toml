@@ -1,0 +1,32 @@
+[package]
+name = "communication-stack-example"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Development Course"]
+
+[dependencies]
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+embedded-hal = "0.2"
+nb = "1.0"
+heapless = "0.8"
+
+# STM32F4 HAL
+stm32f4xx-hal = { version = "0.14", features = ["rt", "stm32f407"] }
+
+# 调试支持
+defmt = "0.3"
+defmt-rtt = "0.4"
+
+# CRC计算
+crc = "3.0"
+
+[profile.dev]
+debug = true
+opt-level = 1
+
+[profile.release]
+debug = false
+opt-level = "s"
+lto = true

@@ -81,6 +81,34 @@ path = "exercises/basic_exercises.rs"
 name = "advanced_exercises"
 path = "exercises/advanced_exercises.rs"
 
+[[bin]]
+name = "exercise_01_variables"
+path = "exercises/exercise_01_variables.rs"
+
+[[bin]]
+name = "exercise_02_ownership"
+path = "exercises/exercise_02_ownership.rs"
+
+[[bin]]
+name = "exercise_03_control_flow"
+path = "exercises/exercise_03_control_flow.rs"
+
+[[bin]]
+name = "exercise_04_functions"
+path = "exercises/exercise_04_functions.rs"
+
+[[bin]]
+name = "exercise_05_structs_enums"
+path = "exercises/exercise_05_structs_enums.rs"
+
+[[bin]]
+name = "comprehensive_exercises"
+path = "exercises/comprehensive_exercises.rs"
+
+[[bin]]
+name = "benchmarks"
+path = "exercises/benchmarks.rs"
+
 # 基准测试配置 - 暂时注释掉，因为基准测试文件不存在
 # [[bench]]
 # name = "collections_bench"

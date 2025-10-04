@@ -1,0 +1,73 @@
+[package]
+name = "memory-manager"
+version = "0.1.0"
+edition = "2021"
+authors = ["Embedded Development Course"]
+description = "嵌入式内存管理器实现示例"
+license = "MIT OR Apache-2.0"
+
+[dependencies]
+# 核心依赖
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
+
+# 嵌入式HAL
+embedded-hal = "0.2"
+nb = "1.0"
+
+# 数据结构
+heapless = "0.8"
+linked_list_allocator = "0.10"
+
+# 调试和日志
+defmt = "0.3"
+defmt-rtt = "0.4"
+
+# 可选的STM32支持
+stm32f4xx-hal = { version = "0.14", optional = true, features = ["rt", "stm32f407"] }
+
+[dev-dependencies]
+# 测试依赖
+cortex-m-semihosting = "0.5"
+
+[features]
+default = ["stm32f4"]
+stm32f4 = ["stm32f4xx-hal"]
+
+# 内存管理特性
+buddy-allocator = []
+slab-allocator = []
+pool-allocator = []
+stack-allocator = []
+
+# 调试特性
+memory-debug = []
+allocation-tracking = []
+memory-statistics = []
+
+[profile.dev]
+debug = true
+opt-level = 1
+
+[profile.release]
+debug = false
+opt-level = "s"  # 优化代码大小
+lto = true
+codegen-units = 1
+
+[[bin]]
+name = "buddy_allocator_demo"
+path = "src/bin/buddy_allocator_demo.rs"
+
+[[bin]]
+name = "slab_allocator_demo"
+path = "src/bin/slab_allocator_demo.rs"
+
+[[bin]]
+name = "pool_allocator_demo"
+path = "src/bin/pool_allocator_demo.rs"
+
+[[bin]]
+name = "memory_benchmark"
+path = "src/bin/memory_benchmark.rs"

@@ -205,11 +205,50 @@ fn check_for_firmware_update() -> bool {
 
 fn perform_firmware_update(led: &mut PC13<Output<PushPull>>) {
   // 执行固件更新
-  // 1. 擦除应用程序区域
-  // 2. 接收新固件数据
-  // 3. 写入 Flash
-  // 4. 验证完整性
-  // 5. 重启系统
+  // 1. 解锁 Flash
+  flash::unlock();
+
+  // 2. 擦除应用程序区域 (扇区 2 到 7)
+  for sector in 2..=7 {
+    led.set_low(); // 擦除时 LED 亮
+    delay_ms(50);
+    if let Err(_) = flash::erase_sector(sector) {
+      // 擦除失败，进入错误处理
+      // 在实际应用中，这里应该有更完善的错误报告机制
+      loop {
+        led.set_high();
+        delay_ms(100);
+        led.set_low();
+        delay_ms(100);
+      }
+    }
+    led.set_high(); // 擦除完成 LED 灭
+    delay_ms(50);
+  }
+
+  // 3. 模拟接收新固件数据并写入 Flash
+  // 实际应用中，这里会从通信接口（如串口、USB、网络）接收数据
+  // 为了演示，我们写入一些模拟数据
+  let dummy_firmware_data: [u32; 10] = [
+    0x11223344, 0x55667788, 0xAABBCCDD, 0xEEFF0011, 0x22334455,
+    0x66778899, 0xAABBCCDD, 0xEEFF0011, 0x12345678, 0x9ABCDEF0,
+  ];
+  let mut current_addr = APP_START_ADDR;
+  for &word in dummy_firmware_data.iter() {
+    if let Err(_) = flash::program_word(current_addr, word) {
+      // 写入失败，进入错误处理
+      loop {
+        led.set_high();
+        delay_ms(100);
+        led.set_low();
+        delay_ms(100);
+      }
+    }
+    current_addr += 4; // 每次写入一个字 (4 字节)
+  }
+
+  // 4. 锁定 Flash
+  flash::lock();
 
   // 快速闪烁表示正在更新
   for _ in 0..20 {

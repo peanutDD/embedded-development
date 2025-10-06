@@ -13,6 +13,7 @@ pub use pip::{PipScheduler, Mutex};
 use crate::{Scheduler, SchedulerConfig, SchedulerError, SchedulerResult, SchedulerStatistics};
 use crate::{Task, TaskConfig, TaskPriority, TaskState};
 use alloc::vec::Vec;
+use alloc::vec;
 use core::cell::RefCell;
 use core::sync::atomic::{AtomicU32, Ordering};
 
@@ -37,7 +38,11 @@ impl SchedulerImpl {
             return Err(SchedulerError::InvalidConfiguration("Invalid max_tasks value (must be between 1 and 255)"));
         }
         
-        let tasks = vec![None; max_tasks as usize];
+        // 使用循环初始化tasks向量，因为Task包含不能Clone的AtomicU32
+        let mut tasks = Vec::with_capacity(max_tasks as usize);
+        for _ in 0..max_tasks as usize {
+            tasks.push(None);
+        }
         
         Ok(Self {
             tasks,
@@ -57,7 +62,7 @@ impl SchedulerImpl {
                 
                 // 计算CPU利用率
                 if task.period > 0 {
-                    let utilization = task.execution_time as f64 / task.period as f64;
+                    let utilization = (task.execution_time as f64 / task.period as f64) as f32;
                     self.statistics.cpu_utilization += utilization;
                 }
                 
@@ -78,7 +83,7 @@ impl SchedulerImpl {
         if let Some(task) = self.tasks[task_id as usize].take() {
             // 更新CPU利用率
             if task.period > 0 {
-                let utilization = task.execution_time as f64 / task.period as f64;
+                let utilization = (task.execution_time as f64 / task.period as f64) as f32;
                 self.statistics.cpu_utilization -= utilization;
             }
             

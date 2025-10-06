@@ -1,9 +1,10 @@
 //! 速率单调调度器实现
 
-use super::SchedulerImpl;
+// 注意：这里不再导入SchedulerImpl，因为我们已经将其重命名为RateMonotonicSchedulerImpl
 use crate::{Scheduler, SchedulerConfig, SchedulerError, SchedulerResult, SchedulerStatistics};
 use crate::{Task, TaskConfig, TaskPriority, TaskState};
 use alloc::vec::Vec;
+use alloc::vec;
 use core::cell::RefCell;
 use core::ops::DerefMut;
 use core::ptr::NonNull;
@@ -14,7 +15,7 @@ use core::sync::atomic::{AtomicU32, Ordering};
 /// 基于任务周期的静态优先级调度算法，周期越短优先级越高
 pub struct RateMonotonicScheduler {
     /// 内部调度器实现
-    inner: RefCell<SchedulerImpl>,
+    inner: RefCell<RateMonotonicSchedulerImpl>,
     /// 系统时钟计数器
     system_clock: AtomicU32,
     /// 配置
@@ -24,7 +25,7 @@ pub struct RateMonotonicScheduler {
 impl RateMonotonicScheduler {
     /// 创建新的速率单调调度器
     pub fn new(config: SchedulerConfig) -> SchedulerResult<Self> {
-        let inner = SchedulerImpl::new(config.max_tasks)?;
+        let inner = RateMonotonicSchedulerImpl::new(config.max_tasks)?;
         
         Ok(Self {
             inner: RefCell::new(inner),
@@ -83,7 +84,8 @@ impl Scheduler for RateMonotonicScheduler {
         let current_time = self.current_time();
         let mut inner = self.inner.borrow_mut();
         
-        // 更新任务状态
+        // 收集需要更新的任务状态和超时任务数
+        let mut deadline_misses_count = 0;
         for task in inner.tasks.iter_mut() {
             if let Some(ref mut task) = task {
                 // 检查任务是否到达执行时间
@@ -96,10 +98,13 @@ impl Scheduler for RateMonotonicScheduler {
                 if task.state == TaskState::Running && 
                    task.deadline > 0 && 
                    current_time > task.next_run_time + task.deadline {
-                    inner.statistics.deadline_misses += 1;
+                    deadline_misses_count += 1;
                 }
             }
         }
+        
+        // 在循环外更新统计信息
+        inner.statistics.deadline_misses += deadline_misses_count;
         
         // 选择最高优先级的等待任务
         let mut highest_priority_task: Option<u8> = None;
@@ -118,6 +123,10 @@ impl Scheduler for RateMonotonicScheduler {
         inner.statistics.scheduling_decisions += 1;
         
         if let Some(task_id) = highest_priority_task {
+            // 先获取需要的统计信息
+            let current_avg_response_time = inner.statistics.average_response_time_us;
+            let current_max_response_time = inner.statistics.max_response_time_us;
+            
             // 更新任务状态
             let task = inner.tasks[task_id as usize].as_mut().unwrap();
             task.state = TaskState::Running;
@@ -129,9 +138,9 @@ impl Scheduler for RateMonotonicScheduler {
             if task.period > 0 {
                 let response_time = current_time - task.last_run_time;
                 inner.statistics.average_response_time_us = 
-                    (inner.statistics.average_response_time_us * (task.run_count - 1) + response_time) / task.run_count;
+                    (current_avg_response_time * (task.run_count - 1) + response_time) / task.run_count;
                 
-                if response_time > inner.statistics.max_response_time_us {
+                if response_time > current_max_response_time {
                     inner.statistics.max_response_time_us = response_time;
                 }
             }
@@ -161,9 +170,13 @@ impl Scheduler for RateMonotonicScheduler {
         }
         
         let utilization = inner.statistics.cpu_utilization;
-        let rm_bound = active_tasks as f32 * (2.0_f32.powf(1.0 / active_tasks as f32) - 1.0);
         
-        utilization <= rm_bound
+        // 对于Rate Monotonic调度，使用近似值
+        // 当任务数大于4时，n*(2^(1/n)-1) ≈ ln(2) ≈ 0.693
+        // 为了简化计算，使用固定值0.693作为边界条件
+        const RM_BOUND_APPROXIMATION: f32 = 0.693;
+        
+        utilization <= RM_BOUND_APPROXIMATION
     }
 
     fn start(&mut self) -> SchedulerResult<()> {
@@ -190,7 +203,7 @@ impl Scheduler for RateMonotonicScheduler {
 }
 
 /// 内部调度器实现
-pub struct SchedulerImpl {
+pub struct RateMonotonicSchedulerImpl {
     /// 任务数组
     pub tasks: Vec<Option<Task>>,
     /// 当前运行的任务
@@ -203,15 +216,20 @@ pub struct SchedulerImpl {
     pub max_tasks: usize,
 }
 
-impl SchedulerImpl {
+impl RateMonotonicSchedulerImpl {
     /// 创建新的内部调度器实现
     pub fn new(max_tasks: usize) -> SchedulerResult<Self> {
         if max_tasks == 0 {
             return Err(SchedulerError::TooManyTasks);
         }
         
+        let mut tasks = Vec::with_capacity(max_tasks);
+        for _ in 0..max_tasks {
+            tasks.push(None);
+        }
+        
         Ok(Self {
-            tasks: vec![None; max_tasks],
+            tasks,
             current_task: None,
             running: false,
             statistics: SchedulerStatistics::new(),
@@ -225,12 +243,12 @@ impl SchedulerImpl {
         for (i, task_slot) in self.tasks.iter_mut().enumerate() {
             if task_slot.is_none() {
                 // 创建任务
-                let task = Task::new(task_config, i as u8)?;
+                let task = Task::new(task_config)?;
                 *task_slot = Some(task);
                 
                 // 更新CPU利用率
-                if task_config.wcet > 0 && task_config.period > 0 {
-                    let task_utilization = task_config.wcet as f32 / task_config.period as f32;
+                if task_config.execution_time > 0 && task_config.period > 0 {
+                    let task_utilization = task_config.execution_time as f32 / task_config.period as f32;
                     self.statistics.cpu_utilization += task_utilization;
                 }
                 
@@ -249,8 +267,8 @@ impl SchedulerImpl {
         
         if let Some(task) = &self.tasks[task_id as usize] {
             // 更新CPU利用率
-            if task.wcet > 0 && task.period > 0 {
-                let task_utilization = task.wcet as f32 / task.period as f32;
+            if task.execution_time > 0 && task.period > 0 {
+                let task_utilization = task.execution_time as f32 / task.period as f32;
                 self.statistics.cpu_utilization -= task_utilization;
             }
             

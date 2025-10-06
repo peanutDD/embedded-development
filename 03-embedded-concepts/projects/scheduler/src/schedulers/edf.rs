@@ -22,7 +22,7 @@ pub struct EdfScheduler {
 impl EdfScheduler {
     /// 创建新的最早截止期优先调度器
     pub fn new(config: SchedulerConfig) -> SchedulerResult<Self> {
-        let inner = SchedulerImpl::new(config.max_tasks)?;
+        let inner = SchedulerImpl::new(config.max_tasks.try_into().unwrap())?;
         
         Ok(Self {
             inner: RefCell::new(inner),
@@ -68,6 +68,8 @@ impl Scheduler for EdfScheduler {
         let mut inner = self.inner.borrow_mut();
         
         // 更新任务状态
+        // 更新任务状态
+        let mut deadline_misses_count = 0;
         for task in inner.tasks.iter_mut() {
             if let Some(ref mut task) = task {
                 // 检查任务是否到达执行时间
@@ -80,11 +82,12 @@ impl Scheduler for EdfScheduler {
                 if task.state == TaskState::Running {
                     let deadline = self.calculate_deadline(task);
                     if deadline > 0 && current_time > deadline {
-                        inner.statistics.deadline_misses += 1;
+                        deadline_misses_count += 1;
                     }
                 }
             }
         }
+        inner.statistics.deadline_misses += deadline_misses_count;
         
         // 选择最早截止期的等待任务（EDF核心逻辑）
         let mut earliest_deadline_task: Option<u8> = None;
@@ -108,19 +111,32 @@ impl Scheduler for EdfScheduler {
         if let Some(task_id) = earliest_deadline_task {
             // 更新任务状态
             let task = inner.tasks[task_id as usize].as_mut().unwrap();
-            task.state = TaskState::Running;
-            task.last_run_time = current_time;
-            task.next_run_time = current_time + task.period;
-            task.run_count += 1;
+            // 先获取需要的值
+            let current_run_count = inner.tasks[task_id as usize].as_ref().unwrap().run_count;
+            let old_average_response_time = inner.statistics.average_response_time_us;
+            let old_max_response_time = inner.statistics.max_response_time_us;
+            let old_context_switches = inner.statistics.context_switches;
+            let old_current_task = inner.current_task;
+            
+            // 更新任务状态
+            {  // 创建一个新的作用域以限制可变借用的范围
+                let task = inner.tasks[task_id as usize].as_mut().unwrap();
+                task.state = TaskState::Running;
+                task.last_run_time = current_time;
+                task.next_run_time = current_time + task.period;
+                task.run_count += 1;
+            }
             
             // 计算响应时间
-            if task.period > 0 {
-                let response_time = current_time - task.last_run_time;
-                inner.statistics.average_response_time_us = 
-                    (inner.statistics.average_response_time_us * (task.run_count - 1) + response_time) / task.run_count;
-                
-                if response_time > inner.statistics.max_response_time_us {
-                    inner.statistics.max_response_time_us = response_time;
+            if let Some(task) = inner.tasks[task_id as usize].as_ref() {
+                if task.period > 0 {
+                    let response_time = current_time - task.last_run_time;
+                    inner.statistics.average_response_time_us = 
+                        (old_average_response_time * current_run_count + response_time) / (current_run_count + 1);
+                    
+                    if response_time > old_max_response_time {
+                        inner.statistics.max_response_time_us = response_time;
+                    }
                 }
             }
             

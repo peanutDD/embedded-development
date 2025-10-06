@@ -88,7 +88,7 @@ pub struct PipScheduler {
 impl PipScheduler {
     /// 创建新的优先级继承协议调度器
     pub fn new(config: SchedulerConfig) -> SchedulerResult<Self> {
-        let inner = SchedulerImpl::new(config.max_tasks)?;
+        let inner = SchedulerImpl::new(config.max_tasks.try_into().unwrap())?;
         let mutexes = RefCell::new(Vec::new());
         
         Ok(Self {
@@ -124,7 +124,7 @@ impl PipScheduler {
         
         // 检查互斥锁ID是否有效
         if mutex_id as usize >= mutexes.len() {
-            return Err(SchedulerError::InvalidMutex);
+            return Err(SchedulerError::ResourceUnavailable);
         }
         
         // 检查任务ID是否有效
@@ -133,29 +133,32 @@ impl PipScheduler {
         }
         
         let mutex = &mut mutexes[mutex_id as usize];
-        let task = &mut inner.tasks[task_id as usize];
         
-        if let Some(ref mut task) = task {
-            // 尝试获取锁
-            if mutex.lock(task_id, task.priority) {
-                return Ok(true);
-            }
-            
-            // 锁已被占用，检查是否需要优先级继承
-            if let Some(owner_id) = mutex.owner() {
-                let owner_task = &mut inner.tasks[owner_id as usize];
-                
-                if let Some(ref mut owner_task) = owner_task {
-                    // 如果请求锁的任务优先级高于锁所有者的优先级，则进行优先级继承
-                    if task.priority > owner_task.priority {
-                        // 保存原始优先级
-                        if mutex.original_priority().is_none() {
-                            mutex.set_priority_inheritance(owner_task.priority);
-                        }
-                        
-                        // 提升所有者优先级
-                        owner_task.priority = task.priority;
+        // 先获取任务优先级（不可变借用）
+        let task_priority = if let Some(ref task) = inner.tasks[task_id as usize] {
+            task.priority
+        } else {
+            return Err(SchedulerError::InvalidTaskId);
+        };
+        
+        // 尝试获取锁
+        if mutex.lock(task_id, task_priority) {
+            return Ok(true);
+        }
+        
+        // 锁已被占用，检查是否需要优先级继承
+        if let Some(owner_id) = mutex.owner() {
+            // 现在安全地获取owner_task的可变引用
+            if let Some(ref mut owner_task) = inner.tasks[owner_id as usize] {
+                // 如果请求锁的任务优先级高于锁所有者的优先级，则进行优先级继承
+                if task_priority > owner_task.priority {
+                    // 保存原始优先级
+                    if mutex.original_priority().is_none() {
+                        mutex.set_priority_inheritance(owner_task.priority);
                     }
+                    
+                    // 提升所有者优先级
+                    owner_task.priority = task_priority;
                 }
             }
         }
@@ -170,7 +173,7 @@ impl PipScheduler {
         
         // 检查互斥锁ID是否有效
         if mutex_id as usize >= mutexes.len() {
-            return Err(SchedulerError::InvalidMutex);
+            return Err(SchedulerError::ResourceUnavailable);
         }
         
         let mutex = &mut mutexes[mutex_id as usize];
@@ -209,6 +212,7 @@ impl Scheduler for PipScheduler {
         let mut inner = self.inner.borrow_mut();
         
         // 更新任务状态
+        let mut deadline_misses_count = 0;
         for task in inner.tasks.iter_mut() {
             if let Some(ref mut task) = task {
                 // 检查任务是否到达执行时间
@@ -220,11 +224,12 @@ impl Scheduler for PipScheduler {
                 // 检查任务是否超时
                 if task.state == TaskState::Running {
                     if task.deadline > 0 && current_time > task.next_run_time + task.deadline {
-                        inner.statistics.deadline_misses += 1;
+                        deadline_misses_count += 1;
                     }
                 }
             }
         }
+        inner.statistics.deadline_misses += deadline_misses_count;
         
         // 选择最高优先级的等待任务
         let mut highest_priority_task: Option<u8> = None;
@@ -245,21 +250,30 @@ impl Scheduler for PipScheduler {
         inner.statistics.scheduling_decisions += 1;
         
         if let Some(task_id) = highest_priority_task {
+            // 先获取任务的当前状态
+            let current_run_count = inner.tasks[task_id as usize].as_ref().unwrap().run_count;
+            let old_average_response_time = inner.statistics.average_response_time_us;
+            let old_max_response_time = inner.statistics.max_response_time_us;
+            
             // 更新任务状态
-            let task = inner.tasks[task_id as usize].as_mut().unwrap();
-            task.state = TaskState::Running;
-            task.last_run_time = current_time;
-            task.next_run_time = current_time + task.period;
-            task.run_count += 1;
+            {  // 创建一个新的作用域以限制可变借用的范围
+                let task = inner.tasks[task_id as usize].as_mut().unwrap();
+                task.state = TaskState::Running;
+                task.last_run_time = current_time;
+                task.next_run_time = current_time + task.period;
+                task.run_count += 1;
+            }
             
             // 计算响应时间
-            if task.period > 0 {
-                let response_time = current_time - task.last_run_time;
-                inner.statistics.average_response_time_us = 
-                    (inner.statistics.average_response_time_us * (task.run_count - 1) + response_time) / task.run_count;
-                
-                if response_time > inner.statistics.max_response_time_us {
-                    inner.statistics.max_response_time_us = response_time;
+            if let Some(task) = inner.tasks[task_id as usize].as_ref() {
+                if task.period > 0 {
+                    let response_time = current_time - task.last_run_time;
+                    inner.statistics.average_response_time_us = 
+                        (old_average_response_time * current_run_count + response_time) / (current_run_count + 1);
+                    
+                    if response_time > old_max_response_time {
+                        inner.statistics.max_response_time_us = response_time;
+                    }
                 }
             }
             
@@ -279,14 +293,17 @@ impl Scheduler for PipScheduler {
     fn is_schedulable(&self) -> bool {
         // 使用RM的可调度性条件：对于n个任务，Σ(Ci/Ti) <= n(2^(1/n)-1)
         let inner = self.inner.borrow();
+        // 计算运行中的任务数量
         let n = inner.tasks.iter().filter(|t| t.is_some()).count() as f64;
         
-        if n == 0 {
+        if n == 0.0 {
             return true;
         }
         
-        let sum = inner.statistics.cpu_utilization;
-        let bound = n * (2.0f64.powf(1.0 / n) - 1.0);
+        let sum = inner.statistics.cpu_utilization as f64;
+        // 使用简化计算：对于n个任务，Σ(Ci/Ti) <= 0.693 (当n较大时的近似值)
+        // 这是RM调度算法的一个保守近似
+        let bound = 0.693;
         
         sum <= bound
     }

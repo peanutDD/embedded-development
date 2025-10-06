@@ -56,19 +56,3 @@ debug = false
 opt-level = "s"  # 优化代码大小
 lto = true
 codegen-units = 1
-
-[[bin]]
-name = "rate_monotonic_demo"
-path = "src/bin/rate_monotonic_demo.rs"
-
-[[bin]]
-name = "edf_demo"
-path = "src/bin/edf_demo.rs"
-
-[[bin]]
-name = "priority_inheritance_demo"
-path = "src/bin/priority_inheritance_demo.rs"
-
-[[bin]]
-name = "scheduler_benchmark"
-path = "src/bin/scheduler_benchmark.rs"

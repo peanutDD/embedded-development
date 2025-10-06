@@ -1,12 +1,14 @@
 #![no_std]
-#![deny(unsafe_op_in_unsafe_fn)]
-#![warn(missing_docs)]
-
-use alloc::boxed::Box;
-
 //! # 嵌入式实时调度器
 //! 
 //! 本库提供了多种适用于嵌入式系统的实时调度算法实现。
+
+#![deny(unsafe_op_in_unsafe_fn)]
+#![warn(missing_docs)]
+
+extern crate alloc;
+
+use alloc::boxed::Box;
 
 // 公共模块导出
 pub mod schedulers;
@@ -278,18 +280,18 @@ impl PriorityUtils {
         // 使用周期的倒数作为优先级基础
         // 周期越短，优先级数值越大
         if period == 0 {
-            255 // 最高优先级
+            TaskPriority::new(255) // 最高优先级
         } else {
-            core::cmp::min(255, 1_000_000 / period) as TaskPriority
+            TaskPriority::new(core::cmp::min(255, (1_000_000 / period).try_into().unwrap()))
         }
     }
     
     /// 计算截止期单调优先级（截止期越短优先级越高）
     pub fn deadline_monotonic_priority(deadline: u32) -> TaskPriority {
         if deadline == 0 {
-            255 // 最高优先级
+            TaskPriority::new(255) // 最高优先级
         } else {
-            core::cmp::min(255, 1_000_000 / deadline) as TaskPriority
+            TaskPriority::new(core::cmp::min(255, (1_000_000 / deadline).try_into().unwrap()))
         }
     }
     
@@ -326,7 +328,7 @@ impl GlobalScheduler {
         self.config = config;
         
         // 根据配置创建相应的调度器
-        match config.scheduler_type {
+        match self.config.scheduler_type {
             SchedulerType::RateMonotonic => {
                 self.scheduler = Some(Box::new(RateMonotonicScheduler::new(self.config.clone())?));
             }
@@ -347,10 +349,11 @@ impl GlobalScheduler {
     }
     
     /// 获取调度器实例
-    pub fn instance(&mut self) -> SchedulerResult<&mut dyn Scheduler> {
-        self.scheduler.as_mut()
-            .map(|s| s.as_mut())
-            .ok_or(SchedulerError::SchedulingFailed)
+    pub fn instance(&mut self) -> SchedulerResult<&mut (dyn Scheduler + 'static)> {
+        match self.scheduler.as_mut() {
+            Some(scheduler) => Ok(scheduler.as_mut()),
+            None => Err(SchedulerError::SchedulingFailed)
+        }
     }
     
     /// 获取配置

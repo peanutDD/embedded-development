@@ -2,7 +2,9 @@
 
 use crate::{Scheduler, SchedulerResult, SchedulerStatistics};
 use core::sync::atomic::{AtomicU32, Ordering};
+use core::cell::RefCell;
 use alloc::vec::Vec;
+use alloc::format;
 
 /// 实时性能分析器
 pub struct PerformanceAnalyzer {
@@ -88,7 +90,7 @@ impl PerformanceAnalyzer {
             return 0.0;
         }
         
-        let sum: f64 = history.iter().map(|s| s.cpu_utilization).sum();
+        let sum: f64 = history.iter().map(|s| s.cpu_utilization as f64).sum();
         sum / history.len() as f64
     }
 

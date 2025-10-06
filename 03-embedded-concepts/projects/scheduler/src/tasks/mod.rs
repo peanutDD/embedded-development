@@ -19,13 +19,33 @@ pub enum TaskState {
 }
 
 /// 任务优先级类型
-pub type TaskPriority = u8;
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub struct TaskPriority(u8);
 
 impl TaskPriority {
     /// 最低优先级
-    pub const MIN: Self = 0;
+    pub const MIN: Self = Self(0);
     /// 最高优先级
-    pub const MAX: Self = 255;
+    pub const MAX: Self = Self(255);
+    
+    /// 关键优先级
+    pub const Critical: Self = Self(255);
+    /// 高优先级
+    pub const High: Self = Self(192);
+    /// 中优先级
+    pub const Medium: Self = Self(128);
+    /// 低优先级
+    pub const Low: Self = Self(64);
+    
+    /// 创建一个新的任务优先级
+    pub const fn new(value: u8) -> Self {
+        Self(value)
+    }
+    
+    /// 获取优先级的数值
+    pub const fn get(&self) -> u8 {
+        self.0
+    }
 }
 
 /// 任务配置结构体

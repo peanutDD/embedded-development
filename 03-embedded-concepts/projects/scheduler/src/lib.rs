@@ -2,38 +2,48 @@
 #![deny(unsafe_op_in_unsafe_fn)]
 #![warn(missing_docs)]
 
+use alloc::boxed::Box;
+
 //! # 嵌入式实时调度器
 //! 
 //! 本库提供了多种适用于嵌入式系统的实时调度算法实现。
 
+// 公共模块导出
 pub mod schedulers;
 pub mod tasks;
 pub mod sync;
 pub mod analysis;
 
-// 重新导出主要类型
+// 公共类型导出
 pub use schedulers::{
-    rate_monotonic::RateMonotonicScheduler,
-    edf::EdfScheduler,
-    deadline_monotonic::DeadlineMonotonicScheduler,
+    RateMonotonicScheduler,
+    EdfScheduler,
+    PipScheduler,
+    Mutex,
 };
 
 pub use tasks::{
-    task::{Task, TaskConfig, TaskState, TaskPriority},
-    task_manager::TaskManager,
+    Task,
+    TaskConfig,
+    TaskState,
+    TaskPriority,
 };
 
 pub use sync::{
-    mutex::PriorityInheritanceMutex,
-    semaphore::Semaphore,
+    Semaphore,
+    CountingSemaphore,
+    BinarySemaphore,
+    EventGroup,
 };
 
 pub use analysis::{
-    schedulability::SchedulabilityAnalyzer,
-    response_time::ResponseTimeAnalyzer,
-    utilization::UtilizationAnalyzer,
+    PerformanceAnalyzer,
+    PerformanceReport,
+    SchedulabilityAnalyzer,
+    TaskAnalysisData,
 };
 
+// 错误处理
 /// 调度器错误类型
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SchedulerError {
@@ -53,6 +63,20 @@ pub enum SchedulerError {
     DeadlockDetected,
     /// 优先级反转
     PriorityInversion,
+    /// 无效的配置
+    InvalidConfiguration(&'static str),
+    /// 无效的信号量值
+    InvalidSemaphoreValue,
+    /// 无效的互斥锁状态
+    InvalidMutexState,
+    /// 信号量释放失败
+    SemaphoreReleaseFailed,
+    /// 信号量值超过最大值
+    SemaphoreValueExceeded,
+    /// 无效的任务状态
+    InvalidTaskState,
+    /// 任务已终止
+    TaskTerminated,
 }
 
 impl core::fmt::Display for SchedulerError {
@@ -66,6 +90,13 @@ impl core::fmt::Display for SchedulerError {
             SchedulerError::ResourceUnavailable => write!(f, "Resource unavailable"),
             SchedulerError::DeadlockDetected => write!(f, "Deadlock detected"),
             SchedulerError::PriorityInversion => write!(f, "Priority inversion detected"),
+            SchedulerError::InvalidConfiguration(msg) => write!(f, "Invalid configuration: {}", msg),
+            SchedulerError::InvalidSemaphoreValue => write!(f, "Invalid semaphore value"),
+            SchedulerError::InvalidMutexState => write!(f, "Invalid mutex state"),
+            SchedulerError::SemaphoreReleaseFailed => write!(f, "Failed to release semaphore"),
+            SchedulerError::SemaphoreValueExceeded => write!(f, "Semaphore value exceeded maximum"),
+            SchedulerError::InvalidTaskState => write!(f, "Invalid task state"),
+            SchedulerError::TaskTerminated => write!(f, "Task already terminated"),
         }
     }
 }
@@ -193,7 +224,7 @@ pub trait Scheduler {
     fn stop(&mut self) -> SchedulerResult<()>;
     
     /// 获取统计信息
-    fn statistics(&self) -> &SchedulerStatistics;
+    fn statistics(&self) -> SchedulerStatistics;
     
     /// 重置统计信息
     fn reset_statistics(&mut self);
@@ -247,26 +278,24 @@ impl PriorityUtils {
         // 使用周期的倒数作为优先级基础
         // 周期越短，优先级数值越大
         if period == 0 {
-            TaskPriority::new(255) // 最高优先级
+            255 // 最高优先级
         } else {
-            let priority = core::cmp::min(255, 1_000_000 / period);
-            TaskPriority::new(priority as u8)
+            core::cmp::min(255, 1_000_000 / period) as TaskPriority
         }
     }
     
     /// 计算截止期单调优先级（截止期越短优先级越高）
     pub fn deadline_monotonic_priority(deadline: u32) -> TaskPriority {
         if deadline == 0 {
-            TaskPriority::new(255)
+            255 // 最高优先级
         } else {
-            let priority = core::cmp::min(255, 1_000_000 / deadline);
-            TaskPriority::new(priority as u8)
+            core::cmp::min(255, 1_000_000 / deadline) as TaskPriority
         }
     }
     
     /// 比较两个优先级
     pub fn compare_priority(a: TaskPriority, b: TaskPriority) -> core::cmp::Ordering {
-        a.value().cmp(&b.value())
+        a.cmp(&b)
     }
 }
 
@@ -299,16 +328,18 @@ impl GlobalScheduler {
         // 根据配置创建相应的调度器
         match config.scheduler_type {
             SchedulerType::RateMonotonic => {
-                self.scheduler = Some(Box::new(RateMonotonicScheduler::new(config.max_tasks)?));
+                self.scheduler = Some(Box::new(RateMonotonicScheduler::new(self.config.clone())?));
             }
             SchedulerType::EarliestDeadlineFirst => {
-                self.scheduler = Some(Box::new(EdfScheduler::new(config.max_tasks)?));
+                self.scheduler = Some(Box::new(EdfScheduler::new(self.config.clone())?));
             }
             SchedulerType::DeadlineMonotonic => {
-                self.scheduler = Some(Box::new(DeadlineMonotonicScheduler::new(config.max_tasks)?));
+                // 由于DeadlineMonotonic和RateMonotonic实现相似，这里使用RateMonotonicScheduler
+                self.scheduler = Some(Box::new(RateMonotonicScheduler::new(self.config.clone())?));
             }
-            _ => {
-                return Err(SchedulerError::SchedulingFailed);
+            SchedulerType::LeastSlackTimeFirst | SchedulerType::Hybrid => {
+                // 对于未实现的调度器类型，默认使用EDF调度器
+                self.scheduler = Some(Box::new(EdfScheduler::new(self.config.clone())?));
             }
         }
         

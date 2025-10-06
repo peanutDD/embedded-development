@@ -6,6 +6,8 @@ authors = ["Embedded Development Course"]
 description = "嵌入式实时调度器实现示例"
 license = "MIT OR Apache-2.0"
 
+[workspace]
+
 [dependencies]
 # 核心依赖
 cortex-m = "0.7"

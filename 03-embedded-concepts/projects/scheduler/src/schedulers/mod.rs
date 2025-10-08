@@ -4,11 +4,17 @@
 pub mod rate_monotonic;
 pub mod edf;
 pub mod pip;
+pub mod deadline_monotonic;
+pub mod least_slack_time_first;
+pub mod hybrid;
 
 // 重导出
 pub use rate_monotonic::RateMonotonicScheduler;
 pub use edf::EdfScheduler;
 pub use pip::{PipScheduler, Mutex};
+pub use deadline_monotonic::DeadlineMonotonicScheduler;
+pub use least_slack_time_first::LeastSlackTimeFirstScheduler;
+pub use hybrid::HybridScheduler;
 
 use crate::{Scheduler, SchedulerConfig, SchedulerError, SchedulerResult, SchedulerStatistics};
 use crate::{Task, TaskConfig, TaskPriority, TaskState};

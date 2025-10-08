@@ -336,15 +336,19 @@ impl GlobalScheduler {
                 self.scheduler = Some(Box::new(EdfScheduler::new(self.config.clone())?));
             }
             SchedulerType::DeadlineMonotonic => {
-                // 由于DeadlineMonotonic和RateMonotonic实现相似，这里使用RateMonotonicScheduler
-                self.scheduler = Some(Box::new(RateMonotonicScheduler::new(self.config.clone())?));
+                let scheduler = DeadlineMonotonicScheduler::new(config)?;
+                GlobalScheduler::set_scheduler(scheduler);
             }
-            SchedulerType::LeastSlackTimeFirst | SchedulerType::Hybrid => {
-                // 对于未实现的调度器类型，默认使用EDF调度器
-                self.scheduler = Some(Box::new(EdfScheduler::new(self.config.clone())?));
+            SchedulerType::LeastSlackTimeFirst => {
+                let scheduler = LeastSlackTimeFirstScheduler::new(config)?;
+                GlobalScheduler::set_scheduler(scheduler);
             }
+            SchedulerType::Hybrid => {
+                let scheduler = HybridScheduler::new(config)?;
+                GlobalScheduler::set_scheduler(scheduler);
+            }
+            _ => return Err(SchedulerError::NotImplemented),
         }
-        
         Ok(())
     }
     

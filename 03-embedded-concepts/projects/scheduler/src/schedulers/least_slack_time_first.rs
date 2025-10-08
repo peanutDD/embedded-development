@@ -99,13 +99,17 @@ impl Scheduler for LeastSlackTimeFirstScheduler {
         
         // 如果有任务需要运行，则更新其状态
         if let Some(task_id) = least_slack_time_task {
+            let task_switched = inner.current_task != Some(task_id);
+            
             if let Some(task) = inner.tasks[task_id as usize].as_mut() {
-                if inner.current_task != Some(task_id) {
-                    // 任务切换
-                    inner.statistics.context_switches += 1;
-                    inner.current_task = Some(task_id);
-                }
                 task.state = TaskState::Running;
+            }
+            
+            // 在释放task引用后再更新其他字段
+            if task_switched {
+                // 任务切换
+                inner.statistics.context_switches += 1;
+                inner.current_task = Some(task_id);
             }
         }
         

@@ -335,19 +335,10 @@ impl GlobalScheduler {
             SchedulerType::EarliestDeadlineFirst => {
                 self.scheduler = Some(Box::new(EdfScheduler::new(self.config.clone())?));
             }
-            SchedulerType::DeadlineMonotonic => {
-                let scheduler = DeadlineMonotonicScheduler::new(config)?;
-                GlobalScheduler::set_scheduler(scheduler);
+            // 其他调度器类型尚未实现，暂时使用RateMonotonic作为默认
+            _ => {
+                self.scheduler = Some(Box::new(RateMonotonicScheduler::new(self.config.clone())?));
             }
-            SchedulerType::LeastSlackTimeFirst => {
-                let scheduler = LeastSlackTimeFirstScheduler::new(config)?;
-                GlobalScheduler::set_scheduler(scheduler);
-            }
-            SchedulerType::Hybrid => {
-                let scheduler = HybridScheduler::new(config)?;
-                GlobalScheduler::set_scheduler(scheduler);
-            }
-            _ => return Err(SchedulerError::NotImplemented),
         }
         Ok(())
     }

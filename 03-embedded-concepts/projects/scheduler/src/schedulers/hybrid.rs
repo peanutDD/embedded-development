@@ -10,7 +10,7 @@ use alloc::vec::Vec;
 use core::cmp::Ordering;
 
 use crate::{
-    Scheduler, SchedulerConfig, SchedulerError, SchedulerResult, SchedulerStatistics, Task, TaskId,
+    Scheduler, SchedulerConfig, SchedulerError, SchedulerResult, SchedulerStatistics, Task,
 };
 
 /// Represents the Hybrid Scheduler.
@@ -64,8 +64,8 @@ impl Scheduler for HybridScheduler {
     ///
     /// # Returns
     ///
-    /// A `SchedulerResult` containing the removed `Task` or a `SchedulerError`.
-    fn remove_task(&mut self, task_id: TaskId) -> SchedulerResult<Task> {
+    /// A `SchedulerResult` indicating success or a `SchedulerError`.
+    fn remove_task(&mut self, task_id: u8) -> SchedulerResult<()> {
         self.inner.remove_task(task_id)
     }
 
@@ -74,7 +74,7 @@ impl Scheduler for HybridScheduler {
     /// # Returns
     ///
     /// A `SchedulerResult` containing the ID of the next task to run or a `SchedulerError`.
-    fn schedule(&mut self) -> SchedulerResult<TaskId> {
+    fn schedule(&mut self) -> SchedulerResult<Option<u8>> {
         self.inner.schedule()
     }
 
@@ -125,7 +125,7 @@ struct HybridSchedulerImpl {
     /// List of all tasks managed by the scheduler.
     tasks: Vec<Task>,
     /// Queue of runnable tasks, ordered by priority/deadline.
-    runnable_tasks: VecDeque<TaskId>,
+    runnable_tasks: VecDeque<u8>,
     /// Statistics for the scheduler.
     statistics: SchedulerStatistics,
     /// Flag indicating if the scheduler is running.
@@ -152,28 +152,26 @@ impl HybridSchedulerImpl {
     }
 
     /// Removes a task from the scheduler's internal task list.
-    fn remove_task(&mut self, task_id: TaskId) -> SchedulerResult<Task> {
+    fn remove_task(&mut self, task_id: u8) -> SchedulerResult<()> {
         let index = self
             .tasks
             .iter()
-            .position(|t| t.id == task_id)
+            .position(|t| if let Some(task) = t { task.id == task_id } else { false })
             .ok_or(SchedulerError::TaskNotFound(task_id))?;
-        let task = self.tasks.remove(index);
-        // TODO: Remove task from runnable_tasks if present
-        Ok(task)
+        self.tasks.remove(index);
+        self.runnable_tasks.retain(|&id| id != task_id);
+        Ok(())
     }
 
     /// Schedules the next task to run based on hybrid policy.
-    fn schedule(&mut self) -> SchedulerResult<TaskId> {
+    fn schedule(&mut self) -> SchedulerResult<Option<u8>> {
         if !self.is_running {
-            return Err(SchedulerError::SchedulerNotRunning);
+            return Err(SchedulerError::SchedulingFailed);
         }
 
         // TODO: Implement hybrid scheduling logic (e.g., prioritize RMS tasks, then EDF tasks)
         // For now, a placeholder that just returns the first runnable task.
-        self.runnable_tasks
-            .pop_front()
-            .ok_or(SchedulerError::NoRunnableTasks)
+        Ok(self.runnable_tasks.pop_front())
     }
 
     /// Checks if the system is schedulable.

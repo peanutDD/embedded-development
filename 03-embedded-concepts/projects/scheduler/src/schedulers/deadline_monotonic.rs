@@ -43,7 +43,7 @@ impl DeadlineMonotonicScheduler {
         // 截止期越短，优先级越高。这里简单地将截止期映射到优先级枚举。
         // 实际应用中可能需要更精细的映射或使用数值优先级。
         match deadline {
-            0..=10 => TaskPriority::Highest,
+            0..=10 => TaskPriority::High,
             11..=50 => TaskPriority::High,
             51..=100 => TaskPriority::Medium,
             _ => TaskPriority::Low,

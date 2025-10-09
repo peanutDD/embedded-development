@@ -9,8 +9,9 @@ use alloc::collections::VecDeque;
 use alloc::vec::Vec;
 use core::cmp::Ordering;
 
-use crate::{
+use super::{
     Scheduler, SchedulerConfig, SchedulerError, SchedulerResult, SchedulerStatistics, Task,
+    TaskConfig, TaskPriority, TaskState
 };
 
 /// Represents the Hybrid Scheduler.
@@ -35,9 +36,10 @@ impl HybridScheduler {
     ///
     /// A `SchedulerResult` containing the `HybridScheduler` instance or a `SchedulerError`.
     pub fn new(config: SchedulerConfig) -> SchedulerResult<Self> {
+        let max_tasks = config.max_tasks;
         Ok(Self {
             config,
-            inner: HybridSchedulerImpl::new(),
+            inner: HybridSchedulerImpl::new(max_tasks as u8)?,
         })
     }
 }
@@ -52,8 +54,8 @@ impl Scheduler for HybridScheduler {
     /// # Returns
     ///
     /// A `SchedulerResult` indicating success or a `SchedulerError`.
-    fn add_task(&mut self, task: Task) -> SchedulerResult<()> {
-        self.inner.add_task(task)
+    fn add_task(&mut self, task_config: TaskConfig) -> SchedulerResult<u8> {
+        self.inner.add_task(task_config)
     }
 
     /// Removes a task from the scheduler.
@@ -123,44 +125,77 @@ impl Scheduler for HybridScheduler {
 /// Internal implementation of the Hybrid Scheduler.
 struct HybridSchedulerImpl {
     /// List of all tasks managed by the scheduler.
-    tasks: Vec<Task>,
+    tasks: Vec<Option<Task>>,
     /// Queue of runnable tasks, ordered by priority/deadline.
-    runnable_tasks: VecDeque<u8>,
+    runnable_tasks: Vec<u8>,
     /// Statistics for the scheduler.
     statistics: SchedulerStatistics,
     /// Flag indicating if the scheduler is running.
     is_running: bool,
+    /// Maximum number of tasks supported
+    max_tasks: usize,
 }
 
 impl HybridSchedulerImpl {
     /// Creates a new `HybridSchedulerImpl` instance.
-    fn new() -> Self {
-        Self {
-            tasks: Vec::new(),
-            runnable_tasks: VecDeque::new(),
+    fn new(max_tasks: u8) -> SchedulerResult<Self> {
+        if max_tasks == 0 || max_tasks > 255 {
+            return Err(SchedulerError::InvalidConfiguration("Invalid max_tasks value (must be between 1 and 255)"));
+        }
+        
+        let mut tasks = Vec::with_capacity(max_tasks as usize);
+        for _ in 0..max_tasks as usize {
+            tasks.push(None);
+        }
+        
+        Ok(Self {
+            tasks,
+            runnable_tasks: Vec::new(),
             statistics: SchedulerStatistics::new(),
             is_running: false,
-        }
+            max_tasks: max_tasks as usize,
+        })
     }
 
     /// Adds a task to the scheduler's internal task list.
-    fn add_task(&mut self, task: Task) -> SchedulerResult<()> {
-        // TODO: Implement logic to categorize tasks into RMS/EDF groups
-        // and add them to appropriate internal data structures.
-        self.tasks.push(task);
-        Ok(())
+    fn add_task(&mut self, task_config: TaskConfig) -> SchedulerResult<u8> {
+        // Find available task ID
+        for (i, task) in self.tasks.iter().enumerate() {
+            if task.is_none() {
+                let task = Task::new(task_config)?;
+                
+                // Calculate CPU utilization
+                if task.period > 0 {
+                    let utilization = (task.execution_time as f64 / task.period as f64) as f32;
+                    self.statistics.cpu_utilization += utilization;
+                }
+                
+                self.tasks[i] = Some(task);
+                return Ok(i as u8);
+            }
+        }
+        
+        Err(SchedulerError::TooManyTasks)
     }
 
     /// Removes a task from the scheduler's internal task list.
     fn remove_task(&mut self, task_id: u8) -> SchedulerResult<()> {
-        let index = self
-            .tasks
-            .iter()
-            .position(|t| if let Some(task) = t { task.id == task_id } else { false })
-            .ok_or(SchedulerError::TaskNotFound(task_id))?;
-        self.tasks.remove(index);
-        self.runnable_tasks.retain(|&id| id != task_id);
-        Ok(())
+        if task_id as usize >= self.tasks.len() {
+            return Err(SchedulerError::InvalidTaskId);
+        }
+        
+        if let Some(task) = self.tasks[task_id as usize].take() {
+            // Update CPU utilization
+            if task.period > 0 {
+                let utilization = (task.execution_time as f64 / task.period as f64) as f32;
+                self.statistics.cpu_utilization -= utilization;
+            }
+            
+            self.runnable_tasks.retain(|&id| id != task_id);
+            return Ok(());
+        }
+        
+        Err(SchedulerError::InvalidTaskId)
     }
 
     /// Schedules the next task to run based on hybrid policy.
@@ -171,7 +206,7 @@ impl HybridSchedulerImpl {
 
         // TODO: Implement hybrid scheduling logic (e.g., prioritize RMS tasks, then EDF tasks)
         // For now, a placeholder that just returns the first runnable task.
-        Ok(self.runnable_tasks.pop_front())
+        Ok(self.runnable_tasks.pop())
     }
 
     /// Checks if the system is schedulable.

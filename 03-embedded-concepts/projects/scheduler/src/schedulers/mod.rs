@@ -16,8 +16,8 @@ pub use deadline_monotonic::DeadlineMonotonicScheduler;
 pub use least_slack_time_first::LeastSlackTimeFirstScheduler;
 pub use hybrid::HybridScheduler;
 
-use crate::{Scheduler, SchedulerConfig, SchedulerError, SchedulerResult, SchedulerStatistics};
-use crate::{Task, TaskConfig, TaskPriority, TaskState};
+use super::{Scheduler, SchedulerConfig, SchedulerError, SchedulerResult, SchedulerStatistics};
+use super::{Task, TaskConfig, TaskPriority, TaskState};
 use alloc::vec::Vec;
 use alloc::vec;
 use core::cell::RefCell;

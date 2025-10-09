@@ -40,7 +40,7 @@ impl LeastSlackTimeFirstScheduler {
     fn calculate_slack_time(&self, task: &Task, current_time: u32) -> i32 {
         // 松弛时间 = 截止期 - 剩余执行时间 - 当前时间
         // 这里简化处理，假设剩余执行时间为0，实际应根据任务状态更新
-        task.deadline as i32 - (task.execution_time as i32 - task.executed_time as i32) - current_time as i32
+        task.deadline as i32 - (task.execution_time as i32) - current_time as i32
     }
 }
 

@@ -16,6 +16,8 @@ pub enum TaskState {
     Suspended,
     /// 终止状态
     Terminated,
+    /// 完成状态
+    Completed,
 }
 
 /// 任务优先级类型
@@ -46,11 +48,18 @@ impl TaskPriority {
     pub const fn get(&self) -> u8 {
         self.0
     }
+    
+    /// 获取优先级的数值（与get方法相同）
+    pub const fn value(&self) -> u8 {
+        self.0
+    }
 }
 
 /// 任务配置结构体
 #[derive(Debug, Clone, Copy)]
 pub struct TaskConfig {
+    /// 任务ID
+    pub id: u8,
     /// 任务函数指针
     pub function: fn(),
     /// 任务名称
@@ -70,6 +79,7 @@ pub struct TaskConfig {
 impl TaskConfig {
     /// 创建新的任务配置
     pub const fn new(
+        id: u8,
         function: fn(),
         name: &'static str,
         priority: TaskPriority,
@@ -79,6 +89,7 @@ impl TaskConfig {
         initial_delay: u32,
     ) -> Self {
         Self {
+            id,
             function,
             name,
             priority,
@@ -93,6 +104,8 @@ impl TaskConfig {
 /// 任务结构体
 #[derive(Debug)]
 pub struct Task {
+    /// 任务ID
+    pub id: u8,
     /// 任务函数指针
     pub function: fn(),
     /// 任务名称
@@ -121,6 +134,88 @@ pub struct Task {
     pub min_execution_time: u32,
 }
 
+/// 任务构建器结构体
+#[derive(Debug, Clone, Copy)]
+pub struct TaskBuilder {
+    config: TaskConfig,
+}
+
+impl TaskBuilder {
+    /// 创建一个新的任务构建器
+    pub const fn new() -> Self {
+        Self {
+            config: TaskConfig {
+                id: 0,
+                function: || {},
+                name: "Unnamed Task",
+                priority: TaskPriority::Medium,
+                period: 0,
+                execution_time: 0,
+                deadline: 0,
+                initial_delay: 0,
+            },
+        }
+    }
+    
+    /// 设置任务ID
+    pub const fn id(mut self, id: u8) -> Self {
+        self.config.id = id;
+        self
+    }
+    
+    /// 设置任务函数
+    pub const fn function(mut self, function: fn()) -> Self {
+        self.config.function = function;
+        self
+    }
+    
+    /// 设置任务名称
+    pub const fn name(mut self, name: &'static str) -> Self {
+        self.config.name = name;
+        self
+    }
+    
+    /// 设置任务优先级
+    pub const fn priority(mut self, priority: TaskPriority) -> Self {
+        self.config.priority = priority;
+        self
+    }
+    
+    /// 设置任务周期
+    pub const fn period(mut self, period: u32) -> Self {
+        self.config.period = period;
+        self
+    }
+    
+    /// 设置任务执行时间
+    pub const fn execution_time(mut self, execution_time: u32) -> Self {
+        self.config.execution_time = execution_time;
+        self
+    }
+    
+    /// 设置任务截止期
+    pub const fn deadline(mut self, deadline: u32) -> Self {
+        self.config.deadline = deadline;
+        self
+    }
+    
+    /// 设置初始延迟
+    pub const fn initial_delay(mut self, initial_delay: u32) -> Self {
+        self.config.initial_delay = initial_delay;
+        self
+    }
+    
+    /// 构建任务配置
+    pub const fn build_config(self) -> TaskConfig {
+        self.config
+    }
+    
+    /// 直接构建任务
+    pub fn build(self) -> SchedulerResult<Task> {
+        Task::new(self.config)
+    }
+}
+
 impl Task {
     /// 创建新的任务
     pub fn new(config: TaskConfig) -> SchedulerResult<Self> {
@@ -131,6 +226,7 @@ impl Task {
         }
         
         Ok(Self {
+            id: config.id,
             function: config.function,
             name: config.name,
             priority: config.priority,

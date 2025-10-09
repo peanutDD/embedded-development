@@ -263,20 +263,26 @@ mod tests {
 
         let task_config1 = TaskConfig {
             id: 0,
+            function: || {},
+            name: "Test Task 1",
             period: 100,
             execution_time: 20,
             deadline: 50,
             priority: TaskPriority::Low,
+            initial_delay: 0,
         };
         let task_id1 = scheduler.add_task(task_config1).unwrap();
         assert_eq!(task_id1, 0);
 
         let task_config2 = TaskConfig {
             id: 1,
+            function: || {},
+            name: "Test Task 2",
             period: 200,
             execution_time: 30,
             deadline: 150,
             priority: TaskPriority::Low,
+            initial_delay: 0,
         };
         let task_id2 = scheduler.add_task(task_config2).unwrap();
         assert_eq!(task_id2, 1);
@@ -299,19 +305,25 @@ mod tests {
 
         let task_config1 = TaskConfig {
             id: 0,
+            function: || {},
+            name: "Test Task 1",
             period: 100,
             execution_time: 20,
             deadline: 50,
             priority: TaskPriority::Low,
+            initial_delay: 0,
         };
         scheduler.add_task(task_config1).unwrap();
 
         let task_config2 = TaskConfig {
             id: 1,
+            function: || {},
+            name: "Test Task 2",
             period: 200,
             execution_time: 30,
             deadline: 150,
             priority: TaskPriority::Low,
+            initial_delay: 0,
         };
         scheduler.add_task(task_config2).unwrap();
 
@@ -348,10 +360,13 @@ mod tests {
 
         let task_config = TaskConfig {
             id: 0,
+            function: || {},
+            name: "Test Task",
             period: 100,
             execution_time: 20,
             deadline: 50,
             priority: TaskPriority::Low,
+            initial_delay: 0,
         };
         scheduler.add_task(task_config).unwrap();
 

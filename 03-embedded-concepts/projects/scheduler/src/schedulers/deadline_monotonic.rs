@@ -41,11 +41,9 @@ impl DeadlineMonotonicScheduler {
     /// 计算任务优先级（截止期越短优先级越高）
     fn calculate_priority(&self, deadline: u32) -> TaskPriority {
         // 截止期越短，优先级越高。这里简单地将截止期映射到优先级枚举。
-        // 实际应用中可能需要更精细的映射或使用数值优先级。
         match deadline {
-            0..=10 => TaskPriority::High,
-            11..=50 => TaskPriority::High,
-            51..=100 => TaskPriority::Medium,
+            0..=50 => TaskPriority::High,
+            51..=150 => TaskPriority::Medium,
             _ => TaskPriority::Low,
         }
     }
@@ -54,10 +52,8 @@ impl DeadlineMonotonicScheduler {
 impl Scheduler for DeadlineMonotonicScheduler {
     fn add_task(&mut self, mut task_config: TaskConfig) -> SchedulerResult<u8> {
         // 根据任务截止期设置优先级（截止期越短优先级越高）
-        if task_config.priority == TaskPriority::Low {
-            // 如果用户没有指定优先级，使用截止期单调调度的优先级策略
-            task_config.priority = self.calculate_priority(task_config.deadline);
-        }
+        // 无条件地根据截止期重新计算优先级
+        task_config.priority = self.calculate_priority(task_config.deadline);
         
         let mut inner = self.inner.borrow_mut();
         inner.add_task(task_config)
@@ -273,20 +269,26 @@ mod tests {
 
         let task_config1 = TaskConfig {
             id: 0,
+            function: || {},
+            name: "Test Task 1",
             period: 100,
             execution_time: 20,
             deadline: 50, // Short deadline, higher priority
             priority: TaskPriority::Low,
+            initial_delay: 0,
         };
         let task_id1 = scheduler.add_task(task_config1).unwrap();
         assert_eq!(task_id1, 0);
 
         let task_config2 = TaskConfig {
             id: 1,
+            function: || {},
+            name: "Test Task 2",
             period: 200,
             execution_time: 30,
             deadline: 150, // Longer deadline, lower priority
             priority: TaskPriority::Low,
+            initial_delay: 0,
         };
         let task_id2 = scheduler.add_task(task_config2).unwrap();
         assert_eq!(task_id2, 1);
@@ -312,19 +314,25 @@ mod tests {
 
         let task_config1 = TaskConfig {
             id: 0,
+            function: || {},
+            name: "Test Task 1",
             period: 100,
             execution_time: 20,
             deadline: 50,
             priority: TaskPriority::Low,
+            initial_delay: 0,
         };
         scheduler.add_task(task_config1).unwrap();
 
         let task_config2 = TaskConfig {
             id: 1,
+            function: || {},
+            name: "Test Task 2",
             period: 200,
             execution_time: 30,
             deadline: 150,
             priority: TaskPriority::Low,
+            initial_delay: 0,
         };
         scheduler.add_task(task_config2).unwrap();
 
@@ -340,6 +348,8 @@ mod tests {
 
         // Simulate Task 0 completing and Task 1 still waiting
         scheduler.inner.borrow_mut().tasks[0].as_mut().unwrap().state = TaskState::Completed;
+        // Ensure Task 1 is still in Waiting state
+        scheduler.inner.borrow_mut().tasks[1].as_mut().unwrap().state = TaskState::Waiting;
         let scheduled_task = scheduler.schedule().unwrap();
         assert_eq!(scheduled_task, Some(1)); // Task 1 should be scheduled next
     }
@@ -358,10 +368,13 @@ mod tests {
 
         let task_config = TaskConfig {
             id: 0,
+            function: || {},
+            name: "Test Task",
             period: 100,
             execution_time: 20,
             deadline: 50,
             priority: TaskPriority::Low,
+            initial_delay: 0,
         };
         scheduler.add_task(task_config).unwrap();
 

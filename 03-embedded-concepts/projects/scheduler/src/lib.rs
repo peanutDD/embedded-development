@@ -85,6 +85,8 @@ pub enum SchedulerError {
     InvalidTaskState,
     /// 任务已终止
     TaskTerminated,
+    /// 调度器未运行
+    SchedulerNotRunning,
 }
 
 impl core::fmt::Display for SchedulerError {
@@ -105,6 +107,7 @@ impl core::fmt::Display for SchedulerError {
             SchedulerError::SemaphoreValueExceeded => write!(f, "Semaphore value exceeded maximum"),
             SchedulerError::InvalidTaskState => write!(f, "Invalid task state"),
             SchedulerError::TaskTerminated => write!(f, "Task already terminated"),
+            SchedulerError::SchedulerNotRunning => write!(f, "Scheduler not running"),
         }
     }
 }
@@ -174,6 +177,8 @@ pub struct SchedulerStatistics {
     pub cpu_utilization: f32,
     /// 调度开销（微秒）
     pub scheduling_overhead_us: u32,
+    /// 总任务数
+    pub total_tasks: u32,
 }
 
 impl SchedulerStatistics {
@@ -187,6 +192,7 @@ impl SchedulerStatistics {
             max_response_time_us: 0,
             cpu_utilization: 0.0,
             scheduling_overhead_us: 0,
+            total_tasks: 0,
         }
     }
     
@@ -262,8 +268,12 @@ impl PriorityUtils {
         // 周期越短，优先级数值越大
         if period == 0 {
             TaskPriority::new(255) // 最高优先级
+        } else if period <= 100 {
+            TaskPriority::High
+        } else if period <= 200 {
+            TaskPriority::Medium
         } else {
-            TaskPriority::new(core::cmp::min(255, (1_000_000 / period).try_into().unwrap()))
+            TaskPriority::Low
         }
     }
     

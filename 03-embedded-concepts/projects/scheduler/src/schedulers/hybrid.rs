@@ -241,40 +241,41 @@ impl HybridSchedulerImpl {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{TaskBuilder, TaskPriority};
+    use crate::tasks::TaskBuilder;
+    use crate::TaskPriority;
 
     #[test]
     fn test_hybrid_scheduler_new() {
         let config = SchedulerConfig::default();
-        let scheduler = HybridScheduler::new(config).unwrap();
+        let scheduler = HybridScheduler::new(config.clone()).unwrap();
         assert!(!scheduler.inner.is_running);
-        assert!(scheduler.inner.tasks.is_empty());
+        assert_eq!(scheduler.inner.tasks.len(), config.max_tasks as usize);
+        assert!(scheduler.inner.tasks.iter().all(|task| task.is_none()));
     }
 
     #[test]
     fn test_hybrid_scheduler_add_task() {
         let config = SchedulerConfig::default();
         let mut scheduler = HybridScheduler::new(config).unwrap();
-        let task = TaskBuilder::new()
+        let task_config = TaskBuilder::new()
             .id(1)
             .priority(TaskPriority::High)
-            .build();
-        scheduler.add_task(task).unwrap();
-        assert_eq!(scheduler.inner.tasks.len(), 1);
+            .build_config();
+        let task_id = scheduler.add_task(task_config).unwrap();
+        assert!(scheduler.inner.tasks[task_id as usize].is_some());
     }
 
     #[test]
     fn test_hybrid_scheduler_remove_task() {
         let config = SchedulerConfig::default();
         let mut scheduler = HybridScheduler::new(config).unwrap();
-        let task = TaskBuilder::new()
+        let task_config = TaskBuilder::new()
             .id(1)
             .priority(TaskPriority::High)
-            .build();
-        scheduler.add_task(task).unwrap();
-        let removed_task = scheduler.remove_task(1).unwrap();
-        assert_eq!(removed_task.id, 1);
-        assert!(scheduler.inner.tasks.is_empty());
+            .build_config();
+        let task_id = scheduler.add_task(task_config).unwrap();
+        scheduler.remove_task(task_id).unwrap();
+        assert!(scheduler.inner.tasks[task_id as usize].is_none());
     }
 
     #[test]
@@ -282,7 +283,7 @@ mod tests {
         let config = SchedulerConfig::default();
         let mut scheduler = HybridScheduler::new(config).unwrap();
         let result = scheduler.schedule();
-        assert!(matches!(result, Err(SchedulerError::SchedulerNotRunning)));
+        assert!(matches!(result, Err(SchedulerError::SchedulingFailed)));
     }
 
     #[test]

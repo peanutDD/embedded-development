@@ -58,47 +58,45 @@ fn main() -> ! {
 }
 
 fn show_memory_layout() {
-  unsafe {
-    // Flash 区域信息
-    let flash_start = 0x08000000u32;
-    let flash_size = 512 * 1024; // 512KB
+  // Flash 区域信息
+  let flash_start = 0x08000000u32;
+  let flash_size = 512 * 1024; // 512KB
 
-    // RAM 区域信息
-    let ram_start = 0x20000000u32;
-    let ram_size = 96 * 1024; // 96KB
+  // RAM 区域信息
+  let ram_start = 0x20000000u32;
+  let ram_size = 96 * 1024; // 96KB
 
-    // 数据段信息
-    let data_start = &_sdata as *const u32 as u32;
-    let data_end = &_edata as *const u32 as u32;
-    let data_size = data_end - data_start;
-    let data_flash_addr = &_sidata as *const u32 as u32;
+  // 数据段信息
+  let data_start = &raw const _sdata as *const u32 as u32;
+  let data_end = &raw const _edata as *const u32 as u32;
+  let data_size = data_end - data_start;
+  let data_flash_addr = &raw const _sidata as *const u32 as u32;
 
-    // BSS 段信息
-    let bss_start = &_sbss as *const u32 as u32;
-    let bss_end = &_ebss as *const u32 as u32;
-    let bss_size = bss_end - bss_start;
+  // BSS 段信息
+  let bss_start = &raw const _sbss as *const u32 as u32;
+  let bss_end = &raw const _ebss as *const u32 as u32;
+  let bss_size = bss_end - bss_start;
 
-    // 堆信息
-    let heap_start = &_sheap as *const u32 as u32;
-    let heap_end = &_eheap as *const u32 as u32;
-    let heap_size = heap_end - heap_start;
+  // 堆信息
+  let heap_start = &raw const _sheap as *const u32 as u32;
+  let heap_end = &raw const _eheap as *const u32 as u32;
+  let heap_size = heap_end - heap_start;
 
-    // 栈信息
-    let stack_start = &_sstack as *const u32 as u32;
-    let stack_end = &_estack as *const u32 as u32;
-    let stack_size = stack_start - stack_end;
+  // 栈信息
+  let stack_start = &raw const _sstack as *const u32 as u32;
+  let stack_end = &raw const _estack as *const u32 as u32;
+  let stack_size = stack_start - stack_end;
 
-    // 在实际应用中，这些信息可以通过调试器查看
-    // 或者通过 RTT、串口等方式输出
+  // 在实际应用中，这些信息可以通过调试器查看
+  // 或者通过 RTT、串口等方式输出
 
-    // 这里我们只是访问这些地址以确保链接器正确设置
-    let _ = (flash_start, flash_size);
-    let _ = (ram_start, ram_size);
-    let _ = (data_start, data_end, data_size, data_flash_addr);
-    let _ = (bss_start, bss_end, bss_size);
-    let _ = (heap_start, heap_end, heap_size);
-    let _ = (stack_start, stack_end, stack_size);
-  }
+  // 这里我们只是访问这些地址以确保链接器正确设置
+  let _ = (flash_start, flash_size);
+  let _ = (ram_start, ram_size);
+  let _ = (data_start, data_end, data_size, data_flash_addr);
+  let _ = (bss_start, bss_end, bss_size);
+  let _ = (heap_start, heap_end, heap_size);
+  let _ = (stack_start, stack_end, stack_size);
 }
 
 fn demonstrate_memory_usage() {
@@ -174,6 +172,7 @@ fn check_stack_usage() {
 }
 
 // 内存访问安全检查函数
+#[allow(dead_code)]
 fn safe_read_u32(addr: u32) -> Result<u32, MemoryError> {
   // 检查地址对齐
   if addr % 4 != 0 {
@@ -188,6 +187,7 @@ fn safe_read_u32(addr: u32) -> Result<u32, MemoryError> {
   unsafe { Ok(core::ptr::read_volatile(addr as *const u32)) }
 }
 
+#[allow(dead_code)]
 fn is_valid_read_address(addr: u32) -> bool {
   // Flash 区域 (只读)
   if addr >= 0x08000000 && addr <= 0x0807FFFF {
@@ -207,6 +207,7 @@ fn is_valid_read_address(addr: u32) -> bool {
   false
 }
 
+#[allow(dead_code)]
 #[derive(Debug)]
 enum MemoryError {
   Misaligned,
@@ -220,10 +221,10 @@ unsafe fn HardFault(ef: &ExceptionFrame) -> ! {
   // 或者安全地重启系统
 
   // 获取故障地址 (如果可用)
-  let cfsr = (*cortex_m::peripheral::SCB::ptr()).cfsr.read();
-  let hfsr = (*cortex_m::peripheral::SCB::ptr()).hfsr.read();
-  let mmfar = (*cortex_m::peripheral::SCB::ptr()).mmfar.read();
-  let bfar = (*cortex_m::peripheral::SCB::ptr()).bfar.read();
+  let cfsr = (*cortex_m::peripheral::SCB::PTR).cfsr.read();
+  let hfsr = (*cortex_m::peripheral::SCB::PTR).hfsr.read();
+  let mmfar = (*cortex_m::peripheral::SCB::PTR).mmfar.read();
+  let bfar = (*cortex_m::peripheral::SCB::PTR).bfar.read();
 
   // 分析故障原因
   let _ = (cfsr, hfsr, mmfar, bfar, ef);
@@ -238,8 +239,8 @@ unsafe fn HardFault(ef: &ExceptionFrame) -> ! {
 #[exception]
 unsafe fn MemoryManagement() -> ! {
   // 内存管理单元 (MPU) 故障
-  let mmfsr = (*cortex_m::peripheral::SCB::ptr()).cfsr.read() & 0xFF;
-  let mmfar = (*cortex_m::peripheral::SCB::ptr()).mmfar.read();
+  let mmfsr = (*cortex_m::peripheral::SCB::PTR).cfsr.read() & 0xFF;
+  let mmfar = (*cortex_m::peripheral::SCB::PTR).mmfar.read();
 
   let _ = (mmfsr, mmfar);
 
@@ -252,8 +253,8 @@ unsafe fn MemoryManagement() -> ! {
 #[exception]
 unsafe fn BusFault() -> ! {
   // 总线访问故障
-  let bfsr = ((*cortex_m::peripheral::SCB::ptr()).cfsr.read() >> 8) & 0xFF;
-  let bfar = (*cortex_m::peripheral::SCB::ptr()).bfar.read();
+  let bfsr = ((*cortex_m::peripheral::SCB::PTR).cfsr.read() >> 8) & 0xFF;
+  let bfar = (*cortex_m::peripheral::SCB::PTR).bfar.read();
 
   let _ = (bfsr, bfar);
 
@@ -266,7 +267,7 @@ unsafe fn BusFault() -> ! {
 #[exception]
 unsafe fn UsageFault() -> ! {
   // 指令用法故障
-  let ufsr = ((*cortex_m::peripheral::SCB::ptr()).cfsr.read() >> 16) & 0xFFFF;
+  let ufsr = ((*cortex_m::peripheral::SCB::PTR).cfsr.read() >> 16) & 0xFFFF;
 
   let _ = ufsr;
 

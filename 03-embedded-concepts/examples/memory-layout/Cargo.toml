@@ -3,24 +3,39 @@ name = "memory-layout-example"
 version = "0.1.0"
 edition = "2021"
 
-[dependencies]
-cortex-m = "0.7"
-cortex-m-rt = "0.7"
-panic-halt = "0.2"
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-# 目标平台配置
+[dependencies]
+cortex-m = "0.7.7"
+cortex-m-rt = { version = "0.7.3", default-features = false }
+panic-halt = "0.2.0"
+
 [profile.dev]
+opt-level = 0
 debug = true
-lto = false
 
 [profile.release]
-debug = true
-lto = true
-codegen-units = 1
 opt-level = "s"
 
-# 链接器配置
-[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+# 确保cargo能找到memory.x文件
+[build]
+# 这个设置会告诉cargo在构建时使用当前目录的配置
 rustflags = [
-  "-C", "link-arg=-Tlink.x",
+  "-C", "link-arg=-Tmemory.x",
+  "-C", "link-arg=--nmagic",
+  "-C", "linker=rust-lld",
 ]
+
+# 为ARM裸机目标设置特定的链接器配置
+[target.thumbv7em-none-eabihf]
+rustflags = [
+  "-C", "link-arg=-Tmemory.x",
+  "-C", "link-arg=--nmagic",
+]
+
+# 环境变量配置 - 帮助cortex-m-rt找到memory.x文件
+[env]
+# 方法1: 直接指定memory.x文件路径
+RUST_TARGET_PATH = "${CARGO_MANIFEST_DIR}"
+# 方法2: 设置RUSTFLAGS环境变量
+RUSTFLAGS = "-C link-arg=-T${CARGO_MANIFEST_DIR}/memory.x"

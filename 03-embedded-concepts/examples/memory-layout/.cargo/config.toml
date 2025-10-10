@@ -1,0 +1,18 @@
+[target.'cfg(all(target_arch = "arm", target_os = "none"))']
+rustflags = [
+    "-C", "link-arg=-Tmemory.x",
+    "-C", "link-arg=--nmagic",
+]
+
+[target.thumbv7em-none-eabihf]
+rustflags = [
+    "-C", "link-arg=-Tmemory.x",
+    "-C", "link-arg=--nmagic",
+]
+
+[env]
+# 设置RUST_TARGET_PATH环境变量，让cortex-m-rt库能找到memory.x文件
+RUST_TARGET_PATH = "${CARGO_MANIFEST_DIR}"
+
+# 直接设置链接器使用当前目录的memory.x文件
+MEMORY_X = "${CARGO_MANIFEST_DIR}/memory.x"

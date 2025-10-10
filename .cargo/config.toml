@@ -5,11 +5,18 @@
 rustflags = []
 
 # 目标配置
+# 注释掉-Tlink.x以避免与项目配置冲突
 [target.'cfg(all(target_arch = "arm", target_os = "none"))']
 rustflags = [
-    "-C", "link-arg=-Tlink.x",
+    # "-C", "link-arg=-Tlink.x",
     "-C", "link-arg=--nmagic",
 ]
+
+# 环境变量配置
+[env]
+# 告诉cortex-m-rt库在哪里找到memory.x文件
+# 设置工作目录为memory-layout项目目录，这样memory.x可以被正确包含
+RUSTFLAGS = "--remap-path-prefix=/Users/tyone/github/embedded-development/03-embedded-concepts/examples/memory-layout=."
 
 # 优化编译缓存
 [cargo-new]

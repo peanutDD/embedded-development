@@ -16,26 +16,3 @@ debug = true
 
 [profile.release]
 opt-level = "s"
-
-# 确保cargo能找到memory.x文件
-[build]
-# 这个设置会告诉cargo在构建时使用当前目录的配置
-rustflags = [
-  "-C", "link-arg=-Tmemory.x",
-  "-C", "link-arg=--nmagic",
-  "-C", "linker=rust-lld",
-]
-
-# 为ARM裸机目标设置特定的链接器配置
-[target.thumbv7em-none-eabihf]
-rustflags = [
-  "-C", "link-arg=-Tmemory.x",
-  "-C", "link-arg=--nmagic",
-]
-
-# 环境变量配置 - 帮助cortex-m-rt找到memory.x文件
-[env]
-# 方法1: 直接指定memory.x文件路径
-RUST_TARGET_PATH = "${CARGO_MANIFEST_DIR}"
-# 方法2: 设置RUSTFLAGS环境变量
-RUSTFLAGS = "-C link-arg=-T${CARGO_MANIFEST_DIR}/memory.x"

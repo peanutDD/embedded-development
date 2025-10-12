@@ -1,10 +1,8 @@
+# 修复后的配置文件，使用绝对路径指定memory.x文件
+
 [target.thumbv7em-none-eabihf]
+# 明确指定memory.x文件的绝对路径
 rustflags = [
-    "-C", "link-arg=-T${CARGO_MANIFEST_DIR}/memory.x",
-    "-C", "link-arg=--nmagic",
+    "-C", "link-arg=-T/Users/tyone/github/embedded-development/03-embedded-concepts/examples/memory-layout/memory.x",
     "-C", "linker=rust-lld",
 ]
-
-[env]
-# 确保cortex-m-rt库能找到memory.x文件
-RUST_TARGET_PATH = "${CARGO_MANIFEST_DIR}"

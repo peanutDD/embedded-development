@@ -1,18 +1,40 @@
 [package]
-name = "memory-layout-example"
+name = "memory-layout"
 version = "0.1.0"
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-cortex-m = "0.7.7"
-cortex-m-rt = { version = "0.7.3", default-features = false }
-panic-halt = "0.2.0"
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "0.2"
 
 [profile.dev]
-opt-level = 0
-debug = true
+opt-level = 1        # 开发模式下使用较低的优化级别
+debug = true         # 启用调试信息
+rpath = false
+lto = false          # 禁用链接时优化
+debug-assertions = true
+codegen-units = 16   # 增加代码生成单元以加快编译速度
+panic = "abort"
 
 [profile.release]
-opt-level = "s"
+opt-level = 3        # 最高优化级别
+debug = false        # 禁用调试信息
+rpath = false
+lto = "fat"          # 全程序链接优化，生成最小的可执行文件
+debug-assertions = false
+codegen-units = 1    # 减少代码生成单元以提高优化效果
+panic = "abort"
+strip = "symbols"    # 移除符号信息以减小可执行文件大小
+
+[profile.size-optimized]
+inherits = "release"
+opt-level = "s"      # 优化大小
+lto = "thin"         # 瘦模式链接优化，平衡大小和编译速度
+codegen-units = 1
+
+[profile.speed-optimized]
+inherits = "release"
+opt-level = "z"      # 最高优化级别
+lto = "fat"          # 全程序链接优化
+codegen-units = 1

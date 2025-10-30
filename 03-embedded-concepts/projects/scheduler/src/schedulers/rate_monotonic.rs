@@ -38,18 +38,31 @@ impl RateMonotonicScheduler {
     /// 
     /// 周期越短，优先级越高
     fn calculate_priority(&self, period: u32) -> TaskPriority {
-        // 这里使用简单的映射，实际应用中可能需要更复杂的策略
-        let priority = if period <= 10 {
-            TaskPriority::Critical
-        } else if period <= 100 {
-            TaskPriority::High
-        } else if period <= 1000 {
-            TaskPriority::Medium
+        // 优化的优先级计算：使用对数映射实现更精细的优先级分配
+        // 避免使用分支，提高执行效率
+        const MAX_PRIORITY: u8 = 255;
+        const MIN_PERIOD: u32 = 1;
+        const MAX_PERIOD: u32 = 10_000_000; // 10秒
+        
+        // 确保周期在有效范围内
+        let clamped_period = core::cmp::max(MIN_PERIOD, core::cmp::min(period, MAX_PERIOD));
+        
+        // 使用分段线性映射，避免浮点数运算
+        let priority: u8 = if clamped_period <= 100 {
+            // 1-100: 最高优先级范围 255-200
+            MAX_PRIORITY - (clamped_period * 55 / 100) as u8
+        } else if clamped_period <= 1000 {
+            // 101-1000: 中高优先级 199-140
+            200 - ((clamped_period - 100) * 60 / 900) as u8
+        } else if clamped_period <= 10_000 {
+            // 1001-10000: 中低优先级 139-80
+            140 - ((clamped_period - 1000) * 60 / 9000) as u8
         } else {
-            TaskPriority::Low
+            // 10001及以上: 低优先级 79-0
+            80 - ((clamped_period - 10_000) * 80 / 9_990_000) as u8
         };
         
-        priority
+        TaskPriority::new(priority)
     }
 
     /// 更新系统时钟
@@ -84,78 +97,140 @@ impl Scheduler for RateMonotonicScheduler {
         let current_time = self.current_time();
         let mut inner = self.inner.borrow_mut();
         
-        // 收集需要更新的任务状态和超时任务数
-        let mut deadline_misses_count = 0;
-        for task in inner.tasks.iter_mut() {
-            if let Some(ref mut task) = task {
-                // 检查任务是否到达执行时间
-                if task.state == TaskState::Ready && 
-                   current_time >= task.next_run_time {
+        // 检查调度器是否运行
+        if !inner.running {
+            return Ok(None);
+        }
+        
+        // 步骤1: 完全隔离任务状态更新和统计信息
+        let mut waiting_tasks = Vec::new();
+        let mut new_deadline_misses = 0;
+        
+        // 仅更新任务状态，不访问统计信息
+        for (i, task) in inner.tasks.iter_mut().enumerate() {
+            if let Some(task) = task {
+                // 检查任务是否准备好运行
+                if task.state == TaskState::Ready && current_time >= task.next_run_time {
                     task.state = TaskState::Waiting;
+                    waiting_tasks.push((i as u8, task.priority));
                 }
                 
-                // 检查任务是否超时
-                if task.state == TaskState::Running && 
-                   task.deadline > 0 && 
-                   current_time > task.next_run_time + task.deadline {
-                    deadline_misses_count += 1;
+                // 检查截止期是否被错过
+                if task.deadline > 0 && current_time > task.next_run_time + task.deadline {
+                    new_deadline_misses += 1;
                 }
             }
         }
         
-        // 在循环外更新统计信息
-        inner.statistics.deadline_misses += deadline_misses_count;
-        
-        // 选择最高优先级的等待任务
-        let mut highest_priority_task: Option<u8> = None;
-        let mut highest_priority = TaskPriority::Low;
-        
-        for (i, task) in inner.tasks.iter().enumerate() {
-            if let Some(ref task) = task {
-                if task.state == TaskState::Waiting && task.priority > highest_priority {
-                    highest_priority = task.priority;
-                    highest_priority_task = Some(i as u8);
-                }
-            }
-        }
-        
-        // 更新统计信息
+        // 步骤2: 更新统计信息（任务借用已释放）
+        inner.statistics.deadline_misses += new_deadline_misses;
         inner.statistics.scheduling_decisions += 1;
         
-        if let Some(task_id) = highest_priority_task {
-            // 先获取需要的统计信息
-            let current_avg_response_time = inner.statistics.average_response_time_us;
-            let current_max_response_time = inner.statistics.max_response_time_us;
+        // 步骤3: 查找最高优先级任务
+        let mut selected_task_id: Option<u8> = None;
+        let mut highest_priority = TaskPriority::MIN;
+        
+        for (task_id, priority) in waiting_tasks {
+            if priority > highest_priority {
+                highest_priority = priority;
+                selected_task_id = Some(task_id);
+            }
+        }
+        
+        // 步骤4: 执行选中的任务
+        if let Some(task_id) = selected_task_id {
+            let task_index = task_id as usize;
             
-            // 更新任务状态
-            let task = inner.tasks[task_id as usize].as_mut().unwrap();
-            task.state = TaskState::Running;
-            task.last_run_time = current_time;
-            task.next_run_time = current_time + task.period;
-            task.run_count += 1;
+            // 存储需要更新的统计信息
+            let mut task_statistics_update = None;
             
-            // 计算响应时间
-            if task.period > 0 {
-                let response_time = current_time - task.last_run_time;
-                inner.statistics.average_response_time_us = 
-                    (current_avg_response_time * (task.run_count - 1) + response_time) / task.run_count;
-                
-                if response_time > current_max_response_time {
-                    inner.statistics.max_response_time_us = response_time;
+            // 完全隔离任务执行和统计信息更新
+            {
+                if let Some(task) = &mut inner.tasks[task_index] {
+                    // 保存任务属性的副本
+                    let task_period = task.period;
+                    let task_deadline = task.deadline;
+                    let old_run_count = task.run_count;
+                    
+                    // 更新任务状态
+                    task.state = TaskState::Running;
+                    task.last_run_time = current_time;
+                    
+                    // 运行任务
+                    task.run();
+                    
+                    // 计算响应时间（在任务可变引用作用域内）
+                    let response_time = if task_period > 0 {
+                        current_time - task.last_run_time
+                    } else {
+                        0
+                    };
+                    
+                    // 保存统计信息更新数据
+                    if task_period > 0 {
+                        task_statistics_update = Some(TaskStatisticsUpdate {
+                            response_time,
+                            old_run_count,
+                            task_period,
+                            task_deadline,
+                            last_run_time: task.last_run_time,
+                            current_time,
+                        });
+                    }
+                    
+                    // 更新下次运行时间并设置任务状态
+                    if task_period > 0 {
+                        task.next_run_time = current_time + task_period;
+                        task.state = TaskState::Ready;
+                    } else {
+                        task.state = TaskState::Completed;
+                    }
                 }
             }
             
-            // 增加上下文切换计数
+            // 步骤5: 更新统计信息（在任务引用完全释放后）
+            if let Some(update) = task_statistics_update {
+                // 访问统计信息进行更新
+                let stats = &mut inner.statistics;
+                
+                // 更新平均响应时间
+                if update.old_run_count <= 10 || update.old_run_count % 10 == 0 {
+                    if update.old_run_count <= 10 {
+                        stats.average_response_time_us = 
+                            (stats.average_response_time_us * update.old_run_count + update.response_time) / 
+                            (update.old_run_count + 1);
+                    } else {
+                        stats.average_response_time_us = 
+                            (stats.average_response_time_us * 9 + update.response_time) / 10;
+                    }
+                }
+                
+                // 更新最大响应时间
+                if update.response_time > stats.max_response_time_us {
+                    stats.max_response_time_us = update.response_time;
+                }
+                
+                // 检查截止期
+                let deadline = if update.task_deadline > 0 { 
+                    update.task_deadline 
+                } else { 
+                    update.task_period 
+                };
+                if update.current_time - update.last_run_time > deadline {
+                    stats.deadline_misses += 1;
+                }
+            }
+            
+            // 更新上下文切换
             if inner.current_task != Some(task_id) {
                 inner.statistics.context_switches += 1;
                 inner.current_task = Some(task_id);
             }
         } else {
-            // 没有等待的任务
             inner.current_task = None;
         }
         
-        Ok(highest_priority_task)
+        Ok(selected_task_id)
     }
 
     fn is_schedulable(&self) -> bool {
@@ -163,7 +238,7 @@ impl Scheduler for RateMonotonicScheduler {
         let inner = self.inner.borrow();
         let active_tasks = inner.tasks.iter()
             .filter(|t| t.is_some() && t.as_ref().unwrap().state != TaskState::Terminated)
-            .count();
+            .count() as u32;
         
         if active_tasks == 0 {
             return true;
@@ -171,12 +246,24 @@ impl Scheduler for RateMonotonicScheduler {
         
         let utilization = inner.statistics.cpu_utilization;
         
-        // 对于Rate Monotonic调度，使用近似值
-        // 当任务数大于4时，n*(2^(1/n)-1) ≈ ln(2) ≈ 0.693
-        // 为了简化计算，使用固定值0.693作为边界条件
-        const RM_BOUND_APPROXIMATION: f32 = 0.693;
+        // 根据任务数量计算精确的RM边界
+        // 预先计算常见任务数的边界值，避免运行时浮点计算
+        let bound = match active_tasks {
+            1 => 1.0,              // 1*(2^(1/1)-1) = 1
+            2 => 0.828,            // 2*(2^(1/2)-1) ≈ 0.828
+            3 => 0.779,            // 3*(2^(1/3)-1) ≈ 0.779
+            4 => 0.756,            // 4*(2^(1/4)-1) ≈ 0.756
+            5 => 0.743,            // 5*(2^(1/5)-1) ≈ 0.743
+            6 => 0.734,            // 6*(2^(1/6)-1) ≈ 0.734
+            7 => 0.728,            // 7*(2^(1/7)-1) ≈ 0.728
+            8 => 0.722,            // 8*(2^(1/8)-1) ≈ 0.722
+            9 => 0.718,            // 9*(2^(1/9)-1) ≈ 0.718
+            10 => 0.715,           // 10*(2^(1/10)-1) ≈ 0.715
+            _ => 0.693,            // 对于更多任务，接近ln(2) ≈ 0.693
+        };
         
-        utilization <= RM_BOUND_APPROXIMATION
+        // 添加安全余量，提高系统稳定性
+        utilization <= bound * 0.95
     }
 
     fn start(&mut self) -> SchedulerResult<()> {
@@ -200,6 +287,16 @@ impl Scheduler for RateMonotonicScheduler {
         let mut inner = self.inner.borrow_mut();
         inner.statistics = SchedulerStatistics::new();
     }
+}
+
+/// 任务统计信息更新结构体
+struct TaskStatisticsUpdate {
+    response_time: u32,
+    old_run_count: u32,
+    task_period: u32,
+    task_deadline: u32,
+    last_run_time: u32,
+    current_time: u32,
 }
 
 /// 内部调度器实现

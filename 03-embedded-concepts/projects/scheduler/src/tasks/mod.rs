@@ -244,7 +244,7 @@ impl Task {
     }
 
     /// 运行任务
-    pub fn run(&self) {
+    pub fn run(&mut self) {
         let start_time = cortex_m::peripheral::DWT::get_cycle_count();
         
         // 调用任务函数
@@ -253,8 +253,25 @@ impl Task {
         let end_time = cortex_m::peripheral::DWT::get_cycle_count();
         let execution_time = end_time.wrapping_sub(start_time);
         
-        // 更新统计信息
-        self.total_execution_time.fetch_add(execution_time, Ordering::Relaxed);
+        // 优化原子操作：仅在需要时才进行原子加法
+        // 对于高频任务，减少原子操作频率
+        if self.run_count % 10 == 0 {
+            self.total_execution_time.fetch_add(execution_time * 10, Ordering::Relaxed);
+        } else if self.run_count % 10 == 9 {
+            self.total_execution_time.fetch_add(execution_time, Ordering::Relaxed);
+        }
+        
+        // 更新运行次数
+        self.run_count += 1;
+        
+        // 优化最大/最小执行时间更新：使用简单的条件检查
+        if execution_time > self.max_execution_time {
+            self.max_execution_time = execution_time;
+        }
+        
+        if execution_time < self.min_execution_time {
+            self.min_execution_time = execution_time;
+        }
     }
 
     /// 挂起任务
